@@ -1,0 +1,67 @@
+body {
+  font-family: Helvetica-Neue, Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  background-color: #ffffff;
+  color: margin: 0px;
+  padding: 0px;
+}
+input[type=button] {
+  font-family: Helvetica-Neue, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  background: #e23c03;
+  border: 0px;
+  color: #ffffff;
+  padding: 5px 10px 5px 10px;
+  margin: 5px 0px 5px 0px;
+  cursor: pointer;
+}
+input[type=button]:disabled {
+  background: #ededed;
+  color: #42433f;
+}
+.top {
+  padding: 5px 10px 5px 10px;
+  text-align: center;
+}
+.top .title {
+  font-family: 'Amatic SC', cursive;
+  font-size: 52px;
+}
+.top .room-list {
+  margin: 0px auto 0px auto;
+}
+.prompt {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  width: 400px;
+  padding: 10px;
+  margin-left: -210px;
+  background: #ededed;
+  color: #e23c03;
+}
+.prompt h1 {
+  margin: 0px 0px 7px 0px;
+  font-size: 24px;
+  font-weight: 400;
+  text-align: center;
+}
+.prompt .rooms {
+  height: 250px;
+  background-color: #ffffff;
+  overflow-y: auto;
+}
+.prompt .rooms .room {
+  font-size: 18px;
+  padding: 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #ededed;
+}
+.prompt .rooms .room:nth-last-child(1) {
+  border-bottom: 0px;
+}
+.prompt .rooms .room-true {
+  background-color: #e23c03;
+  color: #FFF;
+}
