@@ -1,1 +1,12 @@
-Hello world
+<div class="stage">
+    <div class="dj dj-{{dj.active}}" ng-repeat="dj in djs">
+        {{dj.name}}
+    </div>
+    <div class="now-playing-artist">{{current_track.artist}}</div>
+    <div class="now-playing-track">{{current_track.title}}</div>
+</div>
+<div class="audience">
+    <div class="listener" ng-repeat="listener in audience">
+        {{listener.name}}
+    </div>
+</div>

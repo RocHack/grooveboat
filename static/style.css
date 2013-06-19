@@ -63,5 +63,24 @@ input[type=button]:disabled {
 }
 .prompt .rooms .room-true {
   background-color: #e23c03;
-  color: #FFF;
+  color: #ffffff;
+}
+.stage {
+  text-align: center;
+  border-bottom: 1px solid #ededed;
+  padding-bottom: 10px;
+}
+.stage .dj {
+  display: inline-block;
+  padding: 15px;
+}
+.stage .dj.dj-true {
+  background: #e23c03;
+  color: #ffffff;
+}
+.stage .now-playing-artist {
+  margin: 20px 0px 5px 0px;
+  font-size: 36px;
+  font-weight: 400;
+  color: #e23c03;
 }

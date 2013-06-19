@@ -82,7 +82,30 @@ input[type=button]:disabled {
 
         .room-true {
             background-color: @red;
-            color: #FFF;
+            color: @white;
         }
+    }
+}
+
+.stage {
+    text-align: center;
+    border-bottom: 1px solid @gray;
+    padding-bottom: 10px;
+    
+    .dj {
+        display: inline-block;
+        padding: 15px;
+    }
+
+    .dj.dj-true {
+        background: @red;
+        color: @white;
+    }
+
+    .now-playing-artist {
+        margin: 20px 0px 5px 0px;
+        font-size: 36px;
+        font-weight: 400;
+        color: @red;
     }
 }
