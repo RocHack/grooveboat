@@ -1,8 +1,8 @@
 angular.module('grooveboat', [])
     .config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
         $routeProvider
-            .when("/", { controller: RoomListCtrl, templateUrl: "/static/templates/room_list.html"})
-            .when("/room/:room", { controller: RoomCtrl, templateUrl: "/static/templates/room.html"})
+            .when("/", { controller: RoomListCtrl, templateUrl: "static/templates/room_list.html"})
+            .when("/room/:room", { controller: RoomCtrl, templateUrl: "static/templates/room.html"})
             .otherwise({redirect_to: "/"});
 
         $locationProvider.html5Mode(false).hashPrefix("!");
