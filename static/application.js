@@ -39,12 +39,12 @@ function RoomListCtrl($scope, $location, currentUser, groove, localStorageServic
         var name = room.name.replace(/\s/g, "-");
         localStorageService.set("user:nickname", currentUser.nickname);
         $location.path("/room/" + name);
-
-        groove.joinRoom(name);
     }
 }
 
-function RoomCtrl($scope, currentUser, groove, localStorageService) {
+function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService) {
+    groove.joinRoom($routeParams.room);
+
     $scope.djs = [
         { name: "stevenleeg", active: true },
         { name: "celehner", active: false },
@@ -93,4 +93,4 @@ function RoomCtrl($scope, currentUser, groove, localStorageService) {
 }
 
 RoomListCtrl.$inject = ["$scope", "$location", "currentUser", "groove", "localStorageService"];
-RoomCtrl.$inject = ["$scope", "currentUser", "groove", "localStorageService"];
+RoomCtrl.$inject = ["$scope", "$routeParams", "currentUser", "groove", "localStorageService"];
