@@ -40,6 +40,16 @@ input[type=text] {
     color: @dark;
     border: 1px solid @gray;
     padding: 5px;
+
+    &.full {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    &.no_border {
+        border: 0px;
+    }
 }
 
 .top {
@@ -77,6 +87,7 @@ input[type=text] {
         height: 250px;
         background-color: @white;
         overflow-y: auto;
+        margin-bottom: 10px;
 
         .room {
             font-size: 18px;

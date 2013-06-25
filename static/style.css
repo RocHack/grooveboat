@@ -29,6 +29,14 @@ input[type=text] {
   border: 1px solid #ededed;
   padding: 5px;
 }
+input[type=text].full {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+}
+input[type=text].no_border {
+  border: 0px;
+}
 .top {
   padding: 5px 10px 5px 10px;
   text-align: center;
@@ -60,6 +68,7 @@ input[type=text] {
   height: 250px;
   background-color: #ffffff;
   overflow-y: auto;
+  margin-bottom: 10px;
 }
 .prompt .rooms .room {
   font-size: 18px;

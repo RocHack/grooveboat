@@ -11,7 +11,9 @@
         <div class="author">{{message.from}}</div>
         <div class="text">{{message.text}}</div>
     </div>
-    <input class="new_message" placeholder="send a message" type="text" />
+    <form ng-submit="newMessage()">
+        <input class="new_message" placeholder="send a message" type="text" ng-model="message_text" />
+    </form>
 </div>
 
 <div class="audience">
