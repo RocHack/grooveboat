@@ -80,7 +80,10 @@
     };
 
     Groove.prototype.sendChat = function(text) {
-        this.webrtc.send(text);
+        this.webrtc.send({
+            type: 'chat',
+            text: text
+        });
     };
 
     Groove.prototype._onMessage = function(event, conversation) {
@@ -95,7 +98,7 @@
             break;
         case 'chat':
             this.emit('chat', {
-                text: event.message,
+                text: event.text,
                 user: userId
             });
             break;
