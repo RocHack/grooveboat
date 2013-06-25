@@ -28,6 +28,7 @@ input[type=text] {
   color: #42433f;
   border: 1px solid #ededed;
   padding: 5px;
+  outline: none;
 }
 input[type=text].full {
   display: block;

@@ -1,4 +1,4 @@
-angular.module('grooveboat', [])
+angular.module('grooveboat', ["LocalStorageModule"])
     .config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
         $routeProvider
             .when("/", { controller: RoomListCtrl, templateUrl: "static/templates/room_list.html"})
@@ -7,16 +7,16 @@ angular.module('grooveboat', [])
 
         $locationProvider.html5Mode(false).hashPrefix("!");
     }])
-    .factory("$currentUser", function() {
+    .factory("$currentUser", ["localStorageService", function(localStorageService) {
         return {
-            nickname: "",
+            nickname: localStorageService.get("user:nickname"),
             clientID: ""
         }
-    });
+    }]);
 
-function RoomListCtrl($scope, $location, $currentUser) {
+function RoomListCtrl($scope, $location, $currentUser, localStorageService) {
     var selected = -1;
-    $currentUser.name = "steve";
+    $scope.currentUser = $currentUser;
 
     $scope.rooms = [
         { name: "Ambient Electronic", selected: false },
@@ -36,12 +36,12 @@ function RoomListCtrl($scope, $location, $currentUser) {
     $scope.clickJoinRoom = function() {
         var room = $scope.rooms[selected];
         var name = room.name.replace(/\s/g, "-");
-        $currentUser.nickname =  $scope.nickname;
+        localStorageService.set("user:nickname", $currentUser.nickname);
         $location.path("/room/" + name);
     }
 }
 
-function RoomCtrl($scope, $currentUser) {
+function RoomCtrl($scope, $currentUser, localStorageService) {
     $scope.djs = [
         { name: "stevenleeg", active: true },
         { name: "celehner", active: false },
@@ -75,5 +75,5 @@ function RoomCtrl($scope, $currentUser) {
     }
 }
 
-RoomListCtrl.$inject = ["$scope", "$location", "$currentUser"];
-RoomCtrl.$inject = ["$scope", "$currentUser"];
+RoomListCtrl.$inject = ["$scope", "$location", "$currentUser", "localStorageService"];
+RoomCtrl.$inject = ["$scope", "$currentUser", "localStorageService"];
