@@ -113,7 +113,12 @@ input[type=text].no_border {
   width: 250px;
   border-left: 1px solid #ededed;
   border-bottom: 1px solid #ededed;
-  min-height: 400px;
+  height: 400px;
+}
+.chat .messages {
+  height: 370px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .chat .message {
   padding: 10px;
@@ -136,4 +141,5 @@ input[type=text].no_border {
   position: absolute;
   bottom: 0px;
   outline: 0px;
+  height: 20px;
 }

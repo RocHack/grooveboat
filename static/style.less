@@ -144,7 +144,13 @@ input[type=text] {
     width: 250px;
     border-left: 1px solid @gray;
     border-bottom: 1px solid @gray;
-    min-height: 400px;
+    height: 400px;
+
+    .messages {
+        height: 370px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
 
     .message {
         padding: 10px;
@@ -171,5 +177,6 @@ input[type=text] {
         position: absolute;
         bottom: 0px;
         outline: 0px;
+        height: 20px;
     }
 }
