@@ -50,6 +50,11 @@ function RoomCtrl($scope) {
         title: "True Affection",
         artist: "The Blow"
     }
+
+    $scope.chat_messages = [
+        { from: "stevenleeg", text: "Hello there, world" },
+        { from: "celehner", text: "Hello world" }
+    ];
 }
 
 RoomListCtrl.$inject = ["$scope", "$location"];

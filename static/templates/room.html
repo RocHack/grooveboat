@@ -5,6 +5,15 @@
     <div class="now-playing-artist">{{current_track.artist}}</div>
     <div class="now-playing-track">{{current_track.title}}</div>
 </div>
+
+<div class="chat">
+    <div class="message" ng-repeat="message in chat_messages">
+        <div class="author">{{message.from}}</div>
+        <div class="text">{{message.text}}</div>
+    </div>
+    <input class="new_message" placeholder="send a message" type="text" />
+</div>
+
 <div class="audience">
     <div class="listener" ng-repeat="listener in audience">
         {{listener.name}}

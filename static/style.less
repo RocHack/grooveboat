@@ -8,7 +8,7 @@ body {
     font-family: @default-font;
     font-weight: 300;
     background-color: @white;
-    color: 
+    color: @dark;
     margin: 0px;
     padding: 0px;
 }
@@ -31,6 +31,15 @@ input[type=button] {
 input[type=button]:disabled {
     background: @gray;
     color: @dark;
+}
+
+input[type=text] {
+    display: block;
+    font-family: @default-font;
+    font-size: 16px;
+    color: @dark;
+    border: 1px solid @gray;
+    padding: 5px;
 }
 
 .top {
@@ -107,5 +116,48 @@ input[type=button]:disabled {
         font-size: 36px;
         font-weight: 400;
         color: @red;
+    }
+}
+
+.audience {
+    .listener {
+        display: inline-block;
+        padding: 10px;
+    }
+}
+
+.chat {
+    float: right;
+    position: relative;
+    width: 250px;
+    border-left: 1px solid @gray;
+    border-bottom: 1px solid @gray;
+    min-height: 400px;
+
+    .message {
+        padding: 10px;
+
+        .author {
+            display: inline-block;
+            font-weight: 400;
+        }
+
+        .author:after {
+            content: ":";
+        }
+
+        .text {
+            display: inline-block;
+        }
+    }
+
+    .new_message {
+        border-bottom: 0px;
+        border-left: 0px;
+        border-right: 0px;
+        width: 100%;
+        position: absolute;
+        bottom: 0px;
+        outline: 0px;
     }
 }

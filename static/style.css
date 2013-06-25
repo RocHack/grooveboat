@@ -2,7 +2,8 @@ body {
   font-family: Helvetica-Neue, Helvetica, Arial, sans-serif;
   font-weight: 300;
   background-color: #ffffff;
-  color: margin: 0px;
+  color: #42433f;
+  margin: 0px;
   padding: 0px;
 }
 input[type=button] {
@@ -19,6 +20,14 @@ input[type=button] {
 input[type=button]:disabled {
   background: #ededed;
   color: #42433f;
+}
+input[type=text] {
+  display: block;
+  font-family: Helvetica-Neue, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  color: #42433f;
+  border: 1px solid #ededed;
+  padding: 5px;
 }
 .top {
   padding: 5px 10px 5px 10px;
@@ -83,4 +92,38 @@ input[type=button]:disabled {
   font-size: 36px;
   font-weight: 400;
   color: #e23c03;
+}
+.audience .listener {
+  display: inline-block;
+  padding: 10px;
+}
+.chat {
+  float: right;
+  position: relative;
+  width: 250px;
+  border-left: 1px solid #ededed;
+  border-bottom: 1px solid #ededed;
+  min-height: 400px;
+}
+.chat .message {
+  padding: 10px;
+}
+.chat .message .author {
+  display: inline-block;
+  font-weight: 400;
+}
+.chat .message .author:after {
+  content: ":";
+}
+.chat .message .text {
+  display: inline-block;
+}
+.chat .new_message {
+  border-bottom: 0px;
+  border-left: 0px;
+  border-right: 0px;
+  width: 100%;
+  position: absolute;
+  bottom: 0px;
+  outline: 0px;
 }
