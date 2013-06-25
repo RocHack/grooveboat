@@ -1,0 +1,3 @@
+[submodule "static/lib/SimpleWebRTC"]
+	path = static/lib/SimpleWebRTC
+	url = https://github.com/mvayngrib/SimpleWebRTC.git
