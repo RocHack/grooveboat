@@ -7,16 +7,17 @@ angular.module('grooveboat', ["LocalStorageModule"])
 
         $locationProvider.html5Mode(false).hashPrefix("!");
     }])
-    .factory("$currentUser", ["localStorageService", function(localStorageService) {
+    .factory("currentUser", ["localStorageService", function(localStorageService) {
         return {
             nickname: localStorageService.get("user:nickname"),
             clientID: ""
         }
-    }]);
+    }])
+    .service("groove", Groove);
 
-function RoomListCtrl($scope, $location, $currentUser, localStorageService) {
+function RoomListCtrl($scope, $location, currentUser, groove, localStorageService) {
     var selected = -1;
-    $scope.currentUser = $currentUser;
+    $scope.currentUser = currentUser;
 
     $scope.rooms = [
         { name: "Ambient Electronic", selected: false },
@@ -36,12 +37,14 @@ function RoomListCtrl($scope, $location, $currentUser, localStorageService) {
     $scope.clickJoinRoom = function() {
         var room = $scope.rooms[selected];
         var name = room.name.replace(/\s/g, "-");
-        localStorageService.set("user:nickname", $currentUser.nickname);
+        localStorageService.set("user:nickname", currentUser.nickname);
         $location.path("/room/" + name);
+
+        groove.joinRoom(name);
     }
 }
 
-function RoomCtrl($scope, $currentUser, localStorageService) {
+function RoomCtrl($scope, currentUser, groove, localStorageService) {
     $scope.djs = [
         { name: "stevenleeg", active: true },
         { name: "celehner", active: false },
@@ -64,16 +67,27 @@ function RoomCtrl($scope, $currentUser, localStorageService) {
         { from: "celehner", text: "Hello world" }
     ];
 
-    $scope.currentUser = $currentUser;
+    $scope.currentUser = currentUser;
 
     $scope.newMessage = function() {
         $scope.chat_messages.push({
-            from: $currentUser.nickname,
+            from: currentUser.nickname,
             text: $scope.message_text
         });
+
+        groove.sendChat($scope.message_text);
         $scope.message_text = "";
     }
+
+    groove.on("chat", function(data) {
+        $scope.$apply(function($scope) { 
+            $scope.chat_messages.push({
+                from: data.user,
+                text: data.text
+            });
+        });
+    });
 }
 
-RoomListCtrl.$inject = ["$scope", "$location", "$currentUser", "localStorageService"];
-RoomCtrl.$inject = ["$scope", "$currentUser", "localStorageService"];
+RoomListCtrl.$inject = ["$scope", "$location", "currentUser", "groove", "localStorageService"];
+RoomCtrl.$inject = ["$scope", "currentUser", "groove", "localStorageService"];
