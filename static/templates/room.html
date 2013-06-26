@@ -9,7 +9,7 @@
 <div class="chat">
     <div class="messages" id="messages">
         <div class="message" ng-repeat="message in chat_messages">
-            <div class="author">{{message.from}}</div>
+            <div class="author">{{message.from.nickname}}</div>
             <div class="text">{{message.text}}</div>
         </div>
     </div>
