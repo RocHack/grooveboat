@@ -75,6 +75,10 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
     $scope.currentUser = currentUser;
 
     $scope.newMessage = function() {
+        var messages_div = document.getElementById("messages");
+        var isScrolledToBottom = (messages_div.scrollHeight -
+            messages_div.scrollTop - messages_div.clientHeight < 10);
+
         $scope.chat_messages.push({
             from: currentUser,
             text: $scope.message_text
@@ -83,8 +87,11 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
         groove.sendChat($scope.message_text);
         $scope.message_text = "";
 
-        var messages_div = document.getElementById("messages");
-        messages_div.scrollTop = messages_div.scrollHeight + 100;
+        if (isScrolledToBottom) {
+            setTimeout(function() {
+                messages_div.scrollTop = messages_div.scrollHeight;
+            }, 10);
+        }
     };
 
     groove.on("chat", function(message) {
