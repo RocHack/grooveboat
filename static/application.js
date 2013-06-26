@@ -74,11 +74,22 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
 
     $scope.currentUser = currentUser;
 
-    $scope.newMessage = function() {
-        var messages_div = document.getElementById("messages");
-        var isScrolledToBottom = (messages_div.scrollHeight -
-            messages_div.scrollTop - messages_div.clientHeight < 10);
+    function keepScroll(el, fn) {
+        return function keptScroll() {
+            var isScrolledToBottom = (el.scrollHeight -
+                el.scrollTop - el.clientHeight < 10);
+            fn.apply(this, keptScroll.arguments);
+            if (isScrolledToBottom) {
+                setTimeout(function() {
+                    el.scrollTop = el.scrollHeight;
+                }, 10);
+            }
+        };
+    }
 
+    var messages_div = document.getElementById("messages");
+
+    $scope.newMessage = keepScroll(messages_div, function() {
         $scope.chat_messages.push({
             from: currentUser,
             text: $scope.message_text
@@ -86,19 +97,13 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
 
         groove.sendChat($scope.message_text);
         $scope.message_text = "";
+    });
 
-        if (isScrolledToBottom) {
-            setTimeout(function() {
-                messages_div.scrollTop = messages_div.scrollHeight;
-            }, 10);
-        }
-    };
-
-    groove.on("chat", function(message) {
+    groove.on("chat", keepScroll(messages_div, function(message) {
         $scope.$apply(function($scope) { 
             $scope.chat_messages.push(message);
         });
-    });
+    }));
 }
 
 RoomListCtrl.$inject = ["$scope", "$location", "currentUser", "groove", "localStorageService"];
