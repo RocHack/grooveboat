@@ -4,6 +4,8 @@
         var self = this;
         WildEmitter.call(this);
 
+        var users = {};
+
         this.webrtc = new WebRTC({
             url: 'http://signaling.celehner.com:8888',
             video: false,
@@ -32,6 +34,8 @@
             var channel = conversation.channel,
                 userId = conversation.id;
             self.emit('peerConnected', userId);
+
+            this.users[userId] = new User(userId, channel);
         });
 
         this.webrtc.on('dataClose', function (event, conversation) {
@@ -117,6 +121,10 @@
         }
     };
 
+    function User() {
+        this.nickname = "Guest" +  Math.random();
+    }
+
+    window.User = User;
     window.Groove = Groove;
 })();
-
