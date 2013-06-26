@@ -90,12 +90,14 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
     var messages_div = document.getElementById("messages");
 
     $scope.newMessage = keepScroll(messages_div, function() {
-        $scope.chat_messages.push({
-            from: currentUser,
-            text: $scope.message_text
-        });
-
-        groove.sendChat($scope.message_text);
+        var text = $scope.message_text;
+        if (text && text.trim()) {
+            $scope.chat_messages.push({
+                from: currentUser,
+                text: text
+            });
+            groove.sendChat(text);
+        }
         $scope.message_text = "";
     });
 

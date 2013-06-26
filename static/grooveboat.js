@@ -92,7 +92,7 @@
     Groove.prototype.sendChat = function(text) {
         this.webrtc.send({
             type: 'chat',
-            text: text
+            text: String(text)
         });
     };
 
@@ -107,7 +107,7 @@
             break;
         case 'chat':
             this.emit('chat', {
-                text: event.text,
+                text: String(event.text),
                 from: user
             });
             break;
