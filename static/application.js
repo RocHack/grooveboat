@@ -9,12 +9,12 @@ angular.module('grooveboat', ["LocalStorageModule"])
     }])
     .factory("currentUser", ["groove", "localStorageService", function(groove, localStorageService) {
         var user = groove.me;
-        var nick = localStorageService.get("user:nickname");
-        if (!nick) {
-            nick = "Guest " + Math.floor(Math.random()*101);
-            localStorageService.set("user:nickname", nick);
+        var name = localStorageService.get("user:name");
+        if (!name) {
+            name = "Guest " + Math.floor(Math.random()*101);
+            localStorageService.set("user:name", name);
         }
-        user.nickname = nick;
+        user.name = name;
 
         return user;
     }])
@@ -42,7 +42,7 @@ function RoomListCtrl($scope, $location, currentUser, groove, localStorageServic
     $scope.clickJoinRoom = function() {
         var room = $scope.rooms[selected];
         var name = room.name.replace(/\s/g, "-");
-        localStorageService.set("user:nickname", currentUser.nickname);
+        localStorageService.set("user:name", currentUser.name);
         $location.path("/room/" + name);
     }
 }
