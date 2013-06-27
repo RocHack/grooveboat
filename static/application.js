@@ -50,14 +50,7 @@ function RoomListCtrl($scope, $location, currentUser, groove, localStorageServic
 function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService) {
     groove.joinRoom($routeParams.room);
 
-    $scope.users = [
-        { name: "stevenleeg", active: true, dj: true },
-        { name: "celehner", active: false, dj: true },
-        { name: "hankcy", active: false, dj: true },
-        { name: "rochacko", active: false, dj: true },
-        { name: "manyabot", active: false, dj: false },
-        { name: "omeglebot", active: false, dj: false },
-    ];
+    $scope.users = [];
 
     $scope.current_track = {
         title: "True Affection",
@@ -67,6 +60,7 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
     $scope.chat_messages = [];
 
     $scope.currentUser = currentUser;
+    $scope.users.push(currentUser);
 
     $scope.isDJ = function(user) {
         return (user.dj == true);
@@ -93,6 +87,12 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
         };
     }
 
+    function watchUser(user) {
+        user.on("name", function(new_name) {
+            $scope.$digest();
+        });
+    }
+
     var messages_div = document.getElementById("messages");
 
     $scope.newMessage = keepScroll(messages_div, function() {
@@ -112,6 +112,13 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
             $scope.chat_messages.push(message);
         });
     }));
+
+    groove.on("peerConnected", function(user) {
+        $scope.$apply(function($scope) {
+            $scope.users.push(user);
+            watchUser(user);
+        });
+    });
 }
 
 RoomListCtrl.$inject = ["$scope", "$location", "currentUser", "groove", "localStorageService"];

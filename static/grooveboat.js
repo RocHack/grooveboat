@@ -13,7 +13,6 @@
             audio: false,
             data: true,
             autoRequestMedia: false,
-            log: true,
             peerConnectionConfig: {
                 iceServers: [{
                     //"url": "turns:cel@celehner.com:5349"
@@ -36,8 +35,8 @@
                 userId = conversation.id,
                 user = users[userId] = new User(userId);
             self.webrtc.send({
-                type: 'nick',
-                nick: me.nickname
+                type: 'name',
+                name: me.name
             }, userId);
             self.emit('peerConnected', user);
         });
@@ -101,9 +100,9 @@
             userId = conversation.id,
             user = this.users[userId];
         switch (event.type) {
-        case 'nick':
-            user.nickname = event.nick;
-            user.emit('nick', event.nick);
+        case 'name':
+            user.name = event.name;
+            user.emit('name', event.name);
             break;
         case 'chat':
             this.emit('chat', {
