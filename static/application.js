@@ -62,10 +62,7 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
         artist: "The Blow"
     }
 
-    $scope.chat_messages = [
-        { from: "stevenleeg", text: "Hello there, world" },
-        { from: "celehner", text: "Hello world" }
-    ];
+    $scope.chat_messages = [];
 
     $scope.currentUser = currentUser;
 

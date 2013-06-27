@@ -115,6 +115,10 @@ input[type=text].no_border {
   border-bottom: 1px solid #ededed;
   height: 400px;
 }
+.chat .no_messages {
+  text-align: center;
+  padding: 15px;
+}
 .chat .messages {
   height: 370px;
   overflow-y: auto;

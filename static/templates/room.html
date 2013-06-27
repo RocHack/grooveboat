@@ -8,6 +8,9 @@
 
 <div class="chat">
     <div class="messages" id="messages">
+        <div class="no_messages" ng-hide="chat_messages.length">
+            Say something about stuff
+        </div>
         <div class="message" ng-repeat="message in chat_messages">
             <div class="author">{{message.from}}</div>
             <div class="text">{{message.text}}</div>
