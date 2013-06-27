@@ -4,7 +4,8 @@
         var self = this;
         WildEmitter.call(this);
 
-        var users = {};
+        var users = this.users = {};
+        var me = this.me = new User();
 
         this.webrtc = new WebRTC({
             url: 'http://signaling.celehner.com:8888',
@@ -27,28 +28,33 @@
         });
 
         this.webrtc.on('userid', function (id) {
-            self.id = id;
+            me.id = id;
         });
 
         this.webrtc.on('dataOpen', function (event, conversation) {
             var channel = conversation.channel,
-                userId = conversation.id;
-            self.emit('peerConnected', userId);
-
-            this.users[userId] = new User(userId, channel);
+                userId = conversation.id,
+                user = users[userId] = new User(userId);
+            self.webrtc.send({
+                type: 'nick',
+                nick: me.nickname
+            }, userId);
+            self.emit('peerConnected', user);
         });
 
         this.webrtc.on('dataClose', function (event, conversation) {
             var channel = conversation.channel,
-                userId = conversation.id;
+                userId = conversation.id,
+                user = users[userId];
             self.emit('peerDisconnected', userId);
         });
 
         this.webrtc.on('dataError', function (event, conversation) {
             var channel = conversation.channel,
-                userId = conversation.id;
+                userId = conversation.id,
+                user = users[userId];
             console.error('data error', channel, userId);
-            self.emit('peerError', userId);
+            self.emit('peerError', user);
         });
 
         this.webrtc.on('dataMessage', function (event, conversation) {
@@ -86,44 +92,48 @@
     Groove.prototype.sendChat = function(text) {
         this.webrtc.send({
             type: 'chat',
-            text: text
+            text: String(text)
         });
     };
 
     Groove.prototype._onMessage = function(event, conversation) {
         var channel = conversation.channel,
-            userId = conversation.id;
+            userId = conversation.id,
+            user = this.users[userId];
         switch (event.type) {
         case 'nick':
-            this.emit('nick', {
-                nick: event,
-                user: userId
-            });
+            user.nickname = event.nick;
+            user.emit('nick', event.nick);
             break;
         case 'chat':
             this.emit('chat', {
-                text: event.text,
-                user: userId
+                text: String(event.text),
+                from: user
             });
             break;
         case 'bop':
             this.emit('bop', {
-                bopping: !!event,
-                user: userId
+                bopping: event.bopping,
+                user: user
             });
             break;
         case 'track':
             this.emit('track', {
-                track: event,
-                user: userId
+                track: event.track,
+                user: user
             });
             break;
         }
     };
 
-    function User() {
-        this.nickname = "Guest" +  Math.random();
+    function User(id) {
+        WildEmitter.call(this);
+        this.id = id;
     }
+
+    User.prototype = Object.create(WildEmitter.prototype, {
+        constructor: {value: User}
+    });
 
     window.User = User;
     window.Groove = Groove;

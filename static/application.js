@@ -7,11 +7,16 @@ angular.module('grooveboat', ["LocalStorageModule"])
 
         $locationProvider.html5Mode(false).hashPrefix("!");
     }])
-    .factory("currentUser", ["localStorageService", function(localStorageService) {
-        return {
-            nickname: localStorageService.get("user:nickname"),
-            clientID: ""
+    .factory("currentUser", ["groove", "localStorageService", function(groove, localStorageService) {
+        var user = groove.me;
+        var nick = localStorageService.get("user:nickname");
+        if (!nick) {
+            nick = "Guest " + Math.floor(Math.random()*101);
+            localStorageService.set("user:nickname", nick);
         }
+        user.nickname = nick;
+
+        return user;
     }])
     .service("groove", Groove);
 
@@ -66,27 +71,38 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
 
     $scope.currentUser = currentUser;
 
-    $scope.newMessage = function() {
-        $scope.chat_messages.push({
-            from: currentUser.nickname,
-            text: $scope.message_text
-        });
-
-        groove.sendChat($scope.message_text);
-        $scope.message_text = "";
-
-        var messages_div = document.getElementById("messages");
-        messages_div.scrollTop = messages_div.scrollHeight + 100;
+    function keepScroll(el, fn) {
+        return function keptScroll() {
+            var isScrolledToBottom = (el.scrollHeight -
+                el.scrollTop - el.clientHeight < 10);
+            fn.apply(this, keptScroll.arguments);
+            if (isScrolledToBottom) {
+                setTimeout(function() {
+                    el.scrollTop = el.scrollHeight;
+                }, 10);
+            }
+        };
     }
 
-    groove.on("chat", function(data) {
-        $scope.$apply(function($scope) { 
+    var messages_div = document.getElementById("messages");
+
+    $scope.newMessage = keepScroll(messages_div, function() {
+        var text = $scope.message_text;
+        if (text && text.trim()) {
             $scope.chat_messages.push({
-                from: data.user,
-                text: data.text
+                from: currentUser,
+                text: text
             });
-        });
+            groove.sendChat(text);
+        }
+        $scope.message_text = "";
     });
+
+    groove.on("chat", keepScroll(messages_div, function(message) {
+        $scope.$apply(function($scope) { 
+            $scope.chat_messages.push(message);
+        });
+    }));
 }
 
 RoomListCtrl.$inject = ["$scope", "$location", "currentUser", "groove", "localStorageService"];
