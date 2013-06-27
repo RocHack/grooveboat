@@ -119,6 +119,17 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
             watchUser(user);
         });
     });
+
+    groove.on("peerDisconnected", function(user) {
+        $scope.$apply(function($scope) {
+            var i =  $scope.users.indexOf(user);
+            if(i == -1) {
+                return;
+            }
+
+            $scope.users.splice(i, 1);
+        });
+    });
 }
 
 RoomListCtrl.$inject = ["$scope", "$location", "currentUser", "groove", "localStorageService"];
