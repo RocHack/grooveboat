@@ -1,7 +1,8 @@
 <div class="stage">
-    <div class="dj dj-{{dj.active}}" ng-repeat="dj in djs">
+    <div class="dj dj-{{dj.active}}" ng-repeat="dj in users | filter:isDJ">
         {{dj.name}}
     </div>
+    <a class="become-dj" href="#" ng-click"becomeDJ()">join</a>
     <div class="now-playing-artist">{{current_track.artist}}</div>
     <div class="now-playing-track">{{current_track.title}}</div>
 </div>
@@ -22,7 +23,7 @@
 </div>
 
 <div class="audience">
-    <div class="listener" ng-repeat="listener in audience">
+    <div class="listener" ng-repeat="listener in users | filter:isAudience">
         {{listener.name}}
     </div>
 </div>

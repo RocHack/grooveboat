@@ -113,14 +113,20 @@ input[type=text] {
     border-bottom: 1px solid @gray;
     padding-bottom: 10px;
     
-    .dj {
+    .dj, .become-dj {
+        color: @dark;
+        text-decoration: none;
         display: inline-block;
         padding: 15px;
     }
 
-    .dj.dj-true {
+    .dj.dj-true, .become-dj:hover {
         background: @red;
         color: @white;
+    }
+    
+    .become-dj {
+        cursor: pointer;
     }
 
     .now-playing-artist {

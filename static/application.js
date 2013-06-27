@@ -50,16 +50,13 @@ function RoomListCtrl($scope, $location, currentUser, groove, localStorageServic
 function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService) {
     groove.joinRoom($routeParams.room);
 
-    $scope.djs = [
-        { name: "stevenleeg", active: true },
-        { name: "celehner", active: false },
-        { name: "rochacko", active: false },
-        { name: "hankcy", active: false }
-    ];
-
-    $scope.audience = [
-        { name: "manyabot" },
-        { name: "omeglebot" }
+    $scope.users = [
+        { name: "stevenleeg", active: true, dj: true },
+        { name: "celehner", active: false, dj: true },
+        { name: "hankcy", active: false, dj: true },
+        { name: "rochacko", active: false, dj: true },
+        { name: "manyabot", active: false, dj: false },
+        { name: "omeglebot", active: false, dj: false },
     ];
 
     $scope.current_track = {
@@ -70,6 +67,18 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
     $scope.chat_messages = [];
 
     $scope.currentUser = currentUser;
+
+    $scope.isDJ = function(user) {
+        return (user.dj == true);
+    }
+
+    $scope.isAudience = function(user) {
+        return (user.dj != true);
+    }
+
+    $scope.becomeDJ = function() {
+        groove.becomeDJ();
+    }
 
     function keepScroll(el, fn) {
         return function keptScroll() {

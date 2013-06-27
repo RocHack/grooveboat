@@ -89,13 +89,20 @@ input[type=text].no_border {
   border-bottom: 1px solid #ededed;
   padding-bottom: 10px;
 }
-.stage .dj {
+.stage .dj,
+.stage .become-dj {
+  color: #42433f;
+  text-decoration: none;
   display: inline-block;
   padding: 15px;
 }
-.stage .dj.dj-true {
+.stage .dj.dj-true,
+.stage .become-dj:hover {
   background: #e23c03;
   color: #ffffff;
+}
+.stage .become-dj {
+  cursor: pointer;
 }
 .stage .now-playing-artist {
   margin: 20px 0px 5px 0px;
@@ -141,9 +148,10 @@ input[type=text].no_border {
   border-bottom: 0px;
   border-left: 0px;
   border-right: 0px;
+  box-sizing: border-box;
   width: 100%;
   position: absolute;
   bottom: 0px;
   outline: 0px;
-  height: 20px;
+  height: 30px;
 }
