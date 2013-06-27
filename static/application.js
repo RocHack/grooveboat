@@ -7,22 +7,23 @@ angular.module('grooveboat', ["LocalStorageModule"])
 
         $locationProvider.html5Mode(false).hashPrefix("!");
     }])
-    .factory("currentUser", ["groove", "localStorageService", function(groove, localStorageService) {
-        var user = groove.me;
+    .factory("groove", ["localStorageService", function(localStorageService) {
+        var groove = new Groove();
+
         var name = localStorageService.get("user:name");
         if (!name) {
             name = "Guest " + Math.floor(Math.random()*101);
             localStorageService.set("user:name", name);
         }
-        user.name = name;
 
-        return user;
+        groove.me.name = name;
+
+        return groove;
     }])
-    .service("groove", Groove);
 
-function RoomListCtrl($scope, $location, currentUser, groove, localStorageService) {
+function RoomListCtrl($scope, $location, groove, localStorageService) {
     var selected = -1;
-    $scope.currentUser = currentUser;
+    $scope.currentUser = groove.me;
 
     $scope.rooms = [
         { name: "Ambient Electronic", selected: false },
@@ -42,12 +43,12 @@ function RoomListCtrl($scope, $location, currentUser, groove, localStorageServic
     $scope.clickJoinRoom = function() {
         var room = $scope.rooms[selected];
         var name = room.name.replace(/\s/g, "-");
-        localStorageService.set("user:name", currentUser.name);
+        localStorageService.set("user:name", groove.me.name);
         $location.path("/room/" + name);
     }
 }
 
-function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService) {
+function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     groove.joinRoom($routeParams.room);
 
     $scope.users = [];
@@ -59,8 +60,8 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
 
     $scope.chat_messages = [];
 
-    $scope.currentUser = currentUser;
-    $scope.users.push(currentUser);
+    $scope.currentUser = groove.me;
+    $scope.users.push(groove.me);
 
     $scope.isDJ = function(user) {
         return (user.dj == true);
@@ -132,5 +133,5 @@ function RoomCtrl($scope, $routeParams, currentUser, groove, localStorageService
     });
 }
 
-RoomListCtrl.$inject = ["$scope", "$location", "currentUser", "groove", "localStorageService"];
-RoomCtrl.$inject = ["$scope", "$routeParams", "currentUser", "groove", "localStorageService"];
+RoomListCtrl.$inject = ["$scope", "$location", "groove", "localStorageService"];
+RoomCtrl.$inject = ["$scope", "$routeParams", "groove", "localStorageService"];
