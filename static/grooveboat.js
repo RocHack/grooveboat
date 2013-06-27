@@ -45,7 +45,7 @@
             var channel = conversation.channel,
                 userId = conversation.id,
                 user = users[userId];
-            self.emit('peerDisconnected', userId);
+            self.emit('peerDisconnected', user);
         });
 
         this.webrtc.on('dataError', function (event, conversation) {
