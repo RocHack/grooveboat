@@ -100,7 +100,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         var text = $scope.message_text;
         if (text && text.trim()) {
             $scope.chat_messages.push({
-                from: currentUser,
+                from: groove.me,
                 text: text
             });
             groove.sendChat(text);
