@@ -108,6 +108,10 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         $scope.message_text = "";
     });
 
+    $scope.$on("$destroy", function() {
+        groove.leaveRoom();
+    });
+
     groove.on("chat", keepScroll(messages_div, function(message) {
         $scope.$apply(function($scope) { 
             $scope.chat_messages.push(message);
