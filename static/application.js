@@ -52,6 +52,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     groove.joinRoom($routeParams.room);
 
     $scope.users = [];
+    $scope.djs = [];
 
     $scope.current_track = {
         title: "True Affection",
@@ -117,6 +118,13 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
             $scope.chat_messages.push(message);
         });
     }));
+
+    groove.on("djs", function(djs) {
+        console.log('djs array changed', djs);
+        $scope.$apply(function($scope) {
+            $scope.djs = djs;
+        });
+    });
 
     groove.on("peerConnected", function(user) {
         $scope.$apply(function($scope) {

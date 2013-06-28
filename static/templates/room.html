@@ -1,5 +1,5 @@
 <div class="stage">
-    <div class="dj dj-{{dj.active}}" ng-repeat="dj in users | filter:isDJ">
+    <div class="dj dj-{{dj.active}}" ng-repeat="dj in djs">
         {{dj.name}}
     </div>
     <button class="become-dj" ng-click="becomeDJ()">join</button>

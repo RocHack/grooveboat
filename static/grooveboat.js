@@ -35,11 +35,7 @@
             var channel = conversation.channel,
                 userId = conversation.id,
                 user = users[userId] = new User(userId);
-            self.webrtc.send({
-                type: 'name',
-                name: me.name
-            }, userId);
-            self.emit('peerConnected', user);
+            self._welcomeUser(user);
         });
 
         this.webrtc.on('dataClose', function (event, conversation) {
@@ -47,6 +43,10 @@
                 userId = conversation.id,
                 user = users[userId];
             self.emit('peerDisconnected', user);
+            if (user.dj) {
+                self.djs.splice(self.djs.indexOf(user), 1);
+                self.emit('djs', self.djs.slice());
+            }
         });
 
         this.webrtc.on('dataError', function (event, conversation) {
@@ -89,6 +89,16 @@
         this.roomName = null;
     };
 
+    Groove.prototype._welcomeUser = function(user) {
+        this.webrtc.send({
+            type: 'welcome',
+            name: this.me.name,
+            djs: this.djs.filter(Boolean)
+                .map(function(user) { return user.id; })
+        }, user.id);
+        this.emit('peerConnected', user);
+    };
+
     Groove.prototype.sendChat = function(text) {
         this.webrtc.send({
             type: 'chat',
@@ -106,11 +116,16 @@
             type: 'nominateDJ',
             after: after && after.id
         });
-        this._acceptDJ(this.me, after);
+
+        var self = this;
+        setTimeout(function() {
+            self._acceptDJ(self.me, after);
+        });
     };
 
     Groove.prototype._acceptDJ = function(dj, prevDJ) {
         if (dj == prevDJ) prevDJ = null;
+        console.log('accept dj', dj, prevDJ, this.djs);
         var djIndex = this.djs.indexOf(dj);
         if (djIndex != -1) {
             // dj is already in djs list
@@ -130,18 +145,38 @@
         }
 
         dj.dj = true;
-        this.emit('enterDJ', {
-            user: dj,
-            after: prevDJ
-        });
+        this.emit('djs', this.djs.slice());
     };
 
+    Groove.prototype._negotiateDJs = function(djs, sender) {
+        // todo: reconcile with other data known about DJs
+        this.djs = djs;
+        djs.forEach(function(user) {
+            user.dj = true;
+        });
+        this.emit('djs', this.djs.slice());
+        console.log('got dj list', djs, 'from', sender);
+    };
 
     Groove.prototype._onMessage = function(event, conversation) {
         var channel = conversation.channel,
             userId = conversation.id,
-            user = this.users[userId];
+            users = this.users,
+            user = users[userId];
         switch (event.type) {
+        case 'welcome':
+            user.name = event.name;
+            user.emit('name', event.name);
+            // new peers don't know about djs yet, so they announce empty list
+            var djs = event.djs.map(function(id) {
+                return users[id];
+            }).filter(Boolean);
+
+            if (djs.length) {
+                this._negotiateDJs(djs, user);
+            }
+            break;
+
         case 'name':
             user.name = event.name;
             user.emit('name', event.name);
