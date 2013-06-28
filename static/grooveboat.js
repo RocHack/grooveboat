@@ -5,6 +5,7 @@
         WildEmitter.call(this);
 
         var users = this.users = {};
+        var djs = this.djs = [];
         var me = this.me = new User();
 
         this.webrtc = new WebRTC({
@@ -95,6 +96,47 @@
         });
     };
 
+    Groove.prototype.becomeDJ = function() {
+        if (this.me.dj) {
+            // already DJing
+            return;
+        }
+        var after = this.djs[this.djs.length-1];
+        this.webrtc.send({
+            type: 'nominateDJ',
+            after: after && after.id
+        });
+        this._acceptDJ(this.me, after);
+    };
+
+    Groove.prototype._acceptDJ = function(dj, prevDJ) {
+        if (dj == prevDJ) prevDJ = null;
+        var djIndex = this.djs.indexOf(dj);
+        if (djIndex != -1) {
+            // dj is already in djs list
+            if (this.djs[prevDJIndex + 1] == dj) {
+                // already in position
+                return;
+            }
+            // remove from old position
+            this.djs.splice(djIndex, 1);
+        }
+
+        var prevDJIndex = prevDJ ? this.djs.indexOf(prevDJ) : -1;
+        if (prevDJIndex == -1) {
+            this.djs.push(dj);
+        } else {
+            this.djs.splice(prevDJIndex, 0, dj);
+        }
+
+        dj.dj = true;
+        this.emit('enterDJ', {
+            user: dj,
+            after: prevDJ
+        });
+    };
+
+
     Groove.prototype._onMessage = function(event, conversation) {
         var channel = conversation.channel,
             userId = conversation.id,
@@ -104,23 +146,32 @@
             user.name = event.name;
             user.emit('name', event.name);
             break;
+
         case 'chat':
             this.emit('chat', {
                 text: String(event.text),
                 from: user
             });
             break;
+
         case 'bop':
             this.emit('bop', {
                 bopping: event.bopping,
                 user: user
             });
             break;
+
         case 'track':
             this.emit('track', {
                 track: event.track,
                 user: user
             });
+            break;
+
+        case 'nominateDJ':
+            var dj = event.user ? this.users[event.user] : user;
+            var prevDJ = event.after && this.users[event.after];
+            this._acceptDJ(dj, prevDJ);
             break;
         }
     };

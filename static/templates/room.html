@@ -2,7 +2,7 @@
     <div class="dj dj-{{dj.active}}" ng-repeat="dj in users | filter:isDJ">
         {{dj.name}}
     </div>
-    <a class="become-dj" href="#" ng-click"becomeDJ()">join</a>
+    <button class="become-dj" ng-click="becomeDJ()">join</button>
     <div class="now-playing-artist">{{current_track.artist}}</div>
     <div class="now-playing-track">{{current_track.title}}</div>
 </div>
