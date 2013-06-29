@@ -6,16 +6,22 @@ body {
   margin: 0px;
   padding: 0px;
 }
+button,
 input[type=button] {
+  display: inline-block;
   font-family: Helvetica-Neue, Helvetica, Arial, sans-serif;
   font-size: 16px;
   font-weight: 300;
-  background: #e23c03;
+  background: #ffffff;
   border: 0px;
-  color: #ffffff;
-  padding: 5px 10px 5px 10px;
-  margin: 5px 0px 5px 0px;
+  color: #e23c03;
+  padding: 1px 10px 5px 10px;
   cursor: pointer;
+}
+button:hover,
+input[type=button]:hover {
+  background: #e23c03;
+  color: #ffffff;
 }
 input[type=button]:disabled {
   background: #ededed;
@@ -39,15 +45,26 @@ input[type=text].no_border {
   border: 0px;
 }
 .top {
-  padding: 5px 10px 5px 10px;
-  text-align: center;
+  background: #42433f;
+  color: #ffffff;
 }
 .top .title {
   font-family: 'Amatic SC', cursive;
-  font-size: 52px;
+  font-size: 32px;
+  display: inline-block;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 5px 20px 5px 20px;
 }
-.top .room-list {
-  margin: 0px auto 0px auto;
+.top .username {
+  float: right;
+  line-height: 51px;
+  padding: 0px 20px 0px 20px;
+}
+.top .username:hover {
+  background: #e23c03;
+  color: #ffffff;
+  cursor: hover;
 }
 .prompt {
   position: fixed;
@@ -84,43 +101,80 @@ input[type=text].no_border {
   background-color: #e23c03;
   color: #ffffff;
 }
-.stage {
+.now-playing {
   text-align: center;
   border-bottom: 1px solid #ededed;
   padding-bottom: 10px;
+  margin: 0px;
+}
+.now-playing .now-playing-artist {
+  font-family: 'Monoton', cursive;
+  text-transform: lowercase;
+  font-size: 48px;
+  font-weight: 400;
+  color: #e23c03;
+}
+.now-playing .now-playing-track {
+  font-family: 'Pompiere', cursive;
+  font-size: 24px;
+}
+.stage {
+  border-bottom: 1px solid #ededed;
+  text-align: center;
+  margin: 0px;
+  padding: 0px;
 }
 .stage .dj,
 .stage .become-dj {
-  color: #42433f;
-  text-decoration: none;
   display: inline-block;
-  padding: 15px;
+  padding: 5px 20px 5px 20px !important;
+  height: 30px;
+  line-height: 30px;
+  cursor: pointer;
 }
 .stage .dj.dj-true,
+.stage .become-dj.dj-true {
+  background: #e23c03;
+  color: #ffffff;
+  -webkit-animation: anim-dj-active 2s infinite linear;
+}
+.stage .dj.local-true,
+.stage .become-dj.local-true {
+  color: #a3b6c5;
+  font-weight: 500;
+}
+.stage .become-dj {
+  color: #e23c03;
+}
 .stage .become-dj:hover {
   background: #e23c03;
   color: #ffffff;
 }
-.stage .become-dj {
-  cursor: pointer;
-}
-.stage .now-playing-artist {
-  margin: 20px 0px 5px 0px;
-  font-size: 36px;
-  font-weight: 400;
-  color: #e23c03;
+.audience {
+  float: left;
 }
 .audience .listener {
   display: inline-block;
+  text-align: center;
   padding: 10px;
+}
+.audience .listener img {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  border: 1px #ededed solid;
+}
+.audience .listener.local-true {
+  color: #a3b6c5;
+  font-weight: 500;
 }
 .chat {
   float: right;
   position: relative;
-  width: 250px;
+  width: 275px;
   border-left: 1px solid #ededed;
   border-bottom: 1px solid #ededed;
-  height: 400px;
+  height: 500px;
 }
 .chat .no_messages {
   text-align: center;
@@ -154,4 +208,18 @@ input[type=text].no_border {
   bottom: 0px;
   outline: 0px;
   height: 30px;
+}
+/*
+* Animations
+*/
+@-webkit-keyframes anim-dj-active {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .85;
+  }
+  100% {
+    opacity: 1;
+  }
 }

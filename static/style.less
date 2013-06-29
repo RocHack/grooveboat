@@ -2,6 +2,7 @@
 @gray: #EDEDED;
 @dark: #42433F;
 @red:#E23C03;
+@blue: #A3B6C5;
 @default-font: Helvetica-Neue, Helvetica, Arial, sans-serif;
 
 body {
@@ -18,15 +19,21 @@ body {
 //
 button,
 input[type=button] {
+    display: inline-block;
     font-family: @default-font;
     font-size: 16px;
     font-weight: 300;
-    background: @red;
+    background: @white;
     border: 0px;
-    color: @white;
-    padding: 5px 10px 5px 10px;
-    margin: 5px 0px 5px 0px;
+    color: @red;
+    padding: 1px 10px 5px 10px;
     cursor: pointer;
+}
+
+button:hover,
+input[type=button]:hover {
+    background: @red;
+    color: @white;
 }
 
 input[type=button]:disabled {
@@ -55,16 +62,28 @@ input[type=text] {
 }
 
 .top {
-    padding: 5px 10px 5px 10px;
-    text-align: center;
+    background: @dark;
+    color: @white;
 
     .title {
         font-family: 'Amatic SC', cursive;
-        font-size: 52px;
+        font-size: 32px;
+        display: inline-block;
+        color: @white;
+        text-decoration: none;
+        padding: 5px 20px 5px 20px;
     }
 
-    .room-list {
-        margin: 0px auto 0px auto;
+    .username {
+        float: right;
+        line-height: 51px;
+        padding: 0px 20px 0px 20px;
+    }
+
+    .username:hover {
+        background: @red;
+        color: @white;
+        cursor: hover;
     }
 }
 
@@ -109,46 +128,80 @@ input[type=text] {
     }
 }
 
-.stage {
+.now-playing {
     text-align: center;
     border-bottom: 1px solid @gray;
     padding-bottom: 10px;
+    margin: 0px;
     
+    .now-playing-artist {
+        font-family: 'Monoton', cursive;
+        text-transform: lowercase;
+        font-size: 48px;
+        font-weight: 400;
+        color: @red;
+    }
+
+    .now-playing-track {
+        font-family: 'Pompiere', cursive; 
+        font-size: 24px;
+    }
+}
+
+.stage {
+    border-bottom: 1px solid @gray;
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+
     .dj, .become-dj {
-        color: @dark;
-        text-decoration: none;
         display: inline-block;
-        padding: 15px;
-    }
+        padding: 5px 20px 5px 20px !important;
+        height: 30px;
+        line-height: 30px;
+        cursor: pointer;
 
-    .dj.dj-true, .become-dj:hover {
-        background: @red;
-        color: @white;
-    }
+        &.dj-true {
+            background: @red;
+            color: @white;
+            -webkit-animation: anim-dj-active 2s infinite linear;
+        }
 
-    .dj.local-true {
-        text-decoration: underline;
+        &.local-true {
+            color: @blue;
+            font-weight: 500;
+        }
     }
 
     .become-dj {
-        cursor: pointer;
-    }
-
-    .now-playing-artist {
-        margin: 20px 0px 5px 0px;
-        font-size: 36px;
-        font-weight: 400;
         color: @red;
+
+        &:hover {
+            background: @red;
+            color: @white;
+        }
     }
 }
 
 .audience {
+    float: left;
+
     .listener {
         display: inline-block;
         padding: 10px;
+        text-align: center;
+        padding: 10px;
+
+        img {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            border: 1px @gray solid;
+        }
 
         &.local-true {
-            text-decoration: underline;
+            color: @blue;
+            font-weight: 500;
         }
     }
 }
@@ -156,10 +209,10 @@ input[type=text] {
 .chat {
     float: right;
     position: relative;
-    width: 250px;
+    width: 275px;
     border-left: 1px solid @gray;
     border-bottom: 1px solid @gray;
-    height: 400px;
+    height: 500px;
 
     .no_messages {
         text-align: center;
@@ -199,5 +252,22 @@ input[type=text] {
         bottom: 0px;
         outline: 0px;
         height: 30px;
+    }
+}
+
+/*
+* Animations
+*/
+@-webkit-keyframes anim-dj-active {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .85;
+    }
+
+    100% {
+        opacity: 1;
     }
 }

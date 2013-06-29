@@ -1,10 +1,23 @@
+<div class="now-playing">
+    <div class="now-playing-artist">{{current_track.artist}}</div>
+    <div class="now-playing-track">{{current_track.title}}</div>
+</div>
+
 <div class="stage">
+    <div class="dj local-true">stevenleeg</div>
+    <div class="dj dj-true">rochacko</div>
+    <div class="dj">hankcy</div>
     <div class="dj dj-{{dj.active}} local-{{dj.isLocal}}" ng-repeat="dj in djs">
         {{dj.name}}
     </div>
-    <button class="become-dj" ng-click="becomeDJ()">join</button>
-    <div class="now-playing-artist">{{current_track.artist}}</div>
-    <div class="now-playing-track">{{current_track.title}}</div>
+    <div class="become-dj" ng-click="becomeDJ()">join</div>
+</div>
+
+<div class="audience">
+	<div class="listener local-{{listener.isLocal}}" ng-repeat="listener in users | filter:isAudience">
+        <img src="http://www.gravatar.com/avatar/{{listener.name}}?s=80&r=any&default=identicon&forcedefault=1" />
+        <div class="name">{{listener.name}}</div>
+    </div>
 </div>
 
 <div class="chat">
@@ -22,8 +35,3 @@
     </form>
 </div>
 
-<div class="audience">
-	<div class="listener local-{{listener.isLocal}}" ng-repeat="listener in users | filter:isAudience">
-        {{listener.name}}
-    </div>
-</div>
