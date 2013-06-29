@@ -8,6 +8,7 @@
         var users = this.users = {};
         var djs = this.djs = [];
         var me = this.me = new User();
+        me.isLocal = true;
 
         this.webrtc = new WebRTC({
             url: '//celehner.com',
@@ -224,6 +225,8 @@
     User.prototype = Object.create(WildEmitter.prototype, {
         constructor: {value: User}
     });
+
+    User.prototype.local = false;
 
     window.User = User;
     window.Groove = Groove;
