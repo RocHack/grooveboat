@@ -97,7 +97,8 @@
             type: 'welcome',
             name: this.me.name,
             djs: this.djs.filter(Boolean)
-                .map(function(user) { return user.id; })
+                .map(function(user) { return user.id; }),
+            active: this.activeDJ ? this.djs.indexOf(this.activeDJ) : -1
         }, user.id);
         this.emit('peerConnected', user);
     };
@@ -153,7 +154,7 @@
         this.emit('djs', this.djs.slice());
     };
 
-    Groove.prototype._negotiateDJs = function(djs, sender) {
+    Groove.prototype._negotiateDJs = function(djs, sender, activeDJ) {
         djs = djs.filter(Boolean);
         if (!djs.length) return;
         // todo: reconcile with other data known about DJs
@@ -164,7 +165,9 @@
         djs.forEach(function(user) {
             user.dj = true;
         });
+        this.activeDJ = activeDJ;
         this.emit('djs', this.djs.slice());
+        this.emit('activeDJ', activeDJ);
         console.log('got dj list', djs, 'from', sender.name);
     };
 
@@ -182,7 +185,8 @@
                 var djs = event.djs.map(function(id) {
                     return users[id];
                 });
-                this._negotiateDJs(djs, user);
+                var activeDJ = users[event.djs[event.active]];
+                this._negotiateDJs(djs, user, activeDJ);
             }
             break;
 
