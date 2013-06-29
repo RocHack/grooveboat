@@ -1,4 +1,5 @@
 (function () {
+    var isChrome = 'WebKitPoint' in window;
 
     function Groove() {
         var self = this;
@@ -9,16 +10,16 @@
         var me = this.me = new User();
 
         this.webrtc = new WebRTC({
-            url: 'http://signaling.celehner.com:8888',
+            url: '//celehner.com',
+            resource: 'signalmaster/socket.io',
             video: false,
             audio: false,
             data: true,
             autoRequestMedia: false,
             peerConnectionConfig: {
                 iceServers: [{
-                    //"url": "turns:cel@celehner.com:5349"
-                    "url": "turn:cel@celehner.com:3478",
-                    "credential": ""
+                    "url": isChrome ?
+                        "stun:stun.l.google.com:19302" : "stun:124.124.124.2"
                 }]
             }
         });
