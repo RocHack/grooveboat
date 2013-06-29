@@ -227,6 +227,10 @@
     function User(id) {
         WildEmitter.call(this);
         this.id = id;
+
+        User.prototype.generateGravatarHash = function() {
+            return md5(this.name);
+        }
     }
 
     User.prototype = Object.create(WildEmitter.prototype, {
