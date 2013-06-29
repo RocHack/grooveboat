@@ -20,6 +20,19 @@ angular.module('grooveboat', ["LocalStorageModule"])
 
         return groove;
     }])
+    .directive('autoScroll', function() {
+        return function(scope, elements, attrs) {
+            scope.$watch("(" + attrs.autoScroll + ").length", function() {
+                var el = elements[0];
+                var lastElHeight = el.lastElementChild.offsetHeight;
+                var isScrolledToBottom = (el.scrollHeight - el.scrollTop -
+                    el.clientHeight - lastElHeight) < lastElHeight;
+                if (isScrolledToBottom) {
+                    el.scrollTop = el.scrollHeight;
+                }
+            });
+        }
+    });
 
 function RoomListCtrl($scope, $location, groove, localStorageService) {
     var selected = -1;
@@ -76,28 +89,13 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         groove.becomeDJ();
     }
 
-    function keepScroll(el, fn) {
-        return function keptScroll() {
-            var isScrolledToBottom = (el.scrollHeight -
-                el.scrollTop - el.clientHeight < 10);
-            fn.apply(this, keptScroll.arguments);
-            if (isScrolledToBottom) {
-                setTimeout(function() {
-                    el.scrollTop = el.scrollHeight;
-                }, 10);
-            }
-        };
-    }
-
     function watchUser(user) {
         user.on("name", function(new_name) {
             $scope.$digest();
         });
     }
 
-    var messages_div = document.getElementById("messages");
-
-    $scope.newMessage = keepScroll(messages_div, function() {
+    $scope.newMessage = function() {
         var text = $scope.message_text;
         if (text && text.trim()) {
             $scope.chat_messages.push({
@@ -107,17 +105,17 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
             groove.sendChat(text);
         }
         $scope.message_text = "";
-    });
+    };
 
     $scope.$on("$destroy", function() {
         groove.leaveRoom();
     });
 
-    groove.on("chat", keepScroll(messages_div, function(message) {
+    groove.on("chat", function(message) {
         $scope.$apply(function($scope) { 
             $scope.chat_messages.push(message);
         });
-    }));
+    });
 
     groove.on("djs", function(djs) {
         $scope.$apply(function($scope) {
