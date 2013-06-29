@@ -45,6 +45,7 @@
                 user = users[userId];
             self.emit('peerDisconnected', user);
             if (user.dj) {
+                user.dj = false;
                 self.djs.splice(self.djs.indexOf(user), 1);
                 self.emit('djs', self.djs.slice());
             }
@@ -126,23 +127,25 @@
 
     Groove.prototype._acceptDJ = function(dj, prevDJ) {
         if (dj == prevDJ) prevDJ = null;
-        console.log('accept dj', dj, prevDJ, this.djs);
-        var djIndex = this.djs.indexOf(dj);
+        var djs = this.djs,
+            djIndex = djs.indexOf(dj),
+            prevDJIndex = prevDJ ? djs.indexOf(prevDJ) : -1;
+        console.log('accept dj', dj && dj.name, prevDJ && prevDJ.name, djs);
         if (djIndex != -1) {
             // dj is already in djs list
-            if (this.djs[prevDJIndex + 1] == dj) {
+            if (djs[prevDJIndex + 1] == dj) {
                 // already in position
                 return;
             }
             // remove from old position
-            this.djs.splice(djIndex, 1);
+            djs.splice(djIndex, 1);
+            prevDJIndex = prevDJ ? djs.indexOf(prevDJ) : -1;
         }
 
-        var prevDJIndex = prevDJ ? this.djs.indexOf(prevDJ) : -1;
         if (prevDJIndex == -1) {
-            this.djs.push(dj);
+            djs.push(dj);
         } else {
-            this.djs.splice(prevDJIndex, 0, dj);
+            djs.splice(prevDJIndex + 1, 0, dj);
         }
 
         dj.dj = true;
@@ -150,13 +153,15 @@
     };
 
     Groove.prototype._negotiateDJs = function(djs, sender) {
+        djs = djs.filter(Boolean);
+        if (!djs.length) return;
         // todo: reconcile with other data known about DJs
         this.djs = djs;
         djs.forEach(function(user) {
             user.dj = true;
         });
         this.emit('djs', this.djs.slice());
-        console.log('got dj list', djs, 'from', sender);
+        console.log('got dj list', djs, 'from', sender.name);
     };
 
     Groove.prototype._onMessage = function(event, conversation) {
@@ -168,12 +173,11 @@
         case 'welcome':
             user.name = event.name;
             user.emit('name', event.name);
-            // new peers don't know about djs yet, so they announce empty list
-            var djs = event.djs.map(function(id) {
-                return users[id];
-            }).filter(Boolean);
-
-            if (djs.length) {
+            // receive dj listing from peers already in the room
+            if (event.djs && !conversation.initiator) {
+                var djs = event.djs.map(function(id) {
+                    return users[id];
+                });
                 this._negotiateDJs(djs, user);
             }
             break;

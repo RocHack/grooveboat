@@ -120,7 +120,6 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     }));
 
     groove.on("djs", function(djs) {
-        console.log('djs array changed', djs);
         $scope.$apply(function($scope) {
             $scope.djs = djs;
         });
