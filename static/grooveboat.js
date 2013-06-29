@@ -157,6 +157,9 @@
         djs = djs.filter(Boolean);
         if (!djs.length) return;
         // todo: reconcile with other data known about DJs
+        this.djs.forEach(function(user) {
+            user.dj = false;
+        });
         this.djs = djs;
         djs.forEach(function(user) {
             user.dj = true;
