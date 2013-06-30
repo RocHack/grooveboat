@@ -178,8 +178,7 @@
             user = users[userId];
         switch (event.type) {
         case 'welcome':
-            user.name = event.name;
-            user.emit('name', event.name);
+            user.setName(event.name);
             // receive dj listing from peers already in the room
             if (event.djs && !conversation.initiator) {
                 var djs = event.djs.map(function(id) {
@@ -191,8 +190,7 @@
             break;
 
         case 'name':
-            user.name = event.name;
-            user.emit('name', event.name);
+            user.setName(event.name);
             break;
 
         case 'chat':
@@ -227,17 +225,31 @@
     function User(id) {
         WildEmitter.call(this);
         this.id = id;
-
-        User.prototype.generateGravatarHash = function() {
-            return md5(this.name);
-        }
     }
+
+    User.maxNameLength = 32;
 
     User.prototype = Object.create(WildEmitter.prototype, {
         constructor: {value: User}
     });
 
+    User.prototype.generateGravatarHash = function() {
+        return md5(this.name);
+    };
+
     User.prototype.local = false;
+    User.prototype.name = 'Guest';
+
+    User.prototype.setName = function(name) {
+        if (!name || !name.trim()) {
+            delete this.name;
+        } else if (name.length > User.maxNameLength) {
+            this.name = name.substr(0, User.maxNameLength);
+        } else {
+            this.name = name;
+        }
+        this.emit('name', event.name);
+    };
 
     window.User = User;
     window.Groove = Groove;
