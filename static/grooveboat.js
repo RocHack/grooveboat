@@ -47,8 +47,8 @@
             self.emit('peerDisconnected', user);
             if (user.dj) {
                 user.dj = false;
-                self.djs.splice(self.djs.indexOf(user), 1);
-                self.emit('djs', self.djs.slice());
+                djs.splice(djs.indexOf(user), 1);
+                self.emit('djs', djs.slice());
             }
         });
 
@@ -121,10 +121,7 @@
             after: after && after.id
         });
 
-        var self = this;
-        setTimeout(function() {
-            self._acceptDJ(self.me, after);
-        });
+        setTimeout(this._acceptDJ.bind(this, this.me, after), 10);
     };
 
     Groove.prototype._acceptDJ = function(dj, prevDJ) {
@@ -151,6 +148,23 @@
         }
 
         dj.dj = true;
+        this.emit('djs', this.djs.slice());
+    };
+
+    Groove.prototype.quitDJing = function() {
+        if (!this.me.dj) {
+            return;
+        }
+        this.webrtc.send({
+            type: 'quitDJing'
+        });
+        setTimeout(this._acceptQuitDJ.bind(this, this.me), 10);
+    };
+
+    Groove.prototype._acceptQuitDJ = function(user) {
+        user.dj = false;
+        var i = this.djs.indexOf(user);
+        this.djs.splice(i, 1);
         this.emit('djs', this.djs.slice());
     };
 
@@ -219,6 +233,11 @@
             var prevDJ = event.after && this.users[event.after];
             this._acceptDJ(dj, prevDJ);
             break;
+
+        case 'quitDJing':
+            this._acceptQuitDJ(user);
+            break;
+
         }
     };
 

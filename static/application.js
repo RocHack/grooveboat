@@ -93,7 +93,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         if(!groove.me.dj) {
             groove.becomeDJ();
         } else {
-            
+            groove.quitDJing();
         }
     }
 
