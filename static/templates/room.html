@@ -39,15 +39,15 @@
             </form>
         </div>
         <div class="music" ng-show="currentTab == 'music'">
+            <div class="upload">
+                <input type="file" files-bind="files" multiple />
+            </div>
             <ul class="songs">
                 <li ng-repeat="track in tracks">
                     {{track.artist}}
                     {{track.title}}
                 </li>
             </ul>
-            <div class="upload">
-                <input type="file" files-bind="files" multiple />
-            </div>
         </div>
     </div>
 </div>
