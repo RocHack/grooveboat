@@ -4,5 +4,5 @@
         <div class="room room-{{room.selected}}" ng-repeat="room in rooms" ng-click="clickRoom($index)">{{room.name}}</div>
     </div>
     <input type="text" name="user" maxlength="32" placeholder="nickname" class="full no_border" ng-model="currentUser.name">
-    <input type="button" class="join" value="join room" disabled="true" id="join-room" ng-click="clickJoinRoom()" />
+    <input type="button" class="action" value="join room" disabled="true" id="join-room" ng-click="clickJoinRoom()" />
 </div>

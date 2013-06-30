@@ -288,8 +288,12 @@
         constructor: {value: User}
     });
 
-    User.prototype.generateGravatarHash = function() {
-        return md5(this.name);
+    User.prototype.generateGravatarURL = function() {
+        var id = this.id;
+        if(this.gravatar) {
+            id = this.gravatar;
+        }
+        return "//www.gravatar.com/avatar/"+ md5(id) +"?s=80&d=monsterid"
     };
 
     User.prototype.local = false;

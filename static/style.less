@@ -62,6 +62,16 @@ input[type=text] {
     }
 }
 
+a {
+    color: @red;
+    text-decoration: none;
+    font-weight: 400;
+
+    &:hover {
+        color: @dark;
+    }
+}
+
 .top {
     background: @dark;
     color: @white;
@@ -88,6 +98,17 @@ input[type=text] {
     }
 }
 
+.screen {
+    position: fixed;
+    background: #000;
+    opacity: .75;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    z-index: 2;
+}
+
 .prompt {
     position: fixed;
     top: 100px;
@@ -103,6 +124,10 @@ input[type=text] {
         font-size: 24px;
         font-weight: 400;
         text-align: center;
+    }
+
+    p {
+        color: @dark;
     }
 
     .rooms {
@@ -128,11 +153,15 @@ input[type=text] {
         }
     }
 
-    .join {
+    .action {
         margin-top: 10px;
         padding: 10px;
         position: relative;
         right: 2px;
+    }
+
+    &.overlay {
+        z-index: 3;
     }
 }
 

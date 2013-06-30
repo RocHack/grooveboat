@@ -80,6 +80,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     $scope.users = [];
     $scope.djs = [];
     $scope.currentTab = "music";
+    $scope.currentOverlay = false;
     $scope.tracks = groove.playlists[groove.activePlaylist];
     $scope.files = [];
 
@@ -87,6 +88,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         title: "True Affection",
         artist: "The Blow"
     }
+
 
     $scope.chat_messages = [];
     $scope.newMessages = false;
@@ -100,6 +102,10 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         }
 
         $scope.currentTab = tab;
+    }
+
+    $scope.setOverlay = function(overlay) {
+        $scope.currentOverlay = overlay;
     }
 
     $scope.isDJ = function(user) {
@@ -120,6 +126,14 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
 
     $scope.vote = function(direction) {
         groove.me.vote = direction;
+    }
+
+    $scope.saveGravatarEmail = function() {
+        if($scope.tempGravatarEmail == undefined) {
+            return;
+        }
+
+        groove.me.gravatar = $scope.tempGravatarEmail;
     }
 
     $scope.getJoinText = function() {

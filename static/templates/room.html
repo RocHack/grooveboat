@@ -1,3 +1,13 @@
+<div class="screen" ng-show="currentOverlay" ng-click="setOverlay(false)">&nbsp;</div>
+<div class="prompt overlay" ng-show="currentOverlay">
+    <div class="change-avatar" ng-show="currentOverlay == 'change-avatar'">
+        <h1>Change avatar</h1>
+        <p>Grooveboat uses <a href="//gravatar.com">Gravatar</a> to provide users with avatars. If you have a Gravatar account, enter your email address here.</p>
+        <input type="text" class="full" name="gravatar" placeholder="Gravatar email address" ng-model="tempGravatarEmail" />
+        <input type="button" value="save" class="action" ng-click="saveGravatarEmail()" />
+    </div>
+</div>
+
 <div class="now-playing">
     <div class="now-playing-artist">{{current_track.artist}}</div>
     <div class="now-playing-track">{{current_track.title}}</div>
@@ -6,14 +16,14 @@
 
 <div class="stage">
     <div class="dj dj-{{dj.active}} local-{{dj.isLocal}}" ng-repeat="dj in djs">
-        <img src="//www.gravatar.com/avatar/{{dj.generateGravatarHash()}}?s=80&r=any&default=monsterid&forcedefault=1" /> {{dj.name}}
+        <img src="{{dj.generateGravatarURL()}}" /> {{dj.name}}
     </div>
     <div class="become-dj" ng-click="becomeDJ()">{{getJoinText()}}</div>
 </div>
 
 <div class="audience">
 	<div class="listener local-{{listener.isLocal}}" ng-repeat="listener in users | filter:isAudience">
-        <img class="vote-{{listener.vote == 1}}" src="//www.gravatar.com/avatar/{{listener.generateGravatarHash()}}?s=80&r=any&default=monsterid&forcedefault=1" />
+        <img ng-click="setOverlay('change-avatar')" class="vote-{{listener.vote == 1}}" src="{{listener.generateGravatarURL()}}" />
         <div class="name">{{listener.name}}</div>
     </div>
 </div>
