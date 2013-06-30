@@ -113,6 +113,10 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         }
     }
 
+    $scope.vote = function(direction) {
+        groove.me.vote = direction;
+    }
+
     $scope.getJoinText = function() {
         if(groove.me.dj) {
             return "leave";

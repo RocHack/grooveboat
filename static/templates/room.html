@@ -1,6 +1,7 @@
 <div class="now-playing">
     <div class="now-playing-artist">{{current_track.artist}}</div>
     <div class="now-playing-track">{{current_track.title}}</div>
+    <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)">Good</a><a class="vote bad bad-{{currentUser.vote == 0}}" href="" ng-click="vote(0)">Bad</a>
 </div>
 
 <div class="stage">
@@ -12,7 +13,7 @@
 
 <div class="audience">
 	<div class="listener local-{{listener.isLocal}}" ng-repeat="listener in users | filter:isAudience">
-        <img src="//www.gravatar.com/avatar/{{listener.generateGravatarHash()}}?s=80&r=any&default=monsterid&forcedefault=1" />
+        <img class="vote-{{listener.vote == 1}}" src="//www.gravatar.com/avatar/{{listener.generateGravatarHash()}}?s=80&r=any&default=monsterid&forcedefault=1" />
         <div class="name">{{listener.name}}</div>
     </div>
 </div>

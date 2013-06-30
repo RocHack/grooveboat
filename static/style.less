@@ -2,6 +2,7 @@
 @gray: #EDEDED;
 @dark: #42433F;
 @red:#E23C03;
+@green: #B8DC3C;
 @blue: #A3B6C5;
 @default-font: Helvetica-Neue, Helvetica, Arial, sans-serif;
 
@@ -153,6 +154,31 @@ input[type=text] {
         font-family: 'Pompiere', cursive; 
         font-size: 24px;
     }
+
+    .vote {
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 5px;
+        padding: 10px 15px 10px 15px;
+    }
+
+    .vote.good {
+        color: @green;
+    }
+
+    .vote.good:hover, .vote.good-true {
+        background: @green;
+        color: @white;
+    }
+
+    .vote.bad {
+        color: @red;
+    }
+
+    .vote.bad:hover, .vote.bad-true {
+        background: @red;
+        color: @white;
+    }
 }
 
 .stage {
@@ -212,7 +238,11 @@ input[type=text] {
             width: 40px;
             height: 40px;
             border-radius: 20px;
-            border: 1px @gray solid;
+            border: 2px @gray solid;
+
+            &.vote-true {
+                -webkit-animation: anim-vote-true 2s infinite linear;
+            }
         }
 
         &.local-true {
@@ -322,5 +352,19 @@ input[type=text] {
 
     100% {
         opacity: 1;
+    }
+}
+
+@-webkit-keyframes anim-vote-true {
+    0% {
+        border: 2px solid lighten(@green, 30%);
+    }
+
+    50% {
+        border: 2px solid @green;
+    }
+
+    100% {
+        border: 2px solid lighten(@green, 30%);
     }
 }
