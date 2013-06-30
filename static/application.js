@@ -12,9 +12,13 @@ angular.module('grooveboat', ["LocalStorageModule"])
         window.groove = groove;
 
         var name = localStorageService.get("user:name");
+        var gravatar = localStorageService.get("user:gravatar");
         if (!name) {
             name = "Guest " + Math.floor(Math.random()*101);
             localStorageService.set("user:name", name);
+        }
+        if(gravatar) {
+            groove.me.setGravatar(gravatar);
         }
 
         groove.me.name = name;
@@ -140,6 +144,8 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         }
 
         groove.me.gravatar = $scope.tempGravatarEmail;
+        groove.sendGravatar(groove.me.gravatar);
+        name = localStorageService.set("user:gravatar", groove.me.gravatar);
     }
 
     $scope.getJoinText = function() {
@@ -152,6 +158,10 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
 
     function watchUser(user) {
         user.on("name", function(new_name) {
+            $scope.$digest();
+        });
+
+        user.on("gravatar", function(gravatar) {
             $scope.$digest();
         });
     }

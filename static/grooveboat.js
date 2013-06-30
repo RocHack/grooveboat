@@ -102,6 +102,7 @@
         this.webrtc.send({
             type: 'welcome',
             name: this.me.name,
+            gravatar: this.me.gravatar,
             djs: this.djs.filter(Boolean)
                 .map(function(user) { return user.id; }),
             active: this.activeDJ ? this.djs.indexOf(this.activeDJ) : -1
@@ -115,6 +116,13 @@
             text: String(text)
         });
     };
+
+    Groove.prototype.sendGravatar = function(gravatar) {
+        this.webrtc.send({
+            type: 'gravatar',
+            gravatar: gravatar
+        });
+    }
 
     Groove.prototype.becomeDJ = function() {
         if (this.me.dj) {
@@ -199,6 +207,7 @@
         switch (event.type) {
         case 'welcome':
             user.setName(event.name);
+            user.setGravatar(event.gravatar);
             // receive dj listing from peers already in the room
             if (event.djs && !conversation.initiator) {
                 var djs = event.djs.map(function(id) {
@@ -211,6 +220,10 @@
 
         case 'name':
             user.setName(event.name);
+            break;
+
+        case 'gravatar':
+            user.setGravatar(event.gravatar);
             break;
 
         case 'chat':
@@ -300,6 +313,11 @@
         }
         this.emit('name', event.name);
     };
+
+    User.prototype.setGravatar = function(gravatar) {
+        this.gravatar = gravatar;
+        this.emit('gravatar', gravatar);
+    }
 
     window.User = User;
     window.Groove = Groove;
