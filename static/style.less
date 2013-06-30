@@ -275,7 +275,7 @@ a {
             width: 40px;
             height: 40px;
             border-radius: 20px;
-            border: 2px @gray solid;
+            border: 1px @gray solid;
 
             &.vote-true {
                 -webkit-animation: anim-vote-true 2s infinite linear;
@@ -424,14 +424,14 @@ a {
 
 @-webkit-keyframes anim-vote-true {
     0% {
-        border: 2px solid lighten(@green, 30%);
+        box-shadow: 0px 0px 0px @green;
     }
 
     50% {
-        border: 2px solid @green;
+        box-shadow: 0px 0px 15px darken(@green, 20%);
     }
 
     100% {
-        border: 2px solid lighten(@green, 30%);
+        box-shadow: 0px 0px 0px @green;
     }
 }
