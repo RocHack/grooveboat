@@ -5,7 +5,7 @@
 
 <div class="stage">
     <div class="dj dj-{{dj.active}} local-{{dj.isLocal}}" ng-repeat="dj in djs">
-        {{dj.name}}
+        <img src="//www.gravatar.com/avatar/{{dj.generateGravatarHash()}}?s=80&r=any&default=monsterid&forcedefault=1" /> {{dj.name}}
     </div>
     <div class="become-dj" ng-click="becomeDJ()">{{getJoinText()}}</div>
 </div>
