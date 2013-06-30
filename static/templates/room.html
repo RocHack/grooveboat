@@ -17,18 +17,32 @@
     </div>
 </div>
 
-<div class="chat">
-    <div class="messages" id="messages" auto-scroll="chat_messages">
-        <div class="no_messages" ng-hide="chat_messages.length">
-            Say something about stuff
+<div class="sidebar">
+    <div class="tabs">
+        <div class="tab tab-{{currentTab == 'music'}}" ng-click="switchTab('music')">music</div>
+        <div class="tab tab-{{currentTab == 'chat'}}" ng-click="switchTab('chat')">chat</div>
+    </div>
+
+    <div class="sidebar-content">
+        <div class="chat" ng-show="currentTab == 'chat'">
+            <div class="messages" id="messages" auto-scroll="chat_messages">
+                <div class="no_messages" ng-hide="chat_messages.length">
+                    Say something about stuff
+                </div>
+                <div class="message" ng-repeat="message in chat_messages">
+                    <div class="author">{{message.from.name}}</div>
+                    <div class="text">{{message.text}}</div>
+                </div>
+            </div>
+            <form ng-submit="newMessage()">
+                <input class="new_message" placeholder="send a message" type="text" ng-model="message_text" />
+            </form>
         </div>
-        <div class="message" ng-repeat="message in chat_messages">
-            <div class="author">{{message.from.name}}</div>
-            <div class="text">{{message.text}}</div>
+        <div class="music" ng-show="currentTab == 'music'">
+            <div class="upload">
+                <input type="file" name="upfile" />
+            </div>
         </div>
     </div>
-    <form ng-submit="newMessage()">
-        <input class="new_message" placeholder="send a message" type="text" ng-model="message_text" />
-    </form>
 </div>
 

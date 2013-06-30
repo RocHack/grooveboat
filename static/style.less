@@ -213,7 +213,7 @@ input[type=text] {
     }
 }
 
-.chat {
+.sidebar {
     float: right;
     position: relative;
     width: 275px;
@@ -221,13 +221,32 @@ input[type=text] {
     border-bottom: 1px solid @gray;
     height: 500px;
 
+    .sidebar-content {
+        clear: both;
+    }
+
+    .tabs {
+        .tab {
+            float: right;
+            box-sizing: content-box;
+            text-align: center;
+            width: 50%;
+            padding: 5px 0px 5px 0px;
+            border-bottom: 1px solid @gray;
+            cursor: pointer;
+        }
+
+        .tab.tab-true {
+            background-color: @gray;
+        }
+    }
+
     .no_messages {
         text-align: center;
         padding: 15px;
     }
 
     .messages {
-        height: 370px;
         overflow-y: auto;
         overflow-x: hidden;
         word-break: break-word;
@@ -260,6 +279,11 @@ input[type=text] {
         bottom: 0px;
         outline: 0px;
         height: 30px;
+    }
+
+    .upload {
+        text-align: center;
+        padding: 15px 0px 15px 0px;
     }
 }
 

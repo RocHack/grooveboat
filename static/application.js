@@ -70,6 +70,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
 
     $scope.users = [];
     $scope.djs = [];
+    $scope.currentTab = "chat";
 
     $scope.current_track = {
         title: "True Affection",
@@ -81,6 +82,10 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     $scope.currentUser = groove.me;
     $scope.users.push(groove.me);
 
+    $scope.switchTab = function(tab) {
+        $scope.currentTab = tab;
+    }
+    
     $scope.isDJ = function(user) {
         return (user.dj == true);
     }
