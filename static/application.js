@@ -152,7 +152,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         if(groove.me.dj) {
             return "leave";
         } else {
-            return "join";
+            return "become a dj";
         }
     }
 
