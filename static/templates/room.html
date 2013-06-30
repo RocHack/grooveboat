@@ -52,7 +52,7 @@
 
 <div class="stage">
     <div class="dj dj-{{dj.active}} local-{{dj.isLocal}}" ng-repeat="dj in djs">
-        <img ng-src="{{dj.generateGravatarURL()}}" /> {{dj.name}}
+        <img ng-class="{'vote-true': dj.vote == 1}" ng-src="{{dj.generateGravatarURL()}}" /> {{dj.name}} 
     </div>
     <div class="become-dj" ng-click="becomeDJ()">{{getJoinText()}}</div>
 </div>
