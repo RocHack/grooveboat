@@ -89,11 +89,16 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     }
 
     $scope.chat_messages = [];
+    $scope.newMessages = false;
 
     $scope.currentUser = groove.me;
     $scope.users.push(groove.me);
 
     $scope.switchTab = function(tab) {
+        if(tab == "chat" && $scope.newMessages) {
+            $scope.newMessages = false;
+        }
+
         $scope.currentTab = tab;
     }
 
@@ -154,6 +159,10 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
 
     groove.on("chat", function(message) {
         $scope.$apply(function($scope) { 
+            if($scope.currentTab != "chat") {
+                $scope.newMessages = true;
+            }
+
             $scope.chat_messages.push(message);
         });
     });
