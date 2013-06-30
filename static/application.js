@@ -108,6 +108,12 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         $scope.currentOverlay = overlay;
     }
 
+    $scope.clickUser = function(user) {
+        if(user == groove.me) {
+            $scope.setOverlay("change-avatar");
+        } 
+    }
+
     $scope.isDJ = function(user) {
         return (user.dj == true);
     }

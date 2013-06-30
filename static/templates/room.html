@@ -59,7 +59,7 @@
 
 <div class="audience">
 	<div class="listener local-{{listener.isLocal}}" ng-repeat="listener in users | filter:isAudience">
-        <img ng-click="setOverlay('change-avatar')" class="vote-{{listener.vote == 1}}" ng-src="{{listener.generateGravatarURL()}}" />
+        <img ng-click="clickUser(listener)" class="vote-{{listener.vote == 1}}" ng-src="{{listener.generateGravatarURL()}}" />
         <div class="name">{{listener.name}}</div>
     </div>
 </div>
