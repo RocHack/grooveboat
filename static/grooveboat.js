@@ -10,6 +10,15 @@
         var me = this.me = new User();
         me.isLocal = true;
 
+        this.playlists = {default: [
+            {
+                title: 'Fade Away (C2C Remix)',
+                artist: 'Vitalic',
+                file: null
+            }
+        ]};
+        this.activePlaylist = 'default';
+
         this.webrtc = new WebRTC({
             url: '//celehner.com',
             resource: 'signalmaster/socket.io',
@@ -44,6 +53,9 @@
             var channel = conversation.channel,
                 userId = conversation.id,
                 user = users[userId];
+            if (!user) {
+                return;
+            }
             self.emit('peerDisconnected', user);
             if (user.dj) {
                 user.dj = false;
@@ -239,6 +251,30 @@
             break;
 
         }
+    };
+
+    function grooveFileParsed(file, next, tags) {
+        var track = {
+            file: file,
+            title: tags.Title || 'Unknown',
+            artist: tags.Artist || 'Unknown',
+            album: tags.Album || 'Unknown'
+        };
+        console.log('track', track, tags);
+        this.playlists[this.activePlaylist].push(track);
+        this.emit('queueUpdate');
+        next();
+    }
+
+    function grooveProcessFile(files, i) {
+        var file = files[i];
+        console.log('file', file);
+        if (file) ID3v2.parseFile(file, grooveFileParsed.bind(this, file,
+            grooveProcessFile.bind(this, files, i+1)));
+    }
+
+    Groove.prototype.addFilesToQueue = function(files) {
+        grooveProcessFile.call(this, files, 0);
     };
 
     function User(id) {

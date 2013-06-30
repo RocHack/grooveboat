@@ -9,6 +9,7 @@ angular.module('grooveboat', ["LocalStorageModule"])
     }])
     .factory("groove", ["localStorageService", function(localStorageService) {
         var groove = new Groove();
+        window.groove = groove;
 
         var name = localStorageService.get("user:name");
         if (!name) {
@@ -35,7 +36,15 @@ angular.module('grooveboat', ["LocalStorageModule"])
                     setTimeout(scrollToBottom, 10);
                 }
             });
-        }
+        };
+    }).directive('filesBind', function() {
+        return function(scope, el, attrs) {
+            el.bind('change', function(e) {
+                scope.$apply(function() {
+                    scope[attrs.filesBind] = e.target.files;
+                });
+            });
+        };
     });
 
 function RoomListCtrl($scope, $location, groove, localStorageService) {
@@ -70,7 +79,9 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
 
     $scope.users = [];
     $scope.djs = [];
-    $scope.currentTab = "chat";
+    $scope.currentTab = "music";
+    $scope.tracks = groove.playlists[groove.activePlaylist];
+    $scope.files = [];
 
     $scope.current_track = {
         title: "True Affection",
@@ -85,7 +96,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     $scope.switchTab = function(tab) {
         $scope.currentTab = tab;
     }
-    
+
     $scope.isDJ = function(user) {
         return (user.dj == true);
     }
@@ -128,6 +139,11 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         $scope.message_text = "";
     };
 
+    $scope.$watch("files", function() {
+
+        groove.addFilesToQueue($scope.files);
+    });
+
     $scope.$on("$destroy", function() {
         groove.leaveRoom();
     });
@@ -143,6 +159,8 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
             $scope.djs = djs;
         });
     });
+
+    groove.on("queueUpdate", $scope.$digest.bind($scope));
 
     groove.on("peerConnected", function(user) {
         $scope.$apply(function($scope) {
