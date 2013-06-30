@@ -7,7 +7,7 @@
     <div class="dj dj-{{dj.active}} local-{{dj.isLocal}}" ng-repeat="dj in djs">
         {{dj.name}}
     </div>
-    <div class="become-dj" ng-click="becomeDJ()">join</div>
+    <div class="become-dj" ng-click="becomeDJ()">{{getJoinText()}}</div>
 </div>
 
 <div class="audience">

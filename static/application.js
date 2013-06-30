@@ -90,7 +90,19 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     }
 
     $scope.becomeDJ = function() {
-        groove.becomeDJ();
+        if(!groove.me.dj) {
+            groove.becomeDJ();
+        } else {
+            
+        }
+    }
+
+    $scope.getJoinText = function() {
+        if(groove.me.dj) {
+            return "leave";
+        } else {
+            return "join";
+        }
     }
 
     function watchUser(user) {
