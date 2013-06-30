@@ -22,13 +22,17 @@ angular.module('grooveboat', ["LocalStorageModule"])
     }])
     .directive('autoScroll', function() {
         return function(scope, elements, attrs) {
+            var el = elements[0];
+            function scrollToBottom() {
+                el.scrollTop = el.scrollHeight;
+            }
             scope.$watch("(" + attrs.autoScroll + ").length", function() {
-                var el = elements[0];
                 var lastElHeight = el.lastElementChild.offsetHeight;
                 var isScrolledToBottom = (el.scrollHeight - el.scrollTop -
                     el.clientHeight - lastElHeight) < lastElHeight;
                 if (isScrolledToBottom) {
-                    el.scrollTop = el.scrollHeight;
+                    scrollToBottom();
+                    setTimeout(scrollToBottom, 10);
                 }
             });
         }
