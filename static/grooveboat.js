@@ -10,13 +10,7 @@
         var me = this.me = new User();
         me.isLocal = true;
 
-        this.playlists = {default: [
-            {
-                title: 'Fade Away (C2C Remix)',
-                artist: 'Vitalic',
-                file: null
-            }
-        ]};
+        this.playlists = {default: []};
         this.activePlaylist = 'default';
 
         this.webrtc = new WebRTC({
@@ -289,10 +283,7 @@
     });
 
     User.prototype.generateGravatarURL = function() {
-        var id = this.id;
-        if(this.gravatar) {
-            id = this.gravatar;
-        }
+        var id = this.gravatar || this.name;
         return "//www.gravatar.com/avatar/"+ md5(id) +"?s=80&d=monsterid"
     };
 

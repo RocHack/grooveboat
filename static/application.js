@@ -79,7 +79,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
 
     $scope.users = [];
     $scope.djs = [];
-    $scope.currentTab = "music";
+    $scope.currentTab = "chat";
     $scope.currentOverlay = false;
     $scope.tracks = groove.playlists[groove.activePlaylist];
     $scope.files = [];
@@ -89,8 +89,8 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         artist: "The Blow"
     }
 
-
     $scope.chat_messages = [];
+
     $scope.newMessages = false;
 
     $scope.currentUser = groove.me;

@@ -8,26 +8,6 @@
     </div>
 </div>
 
-<div class="now-playing">
-    <div class="now-playing-artist">{{current_track.artist}}</div>
-    <div class="now-playing-track">{{current_track.title}}</div>
-    <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)">Good</a><a class="vote bad bad-{{currentUser.vote == 0}}" href="" ng-click="vote(0)">Bad</a>
-</div>
-
-<div class="stage">
-    <div class="dj dj-{{dj.active}} local-{{dj.isLocal}}" ng-repeat="dj in djs">
-        <img src="{{dj.generateGravatarURL()}}" /> {{dj.name}}
-    </div>
-    <div class="become-dj" ng-click="becomeDJ()">{{getJoinText()}}</div>
-</div>
-
-<div class="audience">
-	<div class="listener local-{{listener.isLocal}}" ng-repeat="listener in users | filter:isAudience">
-        <img ng-click="setOverlay('change-avatar')" class="vote-{{listener.vote == 1}}" src="{{listener.generateGravatarURL()}}" />
-        <div class="name">{{listener.name}}</div>
-    </div>
-</div>
-
 <div class="sidebar">
     <div class="tabs">
         <div class="tab tab-{{currentTab == 'music'}}" ng-click="switchTab('music')">music</div>
@@ -35,7 +15,7 @@
     </div>
 
     <div class="sidebar-content">
-        <div class="chat" ng-show="currentTab == 'chat'">
+        <div class="chat panel" ng-show="currentTab == 'chat'">
             <div class="messages" id="messages" auto-scroll="chat_messages">
                 <div class="no_messages" ng-hide="chat_messages.length">
                     Say something about stuff
@@ -49,7 +29,7 @@
                 <input class="new_message" placeholder="send a message" type="text" ng-model="message_text" />
             </form>
         </div>
-        <div class="music" ng-show="currentTab == 'music'">
+        <div class="music panel" ng-show="currentTab == 'music'">
             <div class="upload">
                 <input type="file" files-bind="files" multiple />
             </div>
@@ -63,3 +43,23 @@
     </div>
 </div>
 
+
+<div class="now-playing">
+    <div class="now-playing-artist">{{current_track.artist}}</div>
+    <div class="now-playing-track">{{current_track.title}}</div>
+    <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)">Good</a><a class="vote bad bad-{{currentUser.vote == 0}}" href="" ng-click="vote(0)">Bad</a>
+</div>
+
+<div class="stage">
+    <div class="dj dj-{{dj.active}} local-{{dj.isLocal}}" ng-repeat="dj in djs">
+        <img ng-src="{{dj.generateGravatarURL()}}" /> {{dj.name}}
+    </div>
+    <div class="become-dj" ng-click="becomeDJ()">{{getJoinText()}}</div>
+</div>
+
+<div class="audience">
+	<div class="listener local-{{listener.isLocal}}" ng-repeat="listener in users | filter:isAudience">
+        <img ng-click="setOverlay('change-avatar')" class="vote-{{listener.vote == 1}}" ng-src="{{listener.generateGravatarURL()}}" />
+        <div class="name">{{listener.name}}</div>
+    </div>
+</div>
