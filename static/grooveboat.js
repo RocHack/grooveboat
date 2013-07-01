@@ -24,6 +24,9 @@
                 iceServers: [{
                     "url": isChrome ?
                         "stun:stun.l.google.com:19302" : "stun:124.124.124.2"
+                }, {
+                    url: "turn:grooveboat@celehner.com",
+                    credential: "signalmaster"
                 }]
             }
         });
