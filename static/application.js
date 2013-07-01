@@ -1,4 +1,4 @@
-angular.module('grooveboat', ["LocalStorageModule"])
+angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
     .config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
         $routeProvider
             .when("/", { controller: RoomListCtrl, templateUrl: "static/templates/room_list.html"})
