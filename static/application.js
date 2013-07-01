@@ -135,7 +135,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     }
 
     $scope.vote = function(direction) {
-        groove.me.vote = direction;
+        groove.vote(direction);
     }
 
     $scope.saveGravatarEmail = function() {
@@ -156,14 +156,11 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         }
     }
 
+    var digest = $scope.$digest.bind($scope);
     function watchUser(user) {
-        user.on("name", function(new_name) {
-            $scope.$digest();
-        });
-
-        user.on("gravatar", function(gravatar) {
-            $scope.$digest();
-        });
+        user.on("name", digest);
+        user.on("vote", digest);
+        user.on("gravatar", digest);
     }
 
     $scope.newMessage = function() {

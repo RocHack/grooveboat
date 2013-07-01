@@ -103,6 +103,7 @@
             type: 'welcome',
             name: this.me.name,
             gravatar: this.me.gravatar,
+            vote: this.me.vote,
             djs: this.djs.filter(Boolean)
                 .map(function(user) { return user.id; }),
             active: this.activeDJ ? this.djs.indexOf(this.activeDJ) : -1
@@ -208,6 +209,7 @@
         case 'welcome':
             user.setName(event.name);
             user.setGravatar(event.gravatar);
+            user.setVote(event.vote);
             // receive dj listing from peers already in the room
             if (event.djs && !conversation.initiator) {
                 var djs = event.djs.map(function(id) {
@@ -233,13 +235,6 @@
             });
             break;
 
-        case 'bop':
-            this.emit('bop', {
-                bopping: event.bopping,
-                user: user
-            });
-            break;
-
         case 'track':
             this.emit('track', {
                 track: event.track,
@@ -257,6 +252,9 @@
             this._acceptQuitDJ(user);
             break;
 
+        case 'vote':
+            user.setVote(event.direction);
+            break;
         }
     };
 
@@ -284,6 +282,14 @@
         grooveProcessFile.call(this, files, 0);
     };
 
+    Groove.prototype.vote = function(direction) {
+        this.me.vote = direction;
+        this.webrtc.send({
+            type: 'vote',
+            direction: direction
+        });
+    };
+
     function User(id) {
         WildEmitter.call(this);
         this.id = id;
@@ -302,6 +308,7 @@
 
     User.prototype.local = false;
     User.prototype.name = 'Guest';
+    User.prototype.vote = 0;
 
     User.prototype.setName = function(name) {
         if (!name || !name.trim()) {
@@ -311,7 +318,12 @@
         } else {
             this.name = name;
         }
-        this.emit('name', event.name);
+        this.emit('name');
+    };
+
+    User.prototype.setVote = function(direction) {
+        this.vote = direction < 0 ? -1 : direction > 0 ? 1 : 0;
+        this.emit('vote');
     };
 
     User.prototype.setGravatar = function(gravatar) {

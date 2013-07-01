@@ -47,7 +47,7 @@
 <div class="now-playing">
     <div class="now-playing-artist">{{current_track.artist}}</div>
     <div class="now-playing-track">{{current_track.title}}</div>
-    <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)">Good</a><a class="vote bad bad-{{currentUser.vote == 0}}" href="" ng-click="vote(0)">Bad</a>
+    <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)">Good</a><a class="vote bad bad-{{currentUser.vote == -1}}" href="" ng-click="vote(-1)">Bad</a>
 </div>
 
 <div class="stage">
