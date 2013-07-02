@@ -13,6 +13,11 @@ body {
     color: @dark;
     margin: 0px;
     padding: 0px;
+    min-width: 500px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
 }
 
 //
@@ -224,12 +229,11 @@ a {
     text-align: center;
     margin: 0px;
     padding: 0px;
-    height: 40px;
+    min-height: 40px;
 
     .dj, .become-dj {
         display: inline-block;
         padding: 5px 20px 5px 20px !important;
-        height: 30px;
         line-height: 30px;
         cursor: pointer;
 
@@ -260,9 +264,7 @@ a {
 
     .become-dj {
         color: @red;
-        /*float: right;*/
-        position: absolute;
-        right: 275px;
+        float: right;
 
         &:hover {
             background: @red;
@@ -304,6 +306,8 @@ a {
     float: right;
     position: relative;
     width: 275px;
+    min-width: 25%;
+    max-width: 50%;
     height: 100%;
     min-height: 350px;
     background-color: white;
