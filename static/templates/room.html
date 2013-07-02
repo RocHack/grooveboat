@@ -30,9 +30,9 @@
             </form>
         </div>
         <div class="music panel" ng-show="currentTab == 'music'">
-            <div class="upload">
-                <input type="file" files-bind="files" multiple />
-            </div>
+            <form class="dropzone track-upload" id="upload-zone" drop-files="files" action="#">
+                drop music
+            </form>
             <ul class="songs">
                 <li ng-repeat="track in tracks">
                     {{track.artist}}

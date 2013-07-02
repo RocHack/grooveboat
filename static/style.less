@@ -326,6 +326,21 @@ a {
         }
     }
 
+    .track-upload {
+        display: block;
+        height: 75px;
+        margin: 10px;
+        border: 2px dashed darken(@gray, 20%);
+        text-align: center;
+        line-height: 75px;
+        color: darken(@gray, 20%);
+        font-size: 22px;
+
+        &.active, &:hover {
+            border: 2px solid darken(@gray, 20%);
+        }
+    }
+
     .tabs {
         .tab {
             float: right;
@@ -400,9 +415,6 @@ a {
         padding: 0;
         margin: 0;
         overflow: auto;
-        position: absolute;
-        bottom: 0;
-        top: 50px;
         width: 100%;
 
         li {

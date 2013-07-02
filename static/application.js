@@ -49,6 +49,33 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
                 });
             });
         };
+    }).directive('dropFiles', function() {
+        function dragEnter(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log("Enter");
+        }
+
+        function dragOver(e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        return function(scope, el, attr) {
+            function drop(e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                console.log("Drop");
+                scope.$apply(function() {
+                    scope.files = e.dataTransfer.files;
+                });
+            }
+
+            el.bind("dragenter", dragEnter);
+            el.bind("dragover", dragOver);
+            el.bind("drop", drop);
+        };
     });
 
 function RoomListCtrl($scope, $location, groove, localStorageService) {
@@ -83,7 +110,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
 
     $scope.users = [];
     $scope.djs = [];
-    $scope.currentTab = "chat";
+    $scope.currentTab = "music";
     $scope.currentOverlay = false;
     $scope.tracks = groove.playlists[groove.activePlaylist];
     $scope.files = [];
