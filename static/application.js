@@ -170,9 +170,9 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
             return;
         }
 
-        groove.me.gravatar = $scope.tempGravatarEmail;
-        groove.sendGravatar(groove.me.gravatar);
-        name = localStorageService.set("user:gravatar", groove.me.gravatar);
+        groove.me.setGravatar($scope.tempGravatarEmail);
+        groove.sendGravatar();
+        localStorageService.set("user:gravatar", groove.me.gravatar);
     }
 
     $scope.getJoinText = function() {

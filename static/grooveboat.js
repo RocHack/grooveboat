@@ -121,12 +121,12 @@
         });
     };
 
-    Groove.prototype.sendGravatar = function(gravatar) {
+    Groove.prototype.sendGravatar = function() {
         this.webrtc.send({
             type: 'gravatar',
-            gravatar: gravatar
+            gravatar: this.me.gravatar
         });
-    }
+    };
 
     Groove.prototype.becomeDJ = function() {
         if (this.me.dj) {
@@ -296,6 +296,7 @@
     function User(id) {
         WildEmitter.call(this);
         this.id = id;
+        this.updateIconURL();
     }
 
     User.maxNameLength = 32;
@@ -304,14 +305,10 @@
         constructor: {value: User}
     });
 
-    User.prototype.generateGravatarURL = function() {
-        var id = this.gravatar || this.name;
-        return "//www.gravatar.com/avatar/"+ md5(id) +"?s=80&d=monsterid"
-    };
-
     User.prototype.local = false;
     User.prototype.name = 'Guest';
     User.prototype.vote = 0;
+    User.prototype.iconURL = 0;
 
     User.prototype.setName = function(name) {
         if (!name || !name.trim()) {
@@ -321,6 +318,7 @@
         } else {
             this.name = name;
         }
+        this.updateIconURL();
         this.emit('name');
     };
 
@@ -331,8 +329,14 @@
 
     User.prototype.setGravatar = function(gravatar) {
         this.gravatar = gravatar;
+        this.updateIconURL();
         this.emit('gravatar', gravatar);
-    }
+    };
+
+    User.prototype.updateIconURL = function() {
+        var id = this.gravatar || this.name || this.id || "";
+        this.iconURL = "//www.gravatar.com/avatar/"+ md5(id) +"?s=80&d=monsterid";
+    };
 
     window.User = User;
     window.Groove = Groove;

@@ -22,7 +22,7 @@
                 </div>
                 <div class="message" ng-repeat="message in chat_messages">
                     <div class="author">{{message.from.name}}</div>
-					<div class="text" ng-bind-html="message.text | linky"></div>
+                    <div class="text" ng-bind-html="message.text | linky"></div>
                 </div>
             </div>
             <form ng-submit="newMessage()">
@@ -51,15 +51,15 @@
 </div>
 
 <div class="stage">
-    <div class="dj dj-{{dj.active}} local-{{dj.isLocal}}" ng-repeat="dj in djs">
-        <img ng-class="{'vote-true': dj.vote == 1}" ng-src="{{dj.generateGravatarURL()}}" /> {{dj.name}} 
+    <div ng-class="{dj: true, active: dj == activeDJ, local: dj.isLocal}" ng-repeat="dj in djs">
+        <img ng-class="{'vote-true': vote == 1}" ng-src="{{dj.iconURL}}" /> {{dj.name}} 
     </div>
     <div class="become-dj" ng-click="becomeDJ()">{{getJoinText()}}</div>
 </div>
 
 <div class="audience">
-	<div class="listener local-{{listener.isLocal}}" ng-repeat="listener in users | filter:isAudience">
-        <img ng-click="clickUser(listener)" class="vote-{{listener.vote == 1}}" ng-src="{{listener.generateGravatarURL()}}" />
+    <div class="listener local-{{listener.isLocal}}" ng-repeat="listener in users | filter:isAudience">
+        <img ng-click="clickUser(listener)" class="vote-{{listener.vote == 1}}" ng-src="{{listener.iconURL}}" />
         <div class="name">{{listener.name}}</div>
     </div>
 </div>
