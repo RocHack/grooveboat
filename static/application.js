@@ -21,7 +21,7 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
             groove.me.setGravatar(gravatar);
         }
 
-        groove.me.name = name;
+        groove.me.setName(name);
 
         return groove;
     }])
@@ -100,6 +100,7 @@ function RoomListCtrl($scope, $location, groove, localStorageService) {
     $scope.clickJoinRoom = function() {
         var room = $scope.rooms[selected];
         var name = room.name.replace(/\s/g, "-");
+        groove.me.updateIconURL(name);
         localStorageService.set("user:name", groove.me.name);
         $location.path("/room/" + name);
     }

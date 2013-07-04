@@ -227,8 +227,8 @@
             user = users[userId];
         switch (event.type) {
         case 'welcome':
-            user.setName(event.name);
             user.setGravatar(event.gravatar);
+            user.setName(event.name);
             user.setVote(event.vote);
             // receive dj listing from peers already in the room
             if (event.djs && !conversation.initiator) {
@@ -328,7 +328,6 @@
     function User(id) {
         WildEmitter.call(this);
         this.id = id;
-        this.updateIconURL();
     }
 
     User.maxNameLength = 32;
@@ -366,9 +365,14 @@
     };
 
     User.prototype.updateIconURL = function() {
-        var id = this.gravatar || this.name || this.id || "";
+        var id = this.gravatar || this.name || "";
+        if (this.gravatarId == id) return;
+        this.gravatarId = id;
         this.iconURL = "//www.gravatar.com/avatar/"+ md5(id) +"?s=80&d=monsterid";
     };
+
+    // set default icon URL
+    User.prototype.updateIconURL();
 
     window.User = User;
     window.Groove = Groove;
