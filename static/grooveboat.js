@@ -7,11 +7,14 @@
 
         var users = this.users = {};
         var djs = this.djs = [];
+        this.activeDJ = null;
+
         var me = this.me = new User();
         me.isLocal = true;
 
         this.playlists = {default: []};
         this.activePlaylist = 'default';
+        this.activeTrack = null;
 
         this.webrtc = new WebRTC({
             url: '//celehner.com',
@@ -138,7 +141,9 @@
             type: 'nominateDJ',
             after: after && after.id
         });
-
+        if (!after) {
+            this.becomeActiveDJ();
+        }
         setTimeout(this._acceptDJ.bind(this, this.me, after), 10);
     };
 
@@ -203,6 +208,18 @@
         console.log('got dj list', djs, 'from', sender.name);
     };
 
+    Groove.prototype.isDJUp = function(user) {
+    };
+
+    Groove.prototype._acceptActiveTrack = function(track, user) {
+        // remember the track they are sending, in case they become dj
+        user.activeTrack = track;
+        if (user == this.activeDJ) {
+            this.activeTrack = track;
+            this.emit('activeTrack');
+        }
+    };
+
     Groove.prototype._onMessage = function(event, conversation) {
         var channel = conversation.channel,
             userId = conversation.id,
@@ -258,13 +275,17 @@
         case 'vote':
             user.setVote(event.direction);
             break;
+
+        case 'activeTrack':
+            this._acceptActiveTrack(event.track, user);
+            break;
         }
     };
 
     function grooveFileParsed(file, next, tags) {
         var track = {
             file: file,
-            title: tags.Title || 'Unknown',
+            title: tags.Title || 'Untitled',
             artist: tags.Artist || 'Unknown',
             album: tags.Album || 'Unknown'
         };
@@ -291,6 +312,17 @@
             type: 'vote',
             direction: direction
         });
+    };
+
+    Groove.prototype.becomeActiveDJ = function() {
+        console.log('becoming active');
+        this.activeDJ = this.me;
+        var track = this.me.activeTrack;
+        this.webrtc.send({
+            type: 'activeTrack',
+            track: track
+        });
+        setTimeout(this._acceptActiveTrack.bind(this, track, this.me), 10);
     };
 
     function User(id) {

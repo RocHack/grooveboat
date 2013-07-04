@@ -227,7 +227,13 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         });
     });
 
-    groove.on("queueUpdate", $scope.$digest.bind($scope));
+    groove.on("activeDJ", function(activeDJ) {
+        $scope.$apply(function($scope) {
+            $scope.activeDJ = activeDJ;
+        });
+    });
+
+    groove.on("queueUpdate", digest);
 
     groove.on("peerConnected", function(user) {
         $scope.$apply(function($scope) {
