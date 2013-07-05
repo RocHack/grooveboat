@@ -115,9 +115,9 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     $scope.tracks = groove.playlists[groove.activePlaylist];
     $scope.files = [];
 
-    $scope.current_track = {
-        title: "True Affection",
-        artist: "The Blow"
+    $scope.currentTrack = {
+        title: "Untitled",
+        artist: "Untitled"
     }
 
     $scope.chat_messages = [];

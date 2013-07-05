@@ -45,16 +45,16 @@
 
 
 <div class="now-playing">
-    <div class="now-playing-artist">{{current_track.artist}}</div>
-    <div class="now-playing-track">{{current_track.title}}</div>
+    <div class="now-playing-artist">{{currentTrack.artist}}</div>
+    <div class="now-playing-track">{{currentTrack.title}}</div>
     <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)">Good</a><a class="vote bad bad-{{currentUser.vote == -1}}" href="" ng-click="vote(-1)">Bad</a>
 </div>
 
 <div class="stage">
+    <div class="become-dj" ng-click="becomeDJ()">{{getJoinText()}}</div>
     <div ng-class="{dj: true, active: dj == activeDJ, local: dj.isLocal}" ng-repeat="dj in djs">
         <img ng-class="{'vote-true': vote == 1}" ng-src="{{dj.iconURL}}" /> {{dj.name}}
     </div>
-    <div class="become-dj" ng-click="becomeDJ()">{{getJoinText()}}</div>
 </div>
 
 <div class="audience">

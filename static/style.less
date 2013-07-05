@@ -92,6 +92,7 @@ a {
 
     .username {
         float: right;
+        color: @white;
         line-height: 51px;
         padding: 0px 20px 0px 20px;
     }
@@ -231,9 +232,9 @@ a {
     padding: 0px;
     min-height: 40px;
 
-    .dj, .become-dj {
+    .dj {
         display: inline-block;
-        padding: 5px 20px 5px 20px !important;
+        padding: 5px 20px 5px 20px;
         line-height: 30px;
         cursor: pointer;
 
@@ -263,8 +264,11 @@ a {
     }
 
     .become-dj {
-        color: @red;
+        display: block;
         float: right;
+        color: @red;
+        padding: 5px 20px 5px 20px;
+        line-height: 30px;
 
         &:hover {
             background: @red;
@@ -305,9 +309,9 @@ a {
     box-sizing: border-box;
     float: right;
     position: relative;
-    width: 275px;
-    min-width: 25%;
-    max-width: 50%;
+    min-width: 275px;
+    width: 25%;
+    max-width: 325px;;
     height: 100%;
     min-height: 350px;
     background-color: white;
