@@ -228,10 +228,20 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         });
     });
 
-    groove.on("activeDJ", function(activeDJ) {
+    groove.on("activeDJ", function() {
         $scope.$apply(function($scope) {
-            $scope.activeDJ = activeDJ;
+            $scope.activeDJ = groove.activeDJ;
         });
+    });
+
+    groove.on("activeTrack", function() {
+        $scope.$apply(function($scope) {
+            $scope.currentTrack = groove.activeTrack;
+        });
+    });
+
+    groove.on("emptyPlaylist", function() {
+        alert("Add some music to your playlist first.");
     });
 
     groove.on("queueUpdate", digest);

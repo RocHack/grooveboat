@@ -58,9 +58,7 @@
             }
             self.emit('peerDisconnected', user);
             if (user.dj) {
-                user.dj = false;
-                djs.splice(djs.indexOf(user), 1);
-                self.emit('djs', djs.slice());
+                self._acceptQuitDJ(user);
             }
         });
 
@@ -112,7 +110,8 @@
             vote: this.me.vote,
             djs: this.djs.filter(Boolean)
                 .map(function(user) { return user.id; }),
-            active: this.activeDJ ? this.djs.indexOf(this.activeDJ) : -1
+            active: this.activeDJ ? this.djs.indexOf(this.activeDJ) : -1,
+            myActiveTrack: this.me == this.activeDJ ? this.activeTrack : null
         }, user.id);
         this.emit('peerConnected', user);
     };
@@ -134,6 +133,11 @@
     Groove.prototype.becomeDJ = function() {
         if (this.me.dj) {
             // already DJing
+            return;
+        }
+        var playlist = this.playlists[this.activePlaylist];
+        if (!playlist || !playlist.length) {
+            this.emit('emptyPlaylist');
             return;
         }
         var after = this.djs[this.djs.length-1];
@@ -187,7 +191,16 @@
     Groove.prototype._acceptQuitDJ = function(user) {
         user.dj = false;
         var i = this.djs.indexOf(user);
-        this.djs.splice(i, 1);
+        if (i != -1) {
+            this.djs.splice(i, 1);
+        }
+        if (this.activeDJ == user) {
+            this.activeDJ = null;
+            this.activeTrack = null;
+            this.emit('activeDJ');
+            this.emit('activeTrack');
+            // todo: allow next dj to take place
+        }
         this.emit('djs', this.djs.slice());
     };
 
@@ -202,22 +215,30 @@
         djs.forEach(function(user) {
             user.dj = true;
         });
-        this.activeDJ = activeDJ;
         this.emit('djs', this.djs.slice());
-        this.emit('activeDJ', activeDJ);
+        this._acceptActiveTrack(activeDJ.activeTrack, activeDJ);
         console.log('got dj list', djs, 'from', sender.name);
     };
 
+    // is it a DJ's valid turn to start playing
     Groove.prototype.isDJUp = function(user) {
+        // for now, allow any dj to play whenever they want
+        return (this.djs.indexOf(user) != -1);
+    };
+
+    Groove.prototype._negotiateActiveTrack = function(track, user) {
+        // remember the track they are sending, in case they become dj
+        user.activeTrack = track;
+        if (this.isDJUp(user)) {
+            this._acceptActiveTrack(track, user);
+        }
     };
 
     Groove.prototype._acceptActiveTrack = function(track, user) {
-        // remember the track they are sending, in case they become dj
-        user.activeTrack = track;
-        if (user == this.activeDJ) {
-            this.activeTrack = track;
-            this.emit('activeTrack');
-        }
+        this.activeTrack = track;
+        this.activeDJ = user;
+        this.emit('activeDJ');
+        this.emit('activeTrack');
     };
 
     Groove.prototype._onMessage = function(event, conversation) {
@@ -230,6 +251,9 @@
             user.setGravatar(event.gravatar);
             user.setName(event.name);
             user.setVote(event.vote);
+            if (event.myActiveTrack) {
+                user.activeTrack = event.myActiveTrack;
+            }
             // receive dj listing from peers already in the room
             if (event.djs && !conversation.initiator) {
                 var djs = event.djs.map(function(id) {
@@ -277,7 +301,7 @@
             break;
 
         case 'activeTrack':
-            this._acceptActiveTrack(event.track, user);
+            this._negotiateActiveTrack(event.track, user);
             break;
         }
     };
@@ -290,14 +314,17 @@
             album: tags.Album || 'Unknown'
         };
         console.log('track', track, tags);
-        this.playlists[this.activePlaylist].push(track);
+        var playlist = this.playlists[this.activePlaylist];
+        playlist.push(track);
+        if (playlist.length == 1) {
+            this.me.activeTrack = track;
+        }
         this.emit('queueUpdate');
         next();
     }
 
     function grooveProcessFile(files, i) {
         var file = files[i];
-        console.log('file', file);
         if (file) ID3v2.parseFile(file, grooveFileParsed.bind(this, file,
             grooveProcessFile.bind(this, files, i+1)));
     }
