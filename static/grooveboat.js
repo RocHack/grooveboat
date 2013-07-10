@@ -70,9 +70,7 @@
             self.emit('peerError', user);
         });
 
-        this.webrtc.on('dataMessage', function (event, conversation) {
-            self._onMessage(event, conversation);
-        });
+        this.webrtc.on('dataMessage', this._onMessage.bind(this));
 
     }
 
@@ -324,9 +322,14 @@
     }
 
     function grooveProcessFile(files, i) {
+        if (i > files.length) return;
+        var next = grooveProcessFile.bind(this, files, i+1);
         var file = files[i];
-        if (file) ID3v2.parseFile(file, grooveFileParsed.bind(this, file,
-            grooveProcessFile.bind(this, files, i+1)));
+        if (file && file.type.indexOf('audio/') == 0) {
+            ID3v2.parseFile(file, grooveFileParsed.bind(this, file, next));
+        } else {
+            next();
+        }
     }
 
     Groove.prototype.addFilesToQueue = function(files) {
