@@ -179,6 +179,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
 
         groove.me.setGravatar($scope.tempGravatarEmail);
         groove.sendGravatar();
+        $scope.setOverlay(false);
         localStorageService.set("user:gravatar", groove.me.gravatar);
     }
 
