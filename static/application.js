@@ -156,6 +156,11 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     }
 
     $scope.becomeDJ = function() {
+        if($scope.tracks.length == 0) {
+            $scope.setOverlay("no-tracks");
+            return;
+        }
+
         if(!groove.me.dj) {
             groove.becomeDJ();
         } else {
