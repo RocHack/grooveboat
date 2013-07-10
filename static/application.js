@@ -117,10 +117,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     $scope.files = [];
     $scope.tempGravatarEmail = groove.me.gravatar;
 
-    $scope.currentTrack = {
-        title: undefined,
-        artist: undefined
-    }
+    $scope.currentTrack = null;
 
     $scope.chat_messages = [];
 

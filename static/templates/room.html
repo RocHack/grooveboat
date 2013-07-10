@@ -49,13 +49,13 @@
 </div>
 
 
-<div class="now-playing" ng-show="{{currentTrack.artist}}">
+<div class="now-playing" ng-show="currentTrack">
     <div class="now-playing-artist">{{currentTrack.artist}}</div>
     <div class="now-playing-track">{{currentTrack.title}}</div>
     <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)">Good</a><a class="vote bad bad-{{currentUser.vote == -1}}" href="" ng-click="vote(-1)">Bad</a>
 </div>
 
-<div class="awaiting-dj" ng-hide="{{currentTrack.artist}}">
+<div class="awaiting-dj" ng-hide="currentTrack">
     awaiting dj
 </div>
 
