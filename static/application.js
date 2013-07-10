@@ -115,6 +115,7 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     $scope.currentOverlay = false;
     $scope.tracks = groove.playlists[groove.activePlaylist];
     $scope.files = [];
+    $scope.tempGravatarEmail = groove.me.gravatar;
 
     $scope.currentTrack = {
         title: "Untitled",
