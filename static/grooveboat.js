@@ -9,7 +9,7 @@
         var djs = this.djs = [];
         this.activeDJ = null;
 
-        var me = this.me = new User();
+        var me = this.me = new User(this);
         me.isLocal = true;
 
         this.playlists = {default: []};
@@ -45,7 +45,7 @@
         this.webrtc.on('dataOpen', function (event, conversation) {
             var channel = conversation.channel,
                 userId = conversation.id,
-                user = users[userId] = new User(userId);
+                user = users[userId] = new User(self, userId);
             self._welcomeUser(user);
         });
 
@@ -60,6 +60,7 @@
             if (user.dj) {
                 self._acceptQuitDJ(user);
             }
+            delete users[userId];
         });
 
         this.webrtc.on('dataError', function (event, conversation) {
@@ -101,6 +102,7 @@
     };
 
     Groove.prototype._welcomeUser = function(user) {
+        var amDJ = this.me == this.activeDJ;
         this.webrtc.send({
             type: 'welcome',
             name: this.me.name,
@@ -109,9 +111,12 @@
             djs: this.djs.filter(Boolean)
                 .map(function(user) { return user.id; }),
             active: this.activeDJ ? this.djs.indexOf(this.activeDJ) : -1,
-            myActiveTrack: this.me == this.activeDJ ? this.activeTrack : null
+            myActiveTrack: amDJ ? this.activeTrack : null
         }, user.id);
         this.emit('peerConnected', user);
+        if (amDJ) {
+            this.streamToPeers([user]);
+        }
     };
 
     Groove.prototype.sendChat = function(text) {
@@ -240,6 +245,7 @@
     };
 
     Groove.prototype._onMessage = function(event, conversation) {
+        //console.log('event', typeof event, event.length, event.type);
         var channel = conversation.channel,
             userId = conversation.id,
             users = this.users,
@@ -301,6 +307,10 @@
         case 'activeTrack':
             this._negotiateActiveTrack(event.track, user);
             break;
+
+        case 'chunk':
+            this._gotChunk(event.data, user);
+            break;
         }
     };
 
@@ -326,7 +336,8 @@
         var next = grooveProcessFile.bind(this, files, i+1);
         var file = files[i];
         if (file && file.type.indexOf('audio/') == 0) {
-            ID3v2.parseFile(file, grooveFileParsed.bind(this, file, next));
+            ID3v2.parseFile(file,
+                grooveFileParsed.bind(this, file, next));
         } else {
             next();
         }
@@ -353,10 +364,103 @@
             track: track
         });
         setTimeout(this._acceptActiveTrack.bind(this, track, this.me), 10);
+        readFile(track.file, function(buf) {
+            this.activeTrackArrayBuffer = buf;
+            // split into chunks
+            var chunkSize = 640;
+            var numChunks = Math.ceil(buf.byteLength/chunkSize);
+            var chunks = this.activeTrackChunks = new Array(numChunks);
+            for (var i = 0; i < numChunks; i++) {
+                if (i % 100 == 0) {
+                    console.log('loading chunk', i, '(' + (i/numChunks) + ')');
+                }
+                var chunkBuf = (i == numChunks-1) ?
+                    new Uint8Array(buf, i * chunkSize):
+                    new Uint8Array(buf, i * chunkSize, chunkSize);
+                chunks[i] = {
+                    type: 'chunk',
+                    data: StringView.bytesToBase64(chunkBuf)
+                };
+            }
+            this.streamToPeers(this.getPeers());
+        }.bind(this));
     };
 
-    function User(id) {
+    function readFile(file, cb) {
+        var reader = new FileReader();
+        reader.readAsArrayBuffer(file);
+        reader.onload = function() {
+            console.log('onload');
+            cb(reader.result);
+        };
+    }
+
+    Groove.prototype.streamToPeers = function(peers, start) {
+        var chunks = this.activeTrackChunks;
+        if (!chunks || !chunks.length) {
+            console.error('No active track chunks to stream.');
+            return;
+        }
+
+        // weed out inactive peers
+        var users = this.users,
+            me = this.me;
+        peers = peers.filter(function(peer) {
+            return peer != me &&
+                peer.id in users;
+        });
+        if (!peers.length) {
+            return;
+        }
+
+        // send data
+        var names = peers.map(function(peer) { return peer.id; }).join(', ');
+        console.log('streaming to', names);
+        start |= 0;
+        var end = Math.min(start + 200, chunks.length);
+        for (var i = start; i < end; i++) {
+            var msg = chunks[i];
+            if (i % 100 == 0) {
+                var percent = (i/chunks.length * 100).toFixed(1);
+                console.log('sending chunks', i, '(' + percent + '%)');
+            }
+            for (var j = 0; j < peers.length; j++) {
+                peers[j].send(msg);
+            }
+        }
+
+        // send the rest
+        if (i < chunks.length) {
+            setTimeout(this.streamToPeers.bind(this, peers, i), 50);
+        }
+    };
+
+    Groove.prototype.getPeers = function() {
+        var peers = [];
+        for (var id in this.users) {
+            var peer = this.users[id];
+            if (peer && peer != this.me) {
+                peers.push(peer);
+            }
+        }
+        return peers;
+    };
+
+    Groove.prototype._gotChunk = function(data, user) {
+        if (Math.random() < 0.05) {
+            console.log('got chunk of length', data.length, 'from', user.name);
+        }
+        if (!user.dj) {
+            console.error('got chunk from non-dj');
+            return;
+        }
+        return;
+        var chunkBuf = StringView.base64ToBytes(data);
+    };
+
+    function User(groove, id) {
         WildEmitter.call(this);
+        this.groove = groove;
         this.id = id;
     }
 
@@ -399,6 +503,10 @@
         if (this.gravatarId == id) return;
         this.gravatarId = id;
         this.iconURL = "//www.gravatar.com/avatar/"+ md5(id) +"?s=80&d=monsterid";
+    };
+
+    User.prototype.send = function(msg) {
+        this.groove.webrtc.send(msg, this.id);
     };
 
     // set default icon URL
