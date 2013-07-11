@@ -578,40 +578,25 @@ parseURL: function(url, onComplete){
 	return [xhr, ID3v2.parseStream(read, onComplete)];
 },
 parseFile: function(file, onComplete){
-
 	var reader = new FileReader();
-
-	var pos = 0, 
-			bits_required = 0, 
-			handle = function(){},
-			maxdata = Infinity;
-
-	function read(bytes, callback, newmax){
-		bits_required = bytes;
-		handle = callback;
-		maxdata = newmax;
-		if(bytes == 0) callback('',[]);
-	}
-	var responseText = '';
-	reader.onload = function(){
-		responseText = reader.result;
-	};
-
-	(function(){
-	
-		if(responseText.length > pos + bits_required && bits_required){
-			var data = responseText.substr(pos, bits_required);
-			var arrdata = data.split('').map(function(e){return e.charCodeAt(0) & 0xff});
-			pos += bits_required;
-			bits_required = 0;
-			if(handle(data, arrdata) === false){
-				return;
-			}
+	var result, pos = 0;
+	function read(bytes, callback, newmax) {
+		if(bytes == 0) {
+			callback('', []);
+			return;
 		}
-		setTimeout(arguments.callee, 0);
-	})()
+		var data = result.substr(pos, bytes);
+		var arrdata = data.split('').map(function(e){return e.charCodeAt(0) & 0xff});
+		pos += bytes;
+		if(callback(data, arrdata) === false){
+			reader = result = null;
+		}
+	}
+	reader.onload = function(){
+		result = reader.result;
+		ID3v2.parseStream(read, onComplete);
+	};
 	reader.readAsBinaryString(fileSlice(file, 0, 128 * 1024));
-	return [reader, ID3v2.parseStream(read, onComplete)];
 }
 }
 
