@@ -106,7 +106,7 @@ function RoomListCtrl($scope, $location, groove, localStorageService) {
     }
 }
 
-function RoomCtrl($scope, $routeParams, groove, localStorageService) {
+function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     groove.joinRoom($routeParams.room);
 
     $scope.users = [];
@@ -118,13 +118,12 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
     $scope.tempGravatarEmail = groove.me.gravatar;
 
     $scope.currentTrack = null;
-
     $scope.chat_messages = [];
-
     $scope.newMessages = false;
-
     $scope.currentUser = groove.me;
     $scope.users.push(groove.me);
+
+    var player = $window.document.createElement("audio");
 
     $scope.switchTab = function(tab) {
         if(tab == "chat" && $scope.newMessages) {
@@ -244,6 +243,13 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
         });
     });
 
+    groove.on("activeTrackURL", function() {
+        var url = groove.activeTrack.url;
+        console.log('got track url', url.length, url.substr(0, 256));
+        player.src = url;
+        player.play();
+    });
+
     groove.on("emptyPlaylist", function() {
         alert("Add some music to your playlist first.");
     });
@@ -270,4 +276,5 @@ function RoomCtrl($scope, $routeParams, groove, localStorageService) {
 }
 
 RoomListCtrl.$inject = ["$scope", "$location", "groove", "localStorageService"];
-RoomCtrl.$inject = ["$scope", "$routeParams", "groove", "localStorageService"];
+RoomCtrl.$inject = ["$scope", "$routeParams", "$window", "groove",
+    "localStorageService"];
