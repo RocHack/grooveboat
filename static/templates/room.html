@@ -15,8 +15,8 @@
 
 <div class="sidebar">
     <div class="tabs">
-        <div class="tab tab-{{currentTab == 'music'}}" ng-click="switchTab('music')">music</div>
-        <div class="tab tab-{{currentTab == 'chat'}} new-messages-{{newMessages}}" ng-click="switchTab('chat')">chat</div>
+        <div class="tab" ng-class="{active:currentTab == 'music'}" ng-click="switchTab('music')">music</div>
+        <div class="tab" ng-class="{active:currentTab == 'chat','new-messages':newMessages}" ng-click="switchTab('chat')">chat</div>
     </div>
 
     <div class="sidebar-content">
