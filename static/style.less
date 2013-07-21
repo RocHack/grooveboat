@@ -439,12 +439,22 @@ a {
         margin: 0;
         overflow: auto;
         width: 100%;
+        border-top: 1px solid @gray;
 
         li {
             list-style-type: none;
             padding: 10px;
-            border-top: 1px solid @gray;
+            border-bottom: 1px dotted @gray;
             font-size: 14px;
+        }
+
+        .track {
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .artist {
+            display: block;
         }
     }
 }
