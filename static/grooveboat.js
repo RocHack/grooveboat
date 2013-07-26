@@ -4,6 +4,15 @@
 (function () {
     var isChrome = 'WebKitPoint' in window;
 
+    // TODO: make a Track class, and put this there
+    function exportTrack(t) {
+        return {
+            title: t.title,
+            artist: t.artist,
+            album: t.album
+        };
+    };
+
     function Groove() {
         var self = this;
         WildEmitter.call(this);
@@ -122,7 +131,7 @@
             djs: this.djs.filter(Boolean)
                 .map(function(user) { return user.id; }),
             active: this.activeDJ ? this.djs.indexOf(this.activeDJ) : -1,
-            myActiveTrack: amDJ ? this.exportActiveTrack() : null
+            myActiveTrack: amDJ ? exportTrack(this.activeTrack) : null
         });
         this.emit('peerConnected', user);
         if (amDJ) {
@@ -207,7 +216,6 @@
     Groove.prototype._acceptQuitDJ = function(user) {
         user.dj = false;
         var i = this.djs.indexOf(user);
-        user._cleanupChunks();
         if (i != -1) {
             this.djs.splice(i, 1);
         }
@@ -256,15 +264,6 @@
         this.activeDJ = user;
         this.emit('activeDJ');
         this.emit('activeTrack');
-    };
-
-    Groove.prototype.exportActiveTrack = function() {
-        var t = this.activeTrack;
-        return {
-            title: t.title,
-            artist: t.artist,
-            album: t.album
-        };
     };
 
     Groove.prototype.gotChat = function(user, text) {
@@ -327,7 +326,7 @@
         var track = this.me.activeTrack;
         this.broadcast({
             type: 'activeTrack',
-            track: track
+            track: exportTrack(track)
         });
         setTimeout(this._acceptActiveTrack.bind(this, track, this.me), 10);
 
@@ -347,54 +346,40 @@
         if (this.localTrackLoaded == track) {
             cb.call(this);
             return;
+        } else if (!this.localTrackLoading) {
+            this.localTrackLoading = true;
         } else {
             this.on('localTrackLoaded', cb.bind(this));
+            return;
         }
 
         var reader = new FileReader();
         reader.readAsDataURL(track.file);
         reader.onload = function() {
             var dataURL = reader.result;
-            // split into chunks
-            var chunkSize = 900;
-            var numChunks = Math.ceil(dataURL.length / chunkSize);
-            var chunks = track.chunks = new Array(numChunks+1);
-            chunks[0] = {
-                type: 'chunkStart',
-                name: track.file.name,
-                numChunks: numChunks
-            };
-
-            for (var i = 0; i < numChunks; i++) {
-                if (i % 100 === 0) {
-                    var percent = Math.ceil(100 * i/numChunks);
-                    console.log('loading chunk', i, '(' + percent + '%)');
-                }
-                var dataURLChunk = (i == numChunks-1) ?
-                    dataURL.substr(i * chunkSize) :
-                    dataURL.substr(i * chunkSize, chunkSize);
-                chunks[i+1] = {
-                    type: 'chunk',
-                    data: dataURLChunk
-                };
-            }
+            this.trackDataURL = dataURL;
             this.localTrackLoaded = track;
+            this.localTrackLoading = false;
             this.emit('localTrackLoaded');
         }.bind(this);
     };
 
-    Groove.prototype.streamToPeers = function(peers, start) {
+    Groove.prototype.streamToPeers = function(peers) {
         var track = this.me.activeTrack,
-            chunks = track.chunks,
-            numChunks = chunks && chunks.length;
-        if (!numChunks) {
+            me = this.me,
+            users = this.users;
+
+        if (!this.trackDataURL) {
             console.error('No active track chunks to stream.');
             return;
         }
 
-        // only send to peers we haven't already sent the track
+        // filter out inactive peers, peers we already sent the track to,
+        // and ourself
         peers = peers.filter(function(peer) {
-            return peer.sendingTrack != track;
+            return peer.sendingTrack != track &&
+                peer != me &&
+                peer.id in users;
         });
         if (!peers.length) return;
 
@@ -403,53 +388,14 @@
         });
 
         // send data
-        var names = peers.map(function(peer) { return peer.id; }).join(', ');
-        console.log('streaming to', names);
-        this._streamToPeers(peers, chunks, start | 0);
-    };
-
-    Groove.prototype._streamToPeers = function(peers, chunks, start) {
-        var me = this.me,
-            users = this.users;
-
-        // weed out inactive peers
-        peers = peers.filter(function(peer) {
-            return peer != me && peer.id in users;
-        });
-        if (!peers.length) return;
-
-        // if we quit DJing, stop streaming to peers
-        if (!me.dj) {
-            peers.forEach(function(peer) {
-                peer.sendingTrack = null;
-            });
-            return;
+        var msg = {
+            type: 'file',
+            data: this.trackDataURL
+        };
+        for (var j = 0; j < peers.length; j++) {
+            peers[j].send(msg);
         }
-
-        var numChunks = chunks.length;
-        var end = Math.min(start + 100, numChunks);
-        for (var i = start; i < end; i++) {
-            var msg = chunks[i];
-            if (i % 100 === 0) {
-                var percent = (i/numChunks * 100).toFixed(1);
-                console.log('sending chunks', i, '(' + percent + '%)');
-            }
-            for (var j = 0; j < peers.length; j++) {
-                peers[j].send(msg);
-            }
-        }
-
-        // send the rest
-        if (i < chunks.length) {
-            var next = this._streamToPeers.bind(this, peers, chunks, i);
-            setTimeout(next, 100);
-
-        } else if (i >= numChunks) {
-            // done
-            peers.forEach(function(peer) {
-                peer.sendingTrack = null;
-            });
-        }
+        // TODO: if we quit DJing, stop streaming to peers
     };
 
     Groove.prototype.getPeers = function() {
@@ -527,6 +473,7 @@
             this.setName(event.name);
             this.setVote(event.vote);
             if (event.myActiveTrack) {
+                // TODO: use this
                 this.activeTrack = event.myActiveTrack;
             }
             // receive dj listing from peers already in the room
@@ -550,12 +497,8 @@
             this.setVote(event.direction);
             break;
 
-        case 'chunkStart':
-            this._gotChunkStart(event);
-            break;
-
-        case 'chunk':
-            this._gotChunk(event.data);
+        case 'file':
+            this._gotDataURL(event.data);
             break;
 
         case 'chat':
@@ -583,40 +526,6 @@
         }
     };
 
-    // got first file chunk
-    User.prototype._gotChunkStart = function(event) {
-        this.chunkI = 0;
-        this.incomingFilename = event.name;
-        this.numChunks = event.numChunks | 0;
-        this.incomingChunks = new Array(this.numChunks);
-    };
-
-    // got a file chunk
-    User.prototype._gotChunk = function(dataURLChunk) {
-        if (Math.random() < 0.05) {
-            console.log('got chunk', this.chunkI, 'out of', this.numChunks);
-        }
-        if (!this.dj) {
-            console.error('got chunk from non-dj');
-            return;
-        }
-
-        this.incomingChunks[this.chunkI++] = dataURLChunk;
-
-        if (this.chunkI >= this.numChunks) {
-            var name = this.incomingFilename;
-            this._gotDataURL(this.incomingChunks.join(''), name);
-        }
-    };
-
-    // done getting chunks
-    User.prototype._cleanupChunks = function() {
-        this.incomingChunks = null;
-        this.incomingFilename = null;
-        this.numChunks = null;
-        this.chunkI = null;
-    };
-
     // got a file
     User.prototype._gotDataURL = function(dataURL, filename) {
         console.log('got data url of length', dataURL.length,
@@ -628,7 +537,6 @@
         } else {
             this.upcomingTrackURL = dataURL;
         }
-        this._cleanupChunks();
     };
 
 
