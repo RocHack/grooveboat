@@ -1,3 +1,6 @@
+/*global WebRTC: false, WildEmitter: false, md5: false, ID3v2: false,
+  Reliable: false */
+
 (function () {
     var isChrome = 'WebKitPoint' in window;
 
@@ -6,7 +9,7 @@
         WildEmitter.call(this);
 
         var users = this.users = {};
-        var djs = this.djs = [];
+        this.djs = [];
         this.activeDJ = null;
 
         var me = this.me = new User(this);
@@ -43,15 +46,13 @@
         });
 
         this.webrtc.on('dataOpen', function (event, conversation) {
-            var channel = conversation.channel,
-                userId = conversation.id,
-                user = users[userId] = new User(self, userId);
+            var userId = conversation.id,
+                user = users[userId] = new User(self, userId, conversation);
             self._welcomeUser(user);
         });
 
         this.webrtc.on('dataClose', function (event, conversation) {
-            var channel = conversation.channel,
-                userId = conversation.id,
+            var userId = conversation.id,
                 user = users[userId];
             if (!user) {
                 return;
@@ -70,8 +71,6 @@
             console.error('data error', channel, userId);
             self.emit('peerError', user);
         });
-
-        this.webrtc.on('dataMessage', this._onMessage.bind(this));
 
     }
 
@@ -101,9 +100,21 @@
         this.roomName = null;
     };
 
+    // send a message to every peer in the room
+    Groove.prototype.broadcast = function(msg) {
+        // TODO: pack the message once instead of letting Reliable do it
+        // for very peer the data is sent to
+        for (var id in this.users) {
+            var peer = this.users[id];
+            if (peer && peer != this.me) {
+                peer.send(msg);
+            }
+        }
+    };
+
     Groove.prototype._welcomeUser = function(user) {
         var amDJ = this.me == this.activeDJ;
-        this.webrtc.send({
+        user.send({
             type: 'welcome',
             name: this.me.name,
             gravatar: this.me.gravatar,
@@ -112,7 +123,7 @@
                 .map(function(user) { return user.id; }),
             active: this.activeDJ ? this.djs.indexOf(this.activeDJ) : -1,
             myActiveTrack: amDJ ? this.exportActiveTrack() : null
-        }, user.id);
+        });
         this.emit('peerConnected', user);
         if (amDJ) {
             this.streamToPeers([user]);
@@ -120,14 +131,14 @@
     };
 
     Groove.prototype.sendChat = function(text) {
-        this.webrtc.send({
+        this.broadcast({
             type: 'chat',
             text: String(text)
         });
     };
 
     Groove.prototype.sendGravatar = function() {
-        this.webrtc.send({
+        this.broadcast({
             type: 'gravatar',
             gravatar: this.me.gravatar
         });
@@ -144,7 +155,7 @@
             return;
         }
         var after = this.djs[this.djs.length-1];
-        this.webrtc.send({
+        this.broadcast({
             type: 'nominateDJ',
             after: after && after.id
         });
@@ -187,7 +198,7 @@
         if (!this.me.dj) {
             return;
         }
-        this.webrtc.send({
+        this.broadcast({
             type: 'quitDJing'
         });
         setTimeout(this._acceptQuitDJ.bind(this, this.me), 10);
@@ -256,78 +267,18 @@
         };
     };
 
-    Groove.prototype._onMessage = function(event, conversation) {
-        //console.log('event', typeof event, event.length, event.type);
-        var channel = conversation.channel,
-            userId = conversation.id,
-            users = this.users,
-            user = users[userId];
-        switch (event.type) {
-        case 'welcome':
-            user.setGravatar(event.gravatar);
-            user.setName(event.name);
-            user.setVote(event.vote);
-            if (event.myActiveTrack) {
-                user.activeTrack = event.myActiveTrack;
-            }
-            // receive dj listing from peers already in the room
-            if (event.djs && !conversation.initiator) {
-                var djs = event.djs.map(function(id) {
-                    return users[id];
-                });
-                var activeDJ = users[event.djs[event.active]];
-                this._negotiateDJs(djs, user, activeDJ);
-            }
-            break;
+    Groove.prototype.gotChat = function(user, text) {
+        this.emit('chat', {
+            text: text,
+            from: user
+        });
+    };
 
-        case 'name':
-            user.setName(event.name);
-            break;
-
-        case 'gravatar':
-            user.setGravatar(event.gravatar);
-            break;
-
-        case 'chat':
-            this.emit('chat', {
-                text: String(event.text),
-                from: user
-            });
-            break;
-
-        case 'track':
-            this.emit('track', {
-                track: event.track,
-                user: user
-            });
-            break;
-
-        case 'nominateDJ':
-            var dj = event.user ? this.users[event.user] : user;
-            var prevDJ = event.after && this.users[event.after];
-            this._acceptDJ(dj, prevDJ);
-            break;
-
-        case 'quitDJing':
-            this._acceptQuitDJ(user);
-            break;
-
-        case 'vote':
-            user.setVote(event.direction);
-            break;
-
-        case 'activeTrack':
-            this._negotiateActiveTrack(event.track, user);
-            break;
-
-        case 'chunkStart':
-            user._gotChunkStart(event);
-            break;
-
-        case 'chunk':
-            user._gotChunk(event.data);
-            break;
-        }
+    Groove.prototype.gotTrack = function(user, track) {
+        this.emit('track', {
+            track: track,
+            user: user
+        });
     };
 
     function grooveFileParsed(file, next, tags) {
@@ -352,8 +303,7 @@
         var next = grooveProcessFile.bind(this, files, i+1);
         var file = files[i];
         if (file && file.type.indexOf('audio/') == 0) {
-            ID3v2.parseFile(file,
-                grooveFileParsed.bind(this, file, next));
+            ID3v2.parseFile(file, grooveFileParsed.bind(this, file, next));
         } else {
             next();
         }
@@ -365,7 +315,7 @@
 
     Groove.prototype.vote = function(direction) {
         this.me.vote = direction;
-        this.webrtc.send({
+        this.broadcast({
             type: 'vote',
             direction: direction
         });
@@ -375,7 +325,7 @@
         console.log('becoming active');
         this.activeDJ = this.me;
         var track = this.me.activeTrack;
-        this.webrtc.send({
+        this.broadcast({
             type: 'activeTrack',
             track: track
         });
@@ -416,7 +366,7 @@
             };
 
             for (var i = 0; i < numChunks; i++) {
-                if (i % 100 == 0) {
+                if (i % 100 === 0) {
                     var percent = Math.ceil(100 * i/numChunks);
                     console.log('loading chunk', i, '(' + percent + '%)');
                 }
@@ -455,7 +405,7 @@
         // send data
         var names = peers.map(function(peer) { return peer.id; }).join(', ');
         console.log('streaming to', names);
-        this._streamToPeers(peers, chunks, start | 0); 
+        this._streamToPeers(peers, chunks, start | 0);
     };
 
     Groove.prototype._streamToPeers = function(peers, chunks, start) {
@@ -477,10 +427,10 @@
         }
 
         var numChunks = chunks.length;
-        var end = Math.min(start + 200, numChunks);
+        var end = Math.min(start + 100, numChunks);
         for (var i = start; i < end; i++) {
             var msg = chunks[i];
-            if (i % 100 == 0) {
+            if (i % 100 === 0) {
                 var percent = (i/numChunks * 100).toFixed(1);
                 console.log('sending chunks', i, '(' + percent + '%)');
             }
@@ -492,7 +442,7 @@
         // send the rest
         if (i < chunks.length) {
             var next = this._streamToPeers.bind(this, peers, chunks, i);
-            setTimeout(next, 50);
+            setTimeout(next, 100);
 
         } else if (i >= numChunks) {
             // done
@@ -512,10 +462,16 @@
         }
         return peers;
     };
-    function User(groove, id) {
+
+    function User(groove, id, conversation) {
         WildEmitter.call(this);
         this.groove = groove;
         this.id = id;
+        if (conversation) {
+            this.conversation = conversation;
+            this.channel = new Reliable(conversation.channel);
+            this.channel.onmessage = this._onMessage.bind(this);
+        }
     }
 
     User.maxNameLength = 32;
@@ -556,13 +512,78 @@
         var id = this.gravatar || this.name || "";
         if (this.gravatarId == id) return;
         this.gravatarId = id;
-        this.iconURL = "//www.gravatar.com/avatar/"+ md5(id) +"?s=80&d=monsterid";
+        this.iconURL = "//www.gravatar.com/avatar/" + md5(id) +
+            "?s=80&d=monsterid";
     };
 
     User.prototype.send = function(msg) {
-        this.groove.webrtc.send(msg, this.id);
+        this.channel.send(msg);
     };
 
+    User.prototype._onMessage = function(event) {
+        switch (event.type) {
+        case 'welcome':
+            this.setGravatar(event.gravatar);
+            this.setName(event.name);
+            this.setVote(event.vote);
+            if (event.myActiveTrack) {
+                this.activeTrack = event.myActiveTrack;
+            }
+            // receive dj listing from peers already in the room
+            if (event.djs && !this.conversation.initiator) {
+                var users = this.groove.users;
+                var djs = event.djs.map(function(id) { return users[id]; });
+                var activeDJ = users[event.djs[event.active]];
+                this.groove._negotiateDJs(djs, this, activeDJ);
+            }
+            break;
+
+        case 'name':
+            this.setName(event.name);
+            break;
+
+        case 'gravatar':
+            this.setGravatar(event.gravatar);
+            break;
+
+        case 'vote':
+            this.setVote(event.direction);
+            break;
+
+        case 'chunkStart':
+            this._gotChunkStart(event);
+            break;
+
+        case 'chunk':
+            this._gotChunk(event.data);
+            break;
+
+        case 'chat':
+            this.groove.gotChat(this, String(event.text));
+            break;
+
+        case 'track':
+            this.groove.gotTrack(this, event.track);
+            break;
+
+        case 'nominateDJ':
+            var dj = event.user ? this.groove.users[event.user] : this;
+            var prevDJ = event.after && this.groove.users[event.after];
+            this.groove._acceptDJ(dj, prevDJ);
+            break;
+
+        case 'quitDJing':
+            this.groove._acceptQuitDJ(this);
+            break;
+
+        case 'activeTrack':
+            this.groove._negotiateActiveTrack(event.track, this);
+            break;
+
+        }
+    };
+
+    // got first file chunk
     User.prototype._gotChunkStart = function(event) {
         this.chunkI = 0;
         this.incomingFilename = event.name;
@@ -570,6 +591,7 @@
         this.incomingChunks = new Array(this.numChunks);
     };
 
+    // got a file chunk
     User.prototype._gotChunk = function(dataURLChunk) {
         if (Math.random() < 0.05) {
             console.log('got chunk', this.chunkI, 'out of', this.numChunks);
@@ -587,6 +609,7 @@
         }
     };
 
+    // done getting chunks
     User.prototype._cleanupChunks = function() {
         this.incomingChunks = null;
         this.incomingFilename = null;
@@ -594,6 +617,7 @@
         this.chunkI = null;
     };
 
+    // got a file
     User.prototype._gotDataURL = function(dataURL, filename) {
         console.log('got data url of length', dataURL.length,
             'from', this.name);
