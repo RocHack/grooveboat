@@ -354,10 +354,10 @@
         }
 
         var reader = new FileReader();
-        reader.readAsDataURL(track.file);
+        reader.readAsArrayBuffer(track.file);
         reader.onload = function() {
-            var dataURL = reader.result;
-            this.trackDataURL = dataURL;
+            var buf = reader.result;
+            this.trackData = buf;
             this.localTrackLoaded = track;
             this.localTrackLoading = false;
             this.emit('localTrackLoaded');
@@ -369,7 +369,7 @@
             me = this.me,
             users = this.users;
 
-        if (!this.trackDataURL) {
+        if (!this.trackData) {
             console.error('No active track chunks to stream.');
             return;
         }
@@ -390,7 +390,7 @@
         // send data
         var msg = {
             type: 'file',
-            data: this.trackDataURL
+            data: this.trackData
         };
         for (var j = 0; j < peers.length; j++) {
             peers[j].send(msg);
@@ -498,7 +498,7 @@
             break;
 
         case 'file':
-            this._gotDataURL(event.data);
+            this._gotFile(event.data);
             break;
 
         case 'chat':
@@ -527,11 +527,22 @@
     };
 
     // got a file
-    User.prototype._gotDataURL = function(dataURL, filename) {
-        console.log('got data url of length', dataURL.length,
-            'from', this.name);
+    User.prototype._gotFile = function(buf) {
+        var blob = new Blob([buf]);
+        var url;
+        if (window.createObjectURL) {
+            url = window.createObjectURL(blob)
+        } else if (window.createBlobURL) {
+            url = window.createBlobURL(blob)
+        } else if (window.URL && window.URL.createObjectURL) {
+            url = window.URL.createObjectURL(blob)
+        } else if (window.webkitURL && window.webkitURL.createObjectURL) {
+            url = window.webkitURL.createObjectURL(blob)
+        }
+
+        console.log('got', blob.size, 'bytes', 'from', this.name, url);
         if (this == this.groove.activeDJ) {
-            this.groove.activeTrack.url = dataURL;
+            this.groove.activeTrack.url = url;
             this.groove.emit('activeTrackURL');
             console.log('activeTrackURL');
         } else {
