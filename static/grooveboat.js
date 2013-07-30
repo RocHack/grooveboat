@@ -325,7 +325,7 @@
             break;
 
         case 'chunk':
-            user._gotChunk(event.data);
+            user._gotChunk(event);
             break;
         }
     };
@@ -411,6 +411,7 @@
             var chunks = track.chunks = new Array(numChunks+1);
             chunks[0] = {
                 type: 'chunkStart',
+                i: 0,
                 name: track.file.name,
                 numChunks: numChunks
             };
@@ -424,6 +425,7 @@
                     dataURL.substr(i * chunkSize) :
                     dataURL.substr(i * chunkSize, chunkSize);
                 chunks[i+1] = {
+                    i: i + 1,
                     type: 'chunk',
                     data: dataURLChunk
                 };
@@ -564,25 +566,26 @@
     };
 
     User.prototype._gotChunkStart = function(event) {
-        this.chunkI = 0;
         this.incomingFilename = event.name;
         this.numChunks = event.numChunks | 0;
         this.incomingChunks = new Array(this.numChunks);
     };
 
-    User.prototype._gotChunk = function(dataURLChunk) {
+    User.prototype._gotChunk = function(event) {
         if (Math.random() < 0.05) {
-            console.log('got chunk', this.chunkI, 'out of', this.numChunks);
+            console.log('got chunk', event.i, 'out of', this.numChunks);
         }
         if (!this.dj) {
             console.error('got chunk from non-dj');
             return;
         }
 
-        this.incomingChunks[this.chunkI++] = dataURLChunk;
+        this.incomingChunks[event.i] = event.data;
 
-        if (this.chunkI >= this.numChunks) {
+        // Handles final chunk
+        if (event.i >= this.numChunks) {
             var name = this.incomingFilename;
+            // TODO: Scan for missing chunks
             this._gotDataURL(this.incomingChunks.join(''), name);
         }
     };
@@ -591,7 +594,6 @@
         this.incomingChunks = null;
         this.incomingFilename = null;
         this.numChunks = null;
-        this.chunkI = null;
     };
 
     User.prototype._gotDataURL = function(dataURL, filename) {
