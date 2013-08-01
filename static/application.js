@@ -78,6 +78,10 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
         };
     });
 
+function TopCtrl($scope, groove) {
+    $scope.currentUser = groove.me;
+}
+
 function RoomListCtrl($scope, $location, groove, localStorageService) {
     var selected = -1;
     $scope.currentUser = groove.me;

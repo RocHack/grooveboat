@@ -18,10 +18,10 @@
         <script src="static/application.js"></script>
     </head>
     <body>
-        <div class="container top">
+        <div class="container top" ng-controller="TopCtrl">
             <a href="#" class="title">grooveboat</a>
             <a class="username">
-                stevenleeg
+                {{currentUser.name}}
             </a>
         </div>
         <div class="content" ng-view></div>
