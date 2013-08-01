@@ -34,6 +34,9 @@
             }
         });
 
+        /*
+         * WebRTC events
+         */
         this.webrtc.on('readyToCall', function () {
             self.emit('ready');
         });
@@ -72,7 +75,16 @@
         });
 
         this.webrtc.on('dataMessage', this._onMessage.bind(this));
-
+        
+        /*
+         * User events
+         */
+        this.me.on("name", function() {
+            self.webrtc.send({
+                type: "name",
+                name: self.me.name
+            });
+        });
     }
 
     Groove.prototype = Object.create(WildEmitter.prototype, {

@@ -1,18 +1,3 @@
-<div class="screen" ng-show="currentOverlay" ng-click="setOverlay(false)">&nbsp;</div>
-<div class="prompt overlay" ng-show="currentOverlay">
-    <div class="change-avatar" ng-show="currentOverlay == 'change-avatar'">
-        <h1>Change avatar</h1>
-        <p>Grooveboat uses <a href="//gravatar.com">Gravatar</a> to provide users with avatars. If you have a Gravatar account, enter your email address here.</p>
-        <input type="text" class="full" name="gravatar" placeholder="Gravatar email address" ng-model="tempGravatarEmail" />
-        <input type="button" value="save" class="action" ng-click="saveGravatarEmail()" />
-    </div>
-    <div class="no-tracks" ng-show="currentOverlay == 'no-tracks'">
-        <h1>Empty queue</h1>
-        <p>Add some tracks to your DJ queue before taking to the stage!</p>
-        <input type="button" value="righto" class="action" ng-click="setOverlay(false)" />
-    </div>
-</div>
-
 <div class="sidebar">
     <div class="tabs">
         <div class="tab" ng-class="{active:currentTab == 'music'}" ng-click="switchTab('music')">music</div>

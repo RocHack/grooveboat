@@ -7,6 +7,9 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
 
         $locationProvider.html5Mode(false).hashPrefix("!");
     }])
+    .run(function($rootScope, $location) {
+        $rootScope.location = $location;
+    })
     .factory("groove", ["localStorageService", function(localStorageService) {
         var groove = new Groove();
         window.groove = groove;
@@ -78,13 +81,23 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
         };
     });
 
-function TopCtrl($scope, groove) {
+function MainCtrl($scope, groove, localStorageService) {
     $scope.currentUser = groove.me;
+    $scope.currentOverlay = false;
+
+    $scope.setOverlay = function(overlay) {
+        $scope.currentOverlay = overlay;
+    }
+
+    $scope.saveName = function() {
+        $scope.currentUser.setName($scope.tempUsername);
+        localStorageService.set("user:name", $scope.tempUsername);
+        $scope.setOverlay(false);
+    }
 }
 
 function RoomListCtrl($scope, $location, groove, localStorageService) {
     var selected = -1;
-    $scope.currentUser = groove.me;
 
     $scope.rooms = [
         { name: "Ambient Electronic", selected: false },
@@ -124,7 +137,6 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     $scope.currentTrack = null;
     $scope.chat_messages = [];
     $scope.newMessages = false;
-    $scope.currentUser = groove.me;
     $scope.users.push(groove.me);
 
     var player = $window.document.createElement("audio");
@@ -135,10 +147,6 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
         }
 
         $scope.currentTab = tab;
-    }
-
-    $scope.setOverlay = function(overlay) {
-        $scope.currentOverlay = overlay;
     }
 
     $scope.clickUser = function(user) {

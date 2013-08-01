@@ -17,10 +17,35 @@
         <script src="static/grooveboat.js"></script>
         <script src="static/application.js"></script>
     </head>
-    <body>
-        <div class="container top" ng-controller="TopCtrl">
+    <body ng-controller="MainCtrl">
+        <div class="screen" ng-show="currentOverlay" ng-click="setOverlay(false)">&nbsp;</div>
+        <div class="prompt overlay" ng-show="currentOverlay">
+
+            <div class="change-avatar" ng-show="currentOverlay == 'change-avatar'">
+                <h1>Change avatar</h1>
+                <p>Grooveboat uses <a href="//gravatar.com">Gravatar</a> to provide users with avatars. If you have a Gravatar account, enter your email address here.</p>
+                <input type="text" class="full" name="gravatar" placeholder="Gravatar email address" ng-model="tempGravatarEmail" />
+                <input type="button" value="save" class="action" ng-click="saveGravatarEmail()" />
+            </div>
+
+            <div class="no-tracks" ng-show="currentOverlay == 'no-tracks'">
+                <h1>Empty queue</h1>
+                <p>Add some tracks to your DJ queue before taking to the stage!</p>
+                <input type="button" value="righto" class="action" ng-click="setOverlay(false)" />
+            </div>
+
+            <div class="change-nick" ng-show="currentOverlay == 'change-name'">
+                <h1>Change your name</h1>
+                <p>Who are you; are you who you are?</p>
+                <input type="text" class="full" name="gravatar" placeholder="{{currentUser.name}}" ng-model="tempUsername" />
+                <input type="button" value="save it" class="action" ng-click="saveName()" />
+            </div>
+
+        </div>
+
+        <div class="container top">
             <a href="#" class="title">grooveboat</a>
-            <a class="username">
+            <a class="username" ng-hide="location.path() == '/'" ng-click="setOverlay('change-name')">
                 {{currentUser.name}}
             </a>
         </div>
