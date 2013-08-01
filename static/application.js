@@ -257,10 +257,15 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     });
 
     groove.on("activeTrackURL", function() {
-        var url = groove.activeTrack.url;
-        console.log('got track url', url.length, url.substr(0, 256));
-        player.src = url;
-        player.play();
+        var url = groove.activeTrack && groove.activeTrack.url;
+        if (url) {
+            console.log("got track url", url.length, url.substr(0, 256));
+            player.src = url;
+            player.play();
+        } else {
+            console.log("no track");
+            player.pause();
+        }
     });
 
     groove.on("emptyPlaylist", function() {

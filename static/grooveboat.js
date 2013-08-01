@@ -217,6 +217,7 @@
             this.activeTrack = null;
             this.emit('activeDJ');
             this.emit('activeTrack');
+            this.emit('activeTrackURL');
             // todo: allow next dj to take place
         }
         this.emit('djs', this.djs.slice());
@@ -644,7 +645,6 @@
         if (this == this.groove.activeDJ) {
             this.groove.activeTrack.url = dataURL;
             this.groove.emit('activeTrackURL');
-            console.log('activeTrackURL');
         } else {
             this.upcomingTrackURL = dataURL;
         }
