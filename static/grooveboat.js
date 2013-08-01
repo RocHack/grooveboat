@@ -391,16 +391,42 @@
             type: 'activeTrack',
             track: track
         });
-        setTimeout(this._acceptActiveTrack.bind(this, track, this.me), 10);
+        setTimeout(function() {
+            this._acceptActiveTrack(track, this.me);
+            this._startPlaying();
+        }.bind(this), 10);
+    };
+
+    // play our active track, and send it to peers.
+    Groove.prototype._startPlaying = function() {
+        // prepare track if needed
+        if (!this.localTrackLoaded) {
+            this.prepareNextTrack(this._startPlaying);
+            return;
+        }
 
         // send our active track to peers who we haven't sent it to yet
-        if (this.localTrackLoaded) {
-            this.streamToPeers(this.getPeers());
-        } else {
-            this.prepareNextTrack(function() {
-                this.streamToPeers(this.getPeers());
-            });
+        this.streamToPeers(this.getPeers());
+        // play track locally
+        this._playMyTrack();
+    };
+
+    // play my track locally, as the active DJ
+    Groove.prototype._playMyTrack = function() {
+        var track = this.me.activeTrack;
+        var file = track.file;
+
+        // make the object url for the track file
+        var URL = window.URL || window.webkitURL;
+        track.url =
+            window.createObjectURL ? window.createObjectURL(file) :
+            window.createBlobURL ? window.createBlobURL(file) :
+            URL && URL.createObjectURL ? URL.createObjectURL(file) : null;
+        if (!track.url) {
+            throw new Error('Unable to make object URL for track file', file);
         }
+
+        this.emit('activeTrackURL');
     };
 
     // load and chunk our next active track, to prepare it for streaming
@@ -409,9 +435,11 @@
         if (this.localTrackLoaded == track) {
             cb.call(this);
             return;
-        } else {
+        } else if (this.localTrackLoading) {
             this.on('localTrackLoaded', cb.bind(this));
+            return;
         }
+        this.localTrackLoading = true;
 
         var reader = new FileReader();
         reader.readAsDataURL(track.file);
@@ -443,7 +471,9 @@
                 };
             }
             this.localTrackLoaded = track;
+            this.localTrackLoading = false;
             this.emit('localTrackLoaded');
+            cb.call(this);
         }.bind(this);
     };
 
