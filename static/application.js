@@ -141,6 +141,15 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     $scope.users.push(groove.me);
 
     var player = $window.document.createElement("audio");
+    window.player = player;
+    player.addEventListener("canplay", function() {
+        var track = groove.activeTrack;
+        console.log("canplay", track && track.currentTime, track);
+        if (track) {
+            player.currentTime = track.currentTime;
+            player.play();
+        }
+    }, false);
 
     $scope.switchTab = function(tab) {
         if(tab == "chat" && $scope.newMessages) {
@@ -257,11 +266,12 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     });
 
     groove.on("activeTrackURL", function() {
-        var url = groove.activeTrack && groove.activeTrack.url;
+        var track = groove.activeTrack;
+        var url = track && track.url;
         if (url) {
             console.log("got track url", url.length, url.substr(0, 256));
             player.src = url;
-            player.play();
+            console.log('current time', track.currentTime, track);
         } else {
             console.log("no track");
             player.pause();
