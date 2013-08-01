@@ -135,6 +135,7 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     $scope.tempGravatarEmail = groove.me.gravatar;
 
     $scope.currentTrack = null;
+    $scope.votes = { yes: 5, no: 2 };
     $scope.chat_messages = [];
     $scope.newMessages = false;
     $scope.users.push(groove.me);

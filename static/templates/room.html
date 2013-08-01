@@ -38,6 +38,10 @@
     <div class="now-playing-artist">{{currentTrack.artist}}</div>
     <div class="now-playing-track">{{currentTrack.title}}</div>
     <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)">Good</a><a class="vote bad bad-{{currentUser.vote == -1}}" href="" ng-click="vote(-1)">Bad</a>
+
+    <div class="opinion-bar">
+        <div class="opinion yes" style="width: {{10 + (votes.yes * 2)}}px">&nbsp;</div><div class="opinion no" style="width: {{10 + (votes.no * 2)}}px">&nbsp;</div>
+    </div>
 </div>
 
 <div class="awaiting-dj" ng-hide="currentTrack">
