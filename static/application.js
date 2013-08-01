@@ -79,6 +79,11 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
             el.bind("dragover", dragOver);
             el.bind("drop", drop);
         };
+    }).filter('emoji', function() {
+        var emoji = window.returnExports;
+        return function(text) {
+            return emoji(text, 'static/lib/emoji/pngs');
+        };
     });
 
 function MainCtrl($scope, groove, localStorageService) {
