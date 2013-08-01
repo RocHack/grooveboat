@@ -277,7 +277,7 @@
 
         console.log('got start time', track.currentTime);
         track.startDate = new Date;
-        track.startDate.setSeconds(track.startDate.getSeconds() + track.currentTime|0);
+        track.startDate.setSeconds(track.startDate.getSeconds() - track.currentTime|0);
 
         this.emit('activeDJ');
         this.emit('activeTrack');
