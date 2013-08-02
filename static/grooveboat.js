@@ -376,7 +376,7 @@
     };
 
     Groove.prototype.vote = function(direction) {
-        this.me.vote = direction;
+        this.me.setVote(direction);
         this.webrtc.send({
             type: 'vote',
             direction: direction
@@ -556,8 +556,9 @@
     };
 
     User.prototype.setVote = function(direction) {
+        var previous = this.vote;
         this.vote = direction < 0 ? -1 : direction > 0 ? 1 : 0;
-        this.emit('vote');
+        this.emit('vote', previous, this.vote);
     };
 
     User.prototype.setGravatar = function(gravatar) {

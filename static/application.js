@@ -135,7 +135,7 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     $scope.tempGravatarEmail = groove.me.gravatar;
 
     $scope.currentTrack = null;
-    $scope.votes = { yes: 5, no: 2 };
+    $scope.votes = { yes: 0, no: 0 };
     $scope.chat_messages = [];
     $scope.newMessages = false;
     $scope.users.push(groove.me);
@@ -178,6 +178,7 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     }
 
     $scope.vote = function(direction) {
+        handleVote(groove.me.vote, direction);
         groove.vote(direction);
     }
 
@@ -200,11 +201,29 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
         }
     }
 
+    function handleVote(previous, next) {
+        if(previous == 1) {
+            $scope.votes.yes -= 1;
+        } else if(previous == -1) {
+            $scope.votes.no -= 1;
+        }
+
+        if(next == 1) {
+            $scope.votes.yes += 1;
+        } else if(next == -1) {
+            $scope.votes.no += 1;
+        }
+    }
+
     var digest = $scope.$digest.bind($scope);
     function watchUser(user) {
         user.on("name", digest);
         user.on("vote", digest);
         user.on("gravatar", digest);
+        user.on("vote", function(previous, next) {
+            handleVote(previous, next);
+            digest();
+        });
     }
 
     $scope.newMessage = function() {
