@@ -1,6 +1,16 @@
 (function () {
     var isChrome = 'WebKitPoint' in window;
 
+    // TODO: put this in a Track class
+    function exportTrack(t) {
+        return {
+            title: t.title,
+            artist: t.artist,
+            album: t.album,
+            currentTime: t.currentTime
+        };
+    }
+
     function Groove() {
         var self = this;
         WildEmitter.call(this);
@@ -85,6 +95,9 @@
                 name: self.me.name
             });
         });
+
+        // keep track of the seek time of the active track
+        setInterval(this.clock.bind(this));
     }
 
     Groove.prototype = Object.create(WildEmitter.prototype, {
@@ -123,7 +136,7 @@
             djs: this.djs.filter(Boolean)
                 .map(function(user) { return user.id; }),
             active: this.activeDJ ? this.djs.indexOf(this.activeDJ) : -1,
-            myActiveTrack: amDJ ? this.exportActiveTrack() : null
+            myActiveTrack: amDJ ? exportTrack(this.activeTrack) : null
         }, user.id);
         this.emit('peerConnected', user);
         if (amDJ) {
@@ -217,6 +230,7 @@
             this.activeTrack = null;
             this.emit('activeDJ');
             this.emit('activeTrack');
+            this.emit('activeTrackURL');
             // todo: allow next dj to take place
         }
         this.emit('djs', this.djs.slice());
@@ -244,28 +258,38 @@
         return (this.djs.indexOf(user) != -1);
     };
 
+    // process a user claiming the active DJ spot
     Groove.prototype._negotiateActiveTrack = function(track, user) {
         // remember the track they are sending, in case they become dj
         user.activeTrack = track;
         if (this.isDJUp(user)) {
             this._acceptActiveTrack(track, user);
+        } else {
+            console.error('User is not an up dj');
         }
     };
 
+    // update the active track and DJ
     Groove.prototype._acceptActiveTrack = function(track, user) {
+        console.log('accept active dj');
         this.activeTrack = track;
         this.activeDJ = user;
+
+        console.log('got start time', track.currentTime);
+        track.startDate = new Date;
+        track.startDate.setSeconds(track.startDate.getSeconds() - track.currentTime|0);
+
         this.emit('activeDJ');
         this.emit('activeTrack');
     };
 
-    Groove.prototype.exportActiveTrack = function() {
-        var t = this.activeTrack;
-        return {
-            title: t.title,
-            artist: t.artist,
-            album: t.album
-        };
+    // increment the current track time once a second
+    Groove.prototype.clock = function() {
+        var track = this.activeTrack;
+        if (!track) {
+            return;
+        }
+        track.currentTime = (new Date - track.startDate)/1000;
     };
 
     Groove.prototype._onMessage = function(event, conversation) {
@@ -387,20 +411,49 @@
         console.log('becoming active');
         this.activeDJ = this.me;
         var track = this.me.activeTrack;
+
+        track.currentTime = 0;
+        track.startDate = new Date
         this.webrtc.send({
             type: 'activeTrack',
-            track: track
+            track: exportTrack(track)
         });
-        setTimeout(this._acceptActiveTrack.bind(this, track, this.me), 10);
+        setTimeout(function() {
+            this._acceptActiveTrack(track, this.me);
+            this._startPlaying();
+        }.bind(this), 10);
+    };
+
+    // play our active track, and send it to peers.
+    Groove.prototype._startPlaying = function() {
+        // prepare track if needed
+        if (!this.localTrackLoaded) {
+            this.prepareNextTrack(this._startPlaying);
+            return;
+        }
 
         // send our active track to peers who we haven't sent it to yet
-        if (this.localTrackLoaded) {
-            this.streamToPeers(this.getPeers());
-        } else {
-            this.prepareNextTrack(function() {
-                this.streamToPeers(this.getPeers());
-            });
+        this.streamToPeers(this.getPeers());
+        // play track locally
+        this._playMyTrack();
+    };
+
+    // play my track locally, as the active DJ
+    Groove.prototype._playMyTrack = function() {
+        var track = this.me.activeTrack;
+        var file = track.file;
+
+        // make the object url for the track file
+        var URL = window.URL || window.webkitURL;
+        track.url =
+            window.createObjectURL ? window.createObjectURL(file) :
+            window.createBlobURL ? window.createBlobURL(file) :
+            URL && URL.createObjectURL ? URL.createObjectURL(file) : null;
+        if (!track.url) {
+            throw new Error('Unable to make object URL for track file', file);
         }
+
+        this.emit('activeTrackURL');
     };
 
     // load and chunk our next active track, to prepare it for streaming
@@ -409,9 +462,11 @@
         if (this.localTrackLoaded == track) {
             cb.call(this);
             return;
-        } else {
+        } else if (this.localTrackLoading) {
             this.on('localTrackLoaded', cb.bind(this));
+            return;
         }
+        this.localTrackLoading = true;
 
         var reader = new FileReader();
         reader.readAsDataURL(track.file);
@@ -443,7 +498,9 @@
                 };
             }
             this.localTrackLoaded = track;
+            this.localTrackLoading = false;
             this.emit('localTrackLoaded');
+            cb.call(this);
         }.bind(this);
     };
 
@@ -585,7 +642,7 @@
     };
 
     User.prototype._gotChunk = function(event) {
-        if (Math.random() < 0.05) {
+        if (Math.random() < 0.01) {
             console.log('got chunk', event.i, 'out of', this.numChunks);
         }
         if (!this.dj) {
@@ -615,7 +672,6 @@
         if (this == this.groove.activeDJ) {
             this.groove.activeTrack.url = dataURL;
             this.groove.emit('activeTrackURL');
-            console.log('activeTrackURL');
         } else {
             this.upcomingTrackURL = dataURL;
         }
