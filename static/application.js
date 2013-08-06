@@ -192,6 +192,10 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     }
 
     $scope.vote = function(direction) {
+        if(groove.activeDJ == groove.me) {
+            return;
+        }
+
         handleVote(groove.me.vote, direction);
         groove.vote(direction);
     }
