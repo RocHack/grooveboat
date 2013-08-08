@@ -139,9 +139,6 @@
             myActiveTrack: amDJ ? exportTrack(this.activeTrack) : null
         }, user.id);
         this.emit('peerConnected', user);
-        if (amDJ) {
-            this.streamToPeers([user]);
-        }
     };
 
     Groove.prototype.sendChat = function(text) {
@@ -363,6 +360,14 @@
         case 'chunk':
             user._gotChunk(event);
             break;
+            
+        case 'requestTrack':
+            this.groove._sendTrack(user, event.track);
+            break;
+
+        case 'requestTrackChunk':
+            this.groove._sendTrackChunk(user, event.i);
+            break;
         }
     };
 
@@ -527,6 +532,29 @@
         var names = peers.map(function(peer) { return peer.id; }).join(', ');
         console.log('streaming to', names);
         this._streamToPeers(peers, chunks, start | 0); 
+    };
+
+    Groove.prototype._sendTrack = function(user, track_type) {
+        var track = this.activePlaylist[0];
+        if(track_type == "current") {
+            track = groove.activeTrack;
+        }
+
+        for(var i = 0; i < track.chunks.length; i++) {
+            user.send(track.chunks[i]);
+        }
+    };
+
+    Groove.prototype._sendTrackChunk = function(user, track_type) {
+        var track = this.activePlaylist[0];
+        if(track_type == "current") {
+            track = groove.activeTrack;
+        }
+
+        user.send({
+            type: "receiveChunk",
+            chunk: track.chunks[i]
+        });
     };
 
     Groove.prototype._streamToPeers = function(peers, chunks, start) {
