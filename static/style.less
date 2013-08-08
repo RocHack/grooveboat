@@ -156,6 +156,8 @@ a {
             padding: 15px;
             cursor: pointer;
             border-bottom: 1px solid @gray;
+            -webkit-user-select: none;
+            -moz-user-select: moz-none;
         }
 
         .room:nth-last-child(1) {
@@ -300,6 +302,7 @@ a {
         color: @red;
         padding: 5px 20px 5px 20px;
         line-height: 30px;
+        cursor: pointer;
 
         &:hover {
             background: @red;
