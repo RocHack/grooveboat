@@ -250,17 +250,29 @@
         console.log('got dj list', djs, 'from', sender.name);
     };
 
+    // get the next DJ to play
+    Groove.prototype.getUpcomingDJ = function() {
+        var activeDJI = this.djs.indexOf(this.activeDJ);
+        var nextDJ;
+        if (activeDJI != -1) {
+            var nextDJI = (activeDJI+1) % this.djs.length;
+            nextDJ = this.djs[nextDJI];
+        }
+        console.log('active DJ', activeDJI, 'next dj', nextDJ);
+    };
+
     // is it a DJ's valid turn to start playing
-    Groove.prototype.isDJUp = function(user) {
-        // for now, allow any dj to play whenever they want
-        return (this.djs.indexOf(user) != -1);
+    Groove.prototype.isUpcomingDJ = function(user) {
+        //console.log('activeDJI', activeDJI, 'nextDJI', nextDJI);
+        var upcomingDJ = this.getUpcomingDJ();
+        return !upcomingDJ || upcomingDJ == user;
     };
 
     // process a user claiming the active DJ spot
     Groove.prototype._negotiateActiveTrack = function(track, user) {
         // remember the track they are sending, in case they become dj
         user.activeTrack = track;
-        if (this.isDJUp(user)) {
+        if (this.isUpcomingDJ(user)) {
             this._acceptActiveTrack(track, user);
         } else {
             console.error('User is not an up dj');
@@ -288,6 +300,14 @@
             return;
         }
         track.currentTime = (new Date - track.startDate)/1000;
+
+        // if we are the upcoming DJ, start DJing after the current song ends
+        var trackEnded = track.duration && track.currentTime > track.duration - 1;
+        if (trackEnded) {
+            if (this.isUpcomingDJ(this.me) ) {
+                this.becomeActiveDJ();
+            }
+        }
     };
 
     Groove.prototype._onMessage = function(event, conversation) {
@@ -298,6 +318,7 @@
             user = users[userId];
         switch (event.type) {
         case 'welcome':
+            console.log('got welcome', event);
             user.setGravatar(event.gravatar);
             user.setName(event.name);
             user.setVote(event.vote);
@@ -465,6 +486,35 @@
         }
 
         this.emit('activeTrackURL');
+
+        // start preloading next track
+        this.requestNextTrack();
+    };
+
+    // request a track file from the upcoming DJ, for preloading
+    Groove.prototype.requestNextTrack = function() {
+        var dj = this.getUpcomingDJ();
+        if (dj) {
+            dj.requestFile();
+        } else {
+            console.log('No upcoming DJs');
+        }
+    };
+
+    // our track was able to be loaded by the player.
+    Groove.prototype.canPlayTrack = function(duration) {
+        if (this.me != this.activeDJ) {
+            return;
+        }
+        this.activeTrack.duration = duration;
+        // tell peers about the track duration if this is our track
+        var event = {
+            type: 'trackDuration',
+            duration: duration
+        };
+        this.getPeers().forEach(function(peer) {
+            peer.send(event);
+        });
     };
 
     // load and chunk our next active track, to prepare it for streaming
@@ -706,12 +756,21 @@
         if (this == this.groove.activeDJ) {
             this.groove.activeTrack.url = dataURL;
             this.groove.emit('activeTrackURL');
+            // start preloading next track
+            this.groove.requestNextTrack();
         } else {
             this.upcomingTrackURL = dataURL;
         }
         this._cleanupChunks();
     };
 
+    User.prototype.requestFile = function() {
+        console.log('requesting next track from', this.id);
+        this.send({
+            type: 'requestTrack',
+            track: 'upcoming'
+        });
+    };
 
     User.prototype._gotTrackDuration = function(duration) {
         console.log('got track duration', duration);
