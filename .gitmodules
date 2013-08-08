@@ -3,4 +3,4 @@
 	url = https://github.com/clehner/SimpleWebRTC.git
 [submodule "static/lib/emoji"]
 	path = static/lib/emoji
-	url = https://github.com/HenrikJoreteg/emoji-images.js.git
+	url = https://github.com/nmbook/emoji-images.js.git
