@@ -7,7 +7,8 @@
             title: t.title,
             artist: t.artist,
             album: t.album,
-            currentTime: t.currentTime
+            currentTime: t.currentTime,
+            duration: t.duration
         };
     }
 
@@ -97,7 +98,7 @@
         });
 
         // keep track of the seek time of the active track
-        setInterval(this.clock.bind(this));
+        setInterval(this.clock.bind(this), 1000);
     }
 
     Groove.prototype = Object.create(WildEmitter.prototype, {
@@ -353,6 +354,10 @@
             this._negotiateActiveTrack(event.track, user);
             break;
 
+        case 'trackDuration':
+            user._gotTrackDuration(event.duration);
+            break;
+
         case 'chunkStart':
             user._gotChunkStart(event);
             break;
@@ -376,7 +381,8 @@
             file: file,
             title: tags.Title || 'Untitled',
             artist: tags.Artist || 'Unknown',
-            album: tags.Album || 'Unknown'
+            album: tags.Album || 'Unknown',
+            duration: null // don't know this yet
         };
         console.log('track', track, tags);
         var playlist = this.playlists[this.activePlaylist];
@@ -706,6 +712,13 @@
         this._cleanupChunks();
     };
 
+
+    User.prototype._gotTrackDuration = function(duration) {
+        console.log('got track duration', duration);
+        if (this == this.groove.activeDJ) {
+            this.activeTrack.duration = duration;
+        }
+    };
 
     // set default icon URL
     User.prototype.updateIconURL();

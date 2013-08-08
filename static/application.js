@@ -160,11 +160,15 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
 
     var player = $window.document.createElement("audio");
     window.player = player;
+    var activeTrack;
     player.addEventListener("canplay", function() {
         var track = groove.activeTrack;
+        if (track == activeTrack) return;
+        activeTrack = track;
         console.log("canplay", track && track.currentTime, track);
         if (track) {
             player.currentTime = track.currentTime;
+            groove.canPlayTrack(player.duration);
             player.play();
         }
     }, false);
