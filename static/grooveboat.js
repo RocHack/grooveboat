@@ -246,7 +246,10 @@
             user.dj = true;
         });
         this.emit('djs', this.djs.slice());
-        this._acceptActiveTrack(activeDJ.activeTrack, activeDJ);
+        var activeTrack = activeDJ.activeTrack;
+        if (activeTrack) {
+            this._acceptActiveTrack(activeTrack, activeDJ);
+        }
         console.log('got dj list', djs, 'from', sender.name);
     };
 
@@ -291,6 +294,9 @@
 
         this.emit('activeDJ');
         this.emit('activeTrack');
+        if (user != this.me) {
+            user.requestFile('current');
+        }
     };
 
     // increment the current track time once a second
@@ -318,7 +324,6 @@
             user = users[userId];
         switch (event.type) {
         case 'welcome':
-            console.log('got welcome', event);
             user.setGravatar(event.gravatar);
             user.setName(event.name);
             user.setVote(event.vote);
@@ -388,11 +393,11 @@
             break;
             
         case 'requestTrack':
-            this.groove._sendTrack(user, event.track);
+            this._sendTrack(user, event.track);
             break;
 
         case 'requestTrackChunk':
-            this.groove._sendTrackChunk(user, event.i);
+            this._sendTrackChunk(user, event.i);
             break;
         }
     };
@@ -465,7 +470,7 @@
         }
 
         // send our active track to peers who we haven't sent it to yet
-        this.streamToPeers(this.getPeers());
+        this.streamToPeers(this.me.activeTrack, this.getPeers());
         // play track locally
         this._playMyTrack();
     };
@@ -488,14 +493,14 @@
         this.emit('activeTrackURL');
 
         // start preloading next track
-        this.requestNextTrack();
+        //this.requestNextTrack();
     };
 
     // request a track file from the upcoming DJ, for preloading
     Groove.prototype.requestNextTrack = function() {
         var dj = this.getUpcomingDJ();
         if (dj) {
-            dj.requestFile();
+            dj.requestFile('upcoming');
         } else {
             console.log('No upcoming DJs');
         }
@@ -565,13 +570,15 @@
         }.bind(this);
     };
 
-    Groove.prototype.streamToPeers = function(peers, start) {
-        var track = this.me.activeTrack,
-            chunks = track.chunks,
+    Groove.prototype.streamToPeers = function(track, peers, start) {
+        var chunks = track.chunks,
             numChunks = chunks && chunks.length;
         if (!numChunks) {
             console.error('No active track chunks to stream.');
             return;
+        }
+        if (track != this.me.activeTrack) {
+            console.error('Preloading tracks is unsupported');
         }
 
         // only send to peers we haven't already sent the track
@@ -594,11 +601,11 @@
         var track = this.activePlaylist[0];
         if(track_type == "current") {
             track = groove.activeTrack;
+        } else {
+            console.error("Only streaming the current track is supported.");
+            return;
         }
-
-        for(var i = 0; i < track.chunks.length; i++) {
-            user.send(track.chunks[i]);
-        }
+        this.streamToPeers(track, [user]);
     };
 
     Groove.prototype._sendTrackChunk = function(user, track_type) {
@@ -757,18 +764,18 @@
             this.groove.activeTrack.url = dataURL;
             this.groove.emit('activeTrackURL');
             // start preloading next track
-            this.groove.requestNextTrack();
+            //this.groove.requestNextTrack();
         } else {
             this.upcomingTrackURL = dataURL;
         }
         this._cleanupChunks();
     };
 
-    User.prototype.requestFile = function() {
+    User.prototype.requestFile = function(trackType) {
         console.log('requesting next track from', this.id);
         this.send({
             type: 'requestTrack',
-            track: 'upcoming'
+            track: trackType
         });
     };
 
