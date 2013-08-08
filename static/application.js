@@ -89,16 +89,30 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
 function MainCtrl($scope, groove, localStorageService) {
     $scope.currentUser = groove.me;
     $scope.currentOverlay = false;
+    $scope.tempGravatarEmail = groove.me.gravatar;
 
     $scope.setOverlay = function(overlay) {
         $scope.currentOverlay = overlay;
-    }
+    };
 
     $scope.saveName = function() {
         $scope.currentUser.setName($scope.tempUsername);
         localStorageService.set("user:name", $scope.tempUsername);
         $scope.setOverlay(false);
-    }
+    };
+
+    $scope.saveGravatarEmail = function() {
+        console.log("Wat");
+        if($scope.tempGravatarEmail == undefined) {
+            return;
+        }
+
+        groove.me.setGravatar($scope.tempGravatarEmail);
+        groove.sendGravatar();
+        $scope.setOverlay(false);
+        localStorageService.set("user:gravatar", groove.me.gravatar);
+    };
+
 }
 
 function RoomListCtrl($scope, $location, groove, localStorageService) {
@@ -137,7 +151,6 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     $scope.currentOverlay = false;
     $scope.tracks = groove.playlists[groove.activePlaylist];
     $scope.files = [];
-    $scope.tempGravatarEmail = groove.me.gravatar;
 
     $scope.currentTrack = null;
     $scope.votes = { yes: 0, no: 0 };
@@ -198,17 +211,6 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
 
         handleVote(groove.me.vote, direction);
         groove.vote(direction);
-    }
-
-    $scope.saveGravatarEmail = function() {
-        if($scope.tempGravatarEmail == undefined) {
-            return;
-        }
-
-        groove.me.setGravatar($scope.tempGravatarEmail);
-        groove.sendGravatar();
-        $scope.setOverlay(false);
-        localStorageService.set("user:gravatar", groove.me.gravatar);
     }
 
     $scope.getJoinText = function() {
