@@ -345,7 +345,6 @@ a {
     position: relative;
     min-width: 275px;
     width: 25%;
-    max-width: 325px;;
     height: 100%;
     min-height: 350px;
     background-color: white;
@@ -426,16 +425,18 @@ a {
         line-height: 1.4;
 
         .author {
-            display: inline-block;
+            display: inline;
             font-weight: 400;
-        }
 
-        .author:after {
-            content: ":";
+            &.local-true {
+                color: @blue;
+                font-weight: 500;
+            }
         }
 
         .text {
-            display: inline-block;
+            display: block;
+            padding-left: 15px;
         }
     }
 

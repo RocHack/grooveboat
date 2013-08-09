@@ -252,11 +252,14 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
 
     $scope.newMessage = function() {
         var text = $scope.message_text;
+        var last = groove.lastChatAuthor;
         if (text && text.trim()) {
             $scope.chat_messages.push({
                 from: groove.me,
-                text: text
+                text: text,
+                isContinuation: last && last == groove.me
             });
+            groove.lastChatAuthor = groove.me;
             groove.sendChat(text);
         }
         $scope.message_text = "";
@@ -277,6 +280,9 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
                 $scope.newMessages = true;
             }
 
+            var last = groove.lastChatAuthor;
+            message.isContinuation = (last && last == message.from);
+            groove.lastChatAuthor = message.from;
             $scope.chat_messages.push(message);
         });
     });
