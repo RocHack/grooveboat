@@ -1,6 +1,7 @@
 var WebsocketServer = require("websocket").server;
 var WebsocketConnection = require("websocket").connection;
 var http = require("http");
+var uuid = require("node-uuid");
 var Peer = require("./peer").Peer;
 
 // Extend the WebSocketConnection prototype to allow easy JSON
@@ -23,10 +24,14 @@ var ws_server = new WebsocketServer({
     autoAcceptConnections: false,
 });
 
+ws_server.peers = {};
+
 ws_server.on("request", function(req) {
     var conn = req.accept("groovebuoy-0.1", req.origin);
-    console.log("[debug] Peer connected");
-    var peer = new Peer(conn);
+    var pid = uuid.v1();
+    console.log("[debug] Peer "+ pid +" connected");
+    var peer = new Peer(ws_server, conn);
+    peer.id = pid;
 
     conn.on("message", function(msg) {
         if(msg.type != "utf8") {
@@ -52,6 +57,7 @@ ws_server.on("request", function(req) {
     });
 
     conn.on("close", function() {
+        delete ws_server.peers[pid];
         console.log("[debug] Peer disconnected");
     });
 });

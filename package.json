@@ -2,6 +2,7 @@
     "name":"groovebuoy",
     "version": "0.1.0",
     "dependencies": {
-        "websocket": "1.0.x"
+        "websocket": "1.0.x",
+        "node-uuid": "1.4.x"
     }
 }
