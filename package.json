@@ -1,0 +1,7 @@
+{
+    "name":"groovebuoy",
+    "version": "0.1.0",
+    "dependencies": {
+        "websocket": "1.0.x"
+    }
+}
