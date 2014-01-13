@@ -1,6 +1,26 @@
 # Groovebuoy
 A WebRTC signaling server with some other niceties that allow [Grooveboat](https://github.com/rochack/grooveboat) to run smoothly.
 
+# Event flow
+As of right now, here's how this event flow should work:
+
+```
+*client connects*
+server -> welcome
+joinRoom <- client
+server -> roomInfo
+
+...
+*client is messing around*
+server <- ping
+client -> pong
+
+...
+*another client connects elsewhere*
+server -> peerJoined
+
+```
+
 # Event documentation
 
 ## Server events
