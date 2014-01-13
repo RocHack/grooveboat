@@ -6,9 +6,9 @@ As of right now, here's how this event flow should work:
 
 ```
 *client connects*
-server -> welcome
+server   -> welcome
 joinRoom <- client
-server -> roomInfo
+server   -> roomInfo
 
 ...
 *client is messing around*
