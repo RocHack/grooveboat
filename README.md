@@ -6,19 +6,18 @@ As of right now, here's how this event flow should work:
 
 ```
 *client connects*
-server   -> welcome
-joinRoom <- client
-server   -> roomInfo
+server -> welcome
+client -> joinRoom
+server -> roomInfo
 
 ...
 *client is messing around*
-ping   <- client
+client -> ping
 server -> pong
 
 ...
 *another client connects elsewhere*
 server -> peerJoined
-
 ```
 
 # Event documentation
