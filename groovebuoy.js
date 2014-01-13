@@ -1,8 +1,7 @@
 var WebsocketServer = require("websocket").server;
 var WebsocketConnection = require("websocket").connection;
 var http = require("http");
-var uuid = require("node-uuid");
-var Peer = require("./peer").Peer;
+var Buoy = require("./buoy").Buoy;
 
 // Extend the WebSocketConnection prototype to allow easy JSON
 WebsocketConnection.prototype.sendJSON = function(send) {
@@ -24,40 +23,4 @@ var ws_server = new WebsocketServer({
     autoAcceptConnections: false,
 });
 
-ws_server.peers = {};
-
-ws_server.on("request", function(req) {
-    var conn = req.accept("groovebuoy-0.1", req.origin);
-    var pid = uuid.v1();
-    console.log("[debug] Peer "+ pid +" connected");
-    var peer = new Peer(ws_server, conn);
-    peer.id = pid;
-
-    conn.on("message", function(msg) {
-        if(msg.type != "utf8") {
-            conn.drop(conn.CLOSE_REASON_PROTOCOL_ERROR);
-            console.log("[err] Received bad data");
-            return;
-        }
-
-        try {
-            msg = JSON.parse(msg.utf8Data);
-        } catch(e) {
-            conn.drop(conn.CLOSE_REASON_PROTOCOL_ERROR);
-            console.log("[err] Received bad JSON data");
-            return;
-        }
-
-        if(!msg['e']) {
-            conn.drop(conn.CLOSE_REASON_PROTOCOL_ERROR);
-            console.log("[err] Received bad object data");
-        }
-
-        peer.emit(msg['e'], msg);
-    });
-
-    conn.on("close", function() {
-        delete ws_server.peers[pid];
-        console.log("[debug] Peer disconnected");
-    });
-});
+var buoy = new Buoy(ws_server);

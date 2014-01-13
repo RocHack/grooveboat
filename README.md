@@ -6,6 +6,17 @@ A WebRTC signaling server with some other niceties that allow [Grooveboat](https
 ## Server events
 These are sent to the server by the client.
 
+### `joinRoom`
+Tells the server that you are joining a room. The server will eventually respond with a `roomData` event.
+
+Send data:
+```json
+{
+    "e":    "joinRoom",
+    "name": "room name"
+}
+```
+
 ### `ping`
 Pings the server!
 
@@ -31,6 +42,40 @@ Send data:
 
 ## Client events
 These are events that are received by the peers.
+
+### `welcome`
+Sent right after the client connects to the server. Provides some simple information about the session.
+
+Send data:
+```json
+{
+    "e":  "welcome",
+    "id": "your-uuid",
+}
+```
+
+### `peerJoined`
+Sent each time a peer joins the current room.
+
+Send data:
+```json
+{
+    "e":  "peerJoined",
+    "id": "their-uuid",
+}
+
+```
+### `roomData`
+Sent after the client sends the `joinRoom` event. Provides information about a room and its peers.
+
+Send data:
+```json
+{
+    "e":     "roomData",
+    "name":  "room name",
+    "peers": ["peer-uuid1", "peer-uuid2", ...]
+}
+```
 
 ### `recvMessage`
 Sent when you are receiving a message from another peer.
