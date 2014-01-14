@@ -16,6 +16,7 @@ function Buoy(server) {
         console.log("[debug] Peer "+ pid +" connected");
         var peer = new Peer(self, conn);
         peer.id = pid;
+        self.peers[pid] = peer;
 
         // Give the peer some info
         peer.send("welcome", {
@@ -46,8 +47,13 @@ function Buoy(server) {
         });
 
         conn.on("close", function() {
-            delete self.peers[pid];
-            console.log("[debug] Peer "+ pid +" disconnected");
+            if(self.peers[pid]) {
+                self.peers[pid].cleanUp();
+                delete self.peers[pid];
+                console.log("[debug] Peer "+ pid +" disconnected");
+            } else {
+                console.log("[error] Invalid client "+ pid +" disconnected");
+            }
         });
     });
 }

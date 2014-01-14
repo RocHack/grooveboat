@@ -15,6 +15,15 @@ function Peer(buoy, conn) {
 util.inherits(Peer, EventEmitter);
 
 /*
+ * Cleans up the peer after it disconnects from the server
+ */
+Peer.prototype.cleanUp = function() {
+    if(this.room) {
+        this.room.leave(this);
+    }
+}
+
+/*
  * Sends data to this peer
  */
 Peer.prototype.send = function(event, data) {

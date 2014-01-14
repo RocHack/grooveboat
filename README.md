@@ -17,7 +17,11 @@ server -> pong
 
 ...
 *another client connects elsewhere*
-server -> peerJoined
+server            -> peerJoined
+client (new)      -> sendTo (the new client begins attempting to peer with users)
+
+*another client leaves*
+server -> peerLeft
 ```
 
 # Event documentation
@@ -80,6 +84,16 @@ Send data:
 ```json
 {
     "e":  "peerJoined",
+    "id": "their-uuid",
+}
+
+### `peerLeft`
+Sent each time a peer leaves the current room.
+
+Send data:
+```json
+{
+    "e":  "peerLeft",
     "id": "their-uuid",
 }
 
