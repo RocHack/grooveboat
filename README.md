@@ -86,6 +86,7 @@ Send data:
     "e":  "peerJoined",
     "id": "their-uuid",
 }
+```
 
 ### `peerLeft`
 Sent each time a peer leaves the current room.
