@@ -54,6 +54,9 @@ function Buoy(server) {
 
 util.inherits(Buoy, EventEmitter);
 
+/*
+ * Sends a message to a peer with the given ID
+ */
 Buoy.prototype.sendPeer = function(id, event, data) {
     var peer = this.peers[id];
     if(!peer) return;
@@ -61,6 +64,10 @@ Buoy.prototype.sendPeer = function(id, event, data) {
     peer.send(event, data);
 }
 
+/*
+ * Gets a room given its name. It will create this room if it does not
+ * exist.
+ */
 Buoy.prototype.getRoom = function(name) {
     var room = this.rooms[name];
     if(!room) {
