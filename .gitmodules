@@ -4,3 +4,6 @@
 [submodule "static/lib/emoji"]
 	path = static/lib/emoji
 	url = https://github.com/nmbook/emoji-images.js.git
+[submodule "static/lib/webrtc.js"]
+	path = static/lib/webrtc.js
+	url = git@github.com:stevenleeg/webrtc.js.git
