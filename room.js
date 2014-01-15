@@ -46,6 +46,13 @@ Room.prototype.leave = function(peer) {
 }
 
 /*
+ * Sends out a chat to all users
+ */
+Room.prototype.sendChat = function(from, message) {
+    this.sendAllBut(from.id, "chat", { msg: message });
+}
+
+/*
  * Sends a message to all peers in the room
  */
 Room.prototype.sendAll = function(event, data) {

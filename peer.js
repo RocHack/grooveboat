@@ -10,6 +10,7 @@ function Peer(buoy, conn) {
     this.on("ping", this.onPing);
     this.on("sendTo", this.onSendTo);
     this.on("joinRoom", this.onJoinRoom);
+    this.on("sendChat", this.onSendChat);
 }
 
 util.inherits(Peer, EventEmitter);
@@ -45,6 +46,17 @@ Peer.prototype.send = function(event, data) {
  */
 Peer.prototype.onPing = function(data) {
     this.send("pong");
+}
+
+/*
+ * Receives a chat message from the client and blasts it out
+ * to all other clients
+ * Expects:
+ *  msg - The text of the chat message
+ */
+Peer.prototype.onSendChat = function(data) {
+    if(!this.room) return;
+    this.room.sendChat(this, data.msg);
 }
 
 /*

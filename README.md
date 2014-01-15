@@ -22,12 +22,27 @@ client (new)      -> sendTo (the new client begins attempting to peer with users
 
 *another client leaves*
 server -> peerLeft
+
+*client sends a chat*
+client -> sendChat
+server -> chat (to all client except for the sender)
 ```
 
 # Event documentation
 
 ## Server events
 These are sent to the server by the client.
+
+### `sendChat`
+Sends a chat message to all other clients in the current room
+
+Send data:
+```json
+{
+    "e":   "sendChat",
+    "msg": "message text"
+}
+```
 
 ### `joinRoom`
 Tells the server that you are joining a room. The server will eventually respond with a `roomData` event.
@@ -119,6 +134,17 @@ Data:
     "e":    "recvMessage",
     "from": "peer-uuid",
     "msg":  { ... }
+}
+```
+
+### `chat`
+Sent when another client sends out a chat.
+
+Send data:
+```json
+{
+    "e":   "chat",
+    "msg": "message text"
 }
 ```
 
