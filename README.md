@@ -1,4 +1,5 @@
-#  Groovebuoy
+![Groovebuoy](http://i.imgur.com/qzfvbgN.png)
+
 A WebRTC signaling server with some other niceties that allow [Grooveboat](https://github.com/rochack/grooveboat) to run smoothly.
 
 # Event flow
