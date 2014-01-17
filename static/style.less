@@ -145,13 +145,13 @@ a {
         color: @dark;
     }
 
-    .rooms {
+    .rooms, .buoys {
         height: 250px;
         background-color: @white;
         overflow-y: auto;
         margin-bottom: 10px;
 
-        .room {
+        .room, .buoy {
             font-size: 18px;
             padding: 15px;
             cursor: pointer;
@@ -160,11 +160,11 @@ a {
             -moz-user-select: moz-none;
         }
 
-        .room:nth-last-child(1) {
+        .room:nth-last-child(1), .buoy:nth-last-child(1) {
             border-bottom: 0px;
         }
 
-        .room-true {
+        .selected {
             background-color: @red;
             color: @white;
         }

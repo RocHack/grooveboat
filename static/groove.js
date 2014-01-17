@@ -91,10 +91,7 @@
          * User events
          */
         this.me.on("name", function() {
-            self.webrtc.send({
-                type: "name",
-                name: self.me.name
-            });
+            // TODO: Send a message to the buoy
         });
 
         // keep track of the seek time of the active track
@@ -105,9 +102,18 @@
         constructor: {value: Groove}
     });
 
+    /*
+     * Connects to a buoy server and instantiates this.buoy
+     */
+    Groove.prototype.connectToBuoy = function(url) {
+        this.buoy = new Buoy(url);
+
+        // Setup buoy events
+    }
+
     Groove.prototype.joinRoom = function(roomName) {
         this.roomName = roomName;
-        this.webrtc.joinRoom(roomName);
+        this.buoy.send("joinRoom", { name: roomName });
     };
 
     Groove.prototype.createRoom = function(roomName, cb) {
