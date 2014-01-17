@@ -1,4 +1,4 @@
-![Grooveboat](http://imgur.com/TKR70qm.png)
+![Grooveboat](http://i.imgur.com/3xnsCqi.png)
 
 A WebRTC powered peer-to-peer implementation of the late [Turntable.fm](http://turntable.fm). Coming soon to a browser near you.
 
