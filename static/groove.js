@@ -124,7 +124,7 @@
     Groove.prototype.onBuoyChat = function(data) {
         this.emit('chat', {
             text: String(data.msg),
-            from: data.from
+            from: this.users[data.from]
         });
     }
 

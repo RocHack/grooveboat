@@ -11,7 +11,7 @@
                     Say something about stuff
                 </div>
                 <div class="message" ng-repeat="message in chat_messages">
-                    <div class="author local-{{message.from}}" ng-hide="message.isContinuation">{{ message.from }}</div>
+                    <div class="author" ng-hide="message.isContinuation">{{ message.from.name }}</div>
                     <div class="text" ng-bind-html-unsafe="message.text | linky | emoji"></div>
                 </div>
             </div>

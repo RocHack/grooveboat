@@ -298,7 +298,7 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
         var last = groove.lastChatAuthor;
         if(text && text.trim()) {
             $scope.chat_messages.push({
-                from: groove.me.id,
+                from: groove.me,
                 text: text,
                 isContinuation: last && last == groove.me
             });
