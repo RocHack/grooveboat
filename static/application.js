@@ -20,6 +20,8 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
         var groove = new Groove();
         window.groove = groove;
 
+        groove.connectToBuoy("ws://"+ window.location.hostname +":8844");
+
         var name = localStorageService.get("user:name");
         var gravatar = localStorageService.get("user:gravatar");
         if (!name) {
@@ -129,8 +131,6 @@ function RoomListCtrl($scope, $location, groove, localStorageService) {
     $scope.creating_room = false;
     $scope.new_room_name = "";
     $scope.rooms = [];
-
-    groove.connectToBuoy("ws://"+ window.location.hostname +":8844");
 
     $scope.clickRoom = function(i) {
         $scope.room_selected = i;
@@ -295,7 +295,7 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     $scope.newMessage = function() {
         var text = $scope.message_text;
         var last = groove.lastChatAuthor;
-        if (text && text.trim()) {
+        if(text && text.trim()) {
             $scope.chat_messages.push({
                 from: groove.me,
                 text: text,
@@ -387,6 +387,6 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     });
 }
 
-BuoyListCtrl.$inject = ["$scope", "$location", "groove", "localStorageService"];
+RoomListCtrl.$inject = ["$scope", "$location", "groove", "localStorageService"];
 RoomCtrl.$inject = ["$scope", "$routeParams", "$window", "groove",
     "localStorageService"];
