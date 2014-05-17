@@ -189,7 +189,7 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
 
     $scope.users = [];
     $scope.djs = [];
-    $scope.currentTab = "music";
+    $scope.currentTab = localStorageService.get("user:tab") || "music";
     $scope.currentOverlay = false;
     $scope.tracks = groove.playlists[groove.activePlaylist];
     $scope.files = [];
@@ -220,6 +220,7 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
             $scope.newMessages = false;
         }
 
+        localStorageService.set("user:tab", tab);
         $scope.currentTab = tab;
     }
 
@@ -297,7 +298,7 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
         var last = groove.lastChatAuthor;
         if(text && text.trim()) {
             $scope.chat_messages.push({
-                from: groove.me,
+                from: groove.me.id,
                 text: text,
                 isContinuation: last && last == groove.me
             });

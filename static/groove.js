@@ -109,7 +109,27 @@
         this.buoy = new Buoy(url);
 
         // Setup buoy events
+        this.buoy.on("welcome", this.onRecvBuoyWelcome.bind(this));
+        this.buoy.on("chat", this.onRecvBuoyChat.bind(this));
     }
+
+    Groove.prototype.onRecvBuoyWelcome = function(data) {
+        console.log("Assigned PID: "+ data.id);
+        this.me.id = data.id;
+    }
+
+    Groove.prototype.onRecvBuoyChat = function(data) {
+        this.emit('chat', {
+            text: String(data.msg),
+            from: data.from
+        });
+    }
+
+    Groove.prototype.sendChat = function(text) {
+        this.buoy.send("sendChat", {
+            msg: text
+        });
+    };
 
     Groove.prototype.joinRoom = function(roomName) {
         this.roomName = roomName;
@@ -146,13 +166,6 @@
             myActiveTrack: amDJ ? exportTrack(this.activeTrack) : null
         }, user.id);
         this.emit('peerConnected', user);
-    };
-
-    Groove.prototype.sendChat = function(text) {
-        this.webrtc.send({
-            type: 'chat',
-            text: String(text)
-        });
     };
 
     Groove.prototype.sendGravatar = function() {
