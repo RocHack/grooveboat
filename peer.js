@@ -14,6 +14,7 @@ function Peer(buoy, conn) {
 
     // Listen to certain events from the buoy
     this.buoy.on("newRoom", this.onBuoyNewRoom.bind(this));
+    this.buoy.on("deleteRoom", this.onBuoyDeleteRoom.bind(this));
 }
 
 util.inherits(Peer, EventEmitter);
@@ -87,12 +88,20 @@ Peer.prototype.onJoinRoom = function(data) {
 }
 
 /*
- * 
+ * Tell the peer when a room has been added
  */
 Peer.prototype.onBuoyNewRoom = function(data) {
     this.send("newRoom", {
         name: data.room.name,
-        id: data.room.id
+    });
+}
+
+/*
+ * Tell the peer when a room has been deleted
+ */
+Peer.prototype.onBuoyDeleteRoom = function(data) {
+    this.send("deleteRoom", {
+        name: data.room,
     });
 }
 

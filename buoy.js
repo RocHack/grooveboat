@@ -99,9 +99,13 @@ Buoy.prototype.getRoom = function(name) {
     return room;
 }
 
+/*
+ * Deletes a room from the buoy given its name
+ */
 Buoy.prototype.deleteRoom = function(name) {
-    this.rooms[name] = undefined;
+    delete this.rooms[name];
     console.log("[debug] Deleting room "+ name);
+    this.emit("deleteRoom", { room: name });
 }
 
 exports.Buoy = Buoy;
