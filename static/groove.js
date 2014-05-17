@@ -109,20 +109,55 @@
         this.buoy = new Buoy(url);
 
         // Setup buoy events
-        this.buoy.on("welcome", this.onRecvBuoyWelcome.bind(this));
-        this.buoy.on("chat", this.onRecvBuoyChat.bind(this));
+        this.buoy.on("welcome", this.onBuoyWelcome.bind(this));
+        this.buoy.on("chat", this.onBuoyChat.bind(this));
+        this.buoy.on("peerJoined", this.onBuoyPeerJoined.bind(this));
+        this.buoy.on("peerLeft", this.onBuoyPeerLeft.bind(this));
+        this.buoy.on("roomData", this.onBuoyRoomData.bind(this));
     }
 
-    Groove.prototype.onRecvBuoyWelcome = function(data) {
+    Groove.prototype.onBuoyWelcome = function(data) {
         console.log("Assigned PID: "+ data.id);
         this.me.id = data.id;
     }
 
-    Groove.prototype.onRecvBuoyChat = function(data) {
+    Groove.prototype.onBuoyChat = function(data) {
         this.emit('chat', {
             text: String(data.msg),
             from: data.from
         });
+    }
+
+    Groove.prototype.onBuoyRoomData = function(data) {
+        this.users = {};
+        for(var i in data.peers) {
+            var peer = data.peers[i];
+
+            if(this.me.id == peer.id) continue;
+
+            var user = new User(this, peer.id);
+            user.name = peer.name;
+
+            this.users[user.id] = user;
+            this.emit('peerConnected', user);
+            console.log("Found user "+ user.name);
+        }
+    }
+
+    Groove.prototype.onBuoyPeerLeft = function(data) {
+        this.emit("peerDisconnected", this.users[data.id]);
+        console.log("User "+ this.users[data.id].name +" disconnected");
+
+        delete this.users[data.id];
+    }
+
+    Groove.prototype.onBuoyPeerJoined = function(data) {
+        var user = this.users[data.id] = new User(this, data.id);
+        user.name = data.name;
+
+        this.emit('peerConnected', user);
+        console.log("Found new peer: "+ data.id);
+        console.log("User "+ user.name +" joined");
     }
 
     Groove.prototype.sendChat = function(text) {
