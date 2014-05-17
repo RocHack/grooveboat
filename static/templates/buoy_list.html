@@ -9,7 +9,7 @@
 </div>
 
 <div class="prompt" ng-show="selecting == 'room'">
-    <h1>select a room {{room_selected}}</h1>
+    <h1>select a room</h1>
     <div class="rooms">
         <div class="room" ng-class="{selected: room_selected == $index}" ng-repeat="room in rooms" ng-click="$parent.room_selected = $index">
             {{room}}

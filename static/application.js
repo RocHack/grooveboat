@@ -163,7 +163,17 @@ function BuoyListCtrl($scope, $location, groove, localStorageService) {
 
         // Listen for any new rooms being created
         groove.buoy.on("newRoom", function(data) {
-            $scope.rooms.push(data.name);
+            $scope.$apply(function($scope) {
+                $scope.rooms.push(data.name);
+            });
+        });
+
+        groove.buoy.on("deleteRoom", function(data) {
+            $scope.$apply(function($scope) {
+                var i = $scope.rooms.indexOf(data.name);
+                if(i == -1) return;
+                $scope.rooms.splice(i, 1);
+            });
         });
     }
 
