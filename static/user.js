@@ -241,7 +241,6 @@
             console.error("Received ice candidate without peer connection");
             return;
         }
-        console.log('Handling ice', candidate.candidate);
         this.pc.processIce(candidate);
     };
 

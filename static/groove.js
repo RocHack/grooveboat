@@ -14,12 +14,12 @@
         var self = this;
         WildEmitter.call(this);
 
-        var users = this.users = {};
-        var djs = this.djs = [];
+        this.users = {};
+        this.djs = [];
         this.activeDJ = null;
 
-        var me = this.me = new User(this);
-        me.isLocal = true;
+        this.me = new User(this);
+        this.me.isLocal = true;
 
         this.playlists = {default: []};
         this.activePlaylist = 'default';
@@ -46,6 +46,8 @@
         this.buoy.on("peerLeft", this.onBuoyPeerLeft.bind(this));
         this.buoy.on("roomData", this.onBuoyRoomData.bind(this));
         this.buoy.on("recvMessage", this.onBuoyRecvMessage.bind(this));
+        this.buoy.on("newDJ", this.onBuoyNewDJ.bind(this));
+        this.buoy.on("removeDJ", this.onBuoyRemoveDJ.bind(this));
     }
 
     Groove.prototype.onBuoyWelcome = function(data) {
@@ -72,10 +74,19 @@
 
             this.users[user.id] = user;
             this.emit('peerConnected', user);
-            console.log("Found user "+ user.name);
+            console.log("Found user", user.name, user.id);
             // prepare to connect to everyone in the room
             // they will send the offer
             user.preparePeerConnection();
+        }
+        this.users[this.me.id] = this.me;
+        for (i = 0; i < data.djs.length; i++) {
+            var dj = this.users[data.djs[i]];
+            if (!dj) {
+                console.error("Unknown DJ", data.djs[i]);
+                continue;
+            }
+            this.djs.push(dj);
         }
     };
 
@@ -104,6 +115,25 @@
         // let's just connect to everyone we see
         user.preparePeerConnection();
         user.offerConnection();
+    };
+
+    Groove.prototype.onBuoyNewDJ = function(data) {
+        var user = this.users[data.id];
+        if (!user) {
+            console.error("Unknown user", data.id);
+            console.log(this.users);
+            return;
+        }
+        this._onDJStart(user);
+    };
+
+    Groove.prototype.onBuoyRemoveDJ = function(data) {
+        var user = this.users[data.id];
+        if (!user) {
+            console.error("Unknown user", data.id);
+            return;
+        }
+        this._onDJQuit(user);
     };
 
     Groove.prototype.sendChat = function(text) {
@@ -166,70 +196,38 @@
             this.emit('emptyPlaylist');
             return;
         }
-        var after = this.djs[this.djs.length-1];
-        this.webrtc.send({
-            type: 'nominateDJ',
-            after: after && after.id
-        });
-        setTimeout(function() {
-            this._acceptDJ(this.me, after);
-            if (!after) {
-                this.becomeActiveDJ();
-            }
-        }.bind(this), 10);
-    };
-
-    Groove.prototype._acceptDJ = function(dj, prevDJ) {
-        if (dj == prevDJ) prevDJ = null;
-        var djs = this.djs,
-            djIndex = djs.indexOf(dj),
-            prevDJIndex = prevDJ ? djs.indexOf(prevDJ) : -1;
-        console.log('accept dj', dj && dj.name, prevDJ && prevDJ.name, djs);
-        if (djIndex != -1) {
-            // dj is already in djs list
-            if (djs[prevDJIndex + 1] == dj) {
-                // already in position
-                return;
-            }
-            // remove from old position
-            djs.splice(djIndex, 1);
-            prevDJIndex = prevDJ ? djs.indexOf(prevDJ) : -1;
-        }
-
-        if (prevDJIndex == -1) {
-            djs.push(dj);
-        } else {
-            djs.splice(prevDJIndex + 1, 0, dj);
-        }
-
-        dj.dj = true;
-        this.emit('djs', this.djs.slice());
+        this.buoy.send('requestDJ', {});
     };
 
     Groove.prototype.quitDJing = function() {
         if (!this.me.dj) {
             return;
         }
-        this.webrtc.send({
-            type: 'quitDJing'
-        });
-        setTimeout(this._acceptQuitDJ.bind(this, this.me), 10);
+        this.buoy.send('quitDJ', {});
+        setTimeout(this._onDJQuit.bind(this, this.me), 10);
     };
 
-    Groove.prototype._acceptQuitDJ = function(user) {
-        user.dj = false;
+    Groove.prototype._onDJStart = function(user) {
+        if (this.djs.indexOf(user) > -1) return;
+        this.djs.push(user);
+        console.log("DJ", user.name, "stepped up");
+        user.dj = true;
+        this.emit('djs', this.djs.slice());
+    };
+
+    Groove.prototype._onDJQuit = function(user) {
+        console.log("DJ", user.name, "stepped down");
         var i = this.djs.indexOf(user);
-        user._cleanupChunks();
-        if (i != -1) {
-            this.djs.splice(i, 1);
-        }
+        if (i == -1) return;
+        this.djs.splice(i, 1);
+        user.dj = false;
+
         if (this.activeDJ == user) {
             this.activeDJ = null;
             this.activeTrack = null;
             this.emit('activeDJ');
             this.emit('activeTrack');
             this.emit('activeTrackURL');
-            // todo: allow next dj to take place
         }
         this.emit('djs', this.djs.slice());
     };
