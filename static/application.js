@@ -1,8 +1,14 @@
 angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
     .config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
         $routeProvider
-            .when("/", { controller: BuoyListCtrl, templateUrl: "static/templates/buoy_list.html"})
-            .when("/room/:room", { controller: RoomCtrl, templateUrl: "static/templates/room.html"})
+            .when("/", { 
+                controller: BuoyListCtrl, 
+                templateUrl: "static/templates/buoy_list.html"
+            })
+            .when("/room/:room", { 
+                controller: RoomCtrl, 
+                templateUrl: "static/templates/room.html"
+            })
             .otherwise({redirect_to: "/"});
 
         $locationProvider.html5Mode(false).hashPrefix("!");
@@ -146,13 +152,18 @@ function BuoyListCtrl($scope, $location, groove, localStorageService) {
         groove.buoy.on("welcome", function(data) {
             var rooms = [];
             for(var i in data.rooms) {
-                rooms.push({ name: data.rooms[i], selected: false });
+                rooms.push(data.rooms[i]);
             }
 
             $scope.$apply(function($scope) {
                 $scope.rooms = rooms;
                 $scope.selecting = "room";
             });
+        });
+
+        // Listen for any new rooms being created
+        groove.buoy.on("newRoom", function(data) {
+            $scope.rooms.push(data.name);
         });
     }
 
@@ -165,13 +176,7 @@ function BuoyListCtrl($scope, $location, groove, localStorageService) {
     $scope.rooms = [];
 
     $scope.clickRoom = function(i) {
-        if(room_selected > -1) {
-            $scope.rooms[room_selected].selected = false;
-        }
-
-        document.getElementById("join-room").disabled = false;
-        $scope.rooms[i].selected = true;
-        selected = i;
+        $scope.room_selected = i;
     }
 
     $scope.clickJoinRoom = function() {
@@ -179,7 +184,7 @@ function BuoyListCtrl($scope, $location, groove, localStorageService) {
         if($scope.room_selected == $scope.rooms.length) {
             room = $scope.new_room_name;
         } else {
-            room = $scope.rooms[$scope.room_selected].name;
+            room = $scope.rooms[$scope.room_selected];
         }
         room = room.replace(/\s/g, "-");
         groove.me.updateIconURL(room);
