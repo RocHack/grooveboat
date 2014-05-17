@@ -16,6 +16,10 @@ server -> roomInfo
 client -> ping
 server -> pong
 
+*client decides they want a nick change*
+client -> setName
+server -> changeName (to all client except for the sender)
+
 ...
 *another client connects elsewhere*
 server            -> peerJoined
@@ -34,6 +38,16 @@ server -> chat (to all client except for the sender)
 ## Server events
 These are sent to the server by the client.
 
+### `setName`
+Changes a client's name
+
+Send data:
+```json
+{
+    "e":   "setName",
+    "name": "newName"
+}
+```
 ### `sendChat`
 Sends a chat message to all other clients in the current room
 
@@ -52,7 +66,8 @@ Send data:
 ```json
 {
     "e":    "joinRoom",
-    "name": "room name"
+    "roomName": "room name"
+    "peerName": "a nickname for yourself"
 }
 ```
 

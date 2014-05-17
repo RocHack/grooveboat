@@ -5,12 +5,14 @@ function Peer(buoy, conn) {
     this.buoy = buoy;
     this.conn = conn;
     this.room = null;
+    this.name = "Anon";
 
     // All events peers can send to the signaling server are here
     this.on("ping", this.onPing);
     this.on("sendTo", this.onSendTo);
     this.on("joinRoom", this.onJoinRoom);
     this.on("sendChat", this.onSendChat);
+    this.on("setName", this.onSetName);
 
     // Listen to certain events from the buoy
     this.buoy.on("newRoom", this.onBuoyNewRoom.bind(this));
@@ -59,9 +61,20 @@ Peer.prototype.onPing = function(data) {
  *  msg - The text of the chat message
  */
 Peer.prototype.onSendChat = function(data) {
-    console.log("[room:chat] "+ data.msg);
     if(!this.room) return;
     this.room.sendChat(this, data.msg);
+}
+
+/*
+ * Changes a client's name and blasts it out to all others
+ * Expects:
+ *  name - The new name
+ */
+Peer.prototype.onSetName = function(data) {
+    if(!this.room) return;
+    this.name = data.name;
+    this.room.sendAllBut(this, "changeName", { name: data.name });
+    console.log("[debug] "+ this.id +" now known as "+ data.name);
 }
 
 /*
@@ -80,12 +93,16 @@ Peer.prototype.onSendTo = function(data) {
 /*
  * Creates/joins a room.
  * Expects:
- *  name - The name of the room
+ *  roomName - The name of the room
+ *  peerName - The name of the peer joining the room
  */
 Peer.prototype.onJoinRoom = function(data) {
-    var room = this.buoy.getRoom(data.name);
+    var room = this.buoy.getRoom(data.roomName);
     room.join(this);
     this.room = room;
+
+    this.name = data.peerName;
+    console.log("[debug] "+ this.name +" joined "+ room.name);
 }
 
 /*
