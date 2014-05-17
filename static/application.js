@@ -2,8 +2,8 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
     .config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
         $routeProvider
             .when("/", { 
-                controller: BuoyListCtrl, 
-                templateUrl: "static/templates/buoy_list.html"
+                controller: RoomListCtrl, 
+                templateUrl: "static/templates/room_list.html"
             })
             .when("/room/:room", { 
                 controller: RoomCtrl, 
@@ -121,62 +121,7 @@ function MainCtrl($scope, groove, localStorageService) {
 
 }
 
-function BuoyListCtrl($scope, $location, groove, localStorageService) {
-    /*
-     * Buoy selection
-     */
-    var buoy_selected = -1;
-    $scope.selecting = "buoy";
-    $scope.connect_disabled = true;
-
-    $scope.buoys = [
-        { name: "Local server", url: "ws://localhost:8844", selected: false },
-        { name: "GB New York 1", url: "ws://archie.stevegattuso.me:8844", selected: false },
-    ];
-
-    $scope.clickBuoy = function(i) {
-        if(buoy_selected > -1) {
-            $scope.buoys[buoy_selected].selected = false;
-        }
-
-        $scope.buoys[i].selected = true;
-        buoy_selected = i;
-        $scope.connect_disabled = false;
-    }
-
-    $scope.clickConnectToBuoy = function() {
-        var buoy = $scope.buoys[buoy_selected];
-        groove.connectToBuoy(buoy.url);
-
-        // Wait to get a welcome message
-        groove.buoy.on("welcome", function(data) {
-            var rooms = [];
-            for(var i in data.rooms) {
-                rooms.push(data.rooms[i]);
-            }
-
-            $scope.$apply(function($scope) {
-                $scope.rooms = rooms;
-                $scope.selecting = "room";
-            });
-        });
-
-        // Listen for any new rooms being created
-        groove.buoy.on("newRoom", function(data) {
-            $scope.$apply(function($scope) {
-                $scope.rooms.push(data.name);
-            });
-        });
-
-        groove.buoy.on("deleteRoom", function(data) {
-            $scope.$apply(function($scope) {
-                var i = $scope.rooms.indexOf(data.name);
-                if(i == -1) return;
-                $scope.rooms.splice(i, 1);
-            });
-        });
-    }
-
+function RoomListCtrl($scope, $location, groove, localStorageService) {
     /*
      * Room selection
      */
@@ -184,6 +129,8 @@ function BuoyListCtrl($scope, $location, groove, localStorageService) {
     $scope.creating_room = false;
     $scope.new_room_name = "";
     $scope.rooms = [];
+
+    groove.connectToBuoy("ws://"+ window.location.hostname +":8844");
 
     $scope.clickRoom = function(i) {
         $scope.room_selected = i;
@@ -201,6 +148,37 @@ function BuoyListCtrl($scope, $location, groove, localStorageService) {
         localStorageService.set("user:name", groove.me.name);
         $location.path("/room/" + room);
     }
+
+    /*
+     * Buoy listeners
+     */
+    // Wait to get a welcome message
+    groove.buoy.on("welcome", function(data) {
+        var rooms = [];
+        for(var i in data.rooms) {
+            rooms.push(data.rooms[i]);
+        }
+
+        $scope.$apply(function($scope) {
+            $scope.rooms = rooms;
+            $scope.selecting = "room";
+        });
+    });
+
+    // Listen for any new rooms being created
+    groove.buoy.on("newRoom", function(data) {
+        $scope.$apply(function($scope) {
+            $scope.rooms.push(data.name);
+        });
+    });
+
+    groove.buoy.on("deleteRoom", function(data) {
+        $scope.$apply(function($scope) {
+            var i = $scope.rooms.indexOf(data.name);
+            if(i == -1) return;
+            $scope.rooms.splice(i, 1);
+        });
+    });
 }
 
 function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {

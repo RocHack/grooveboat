@@ -1,14 +1,4 @@
-<div class="prompt" ng-show="selecting == 'buoy'">
-    <h1>Select a buoy</h1>
-    <div class="buoys">
-        <div class="buoy" ng-class="{selected: buoy.selected}" ng-repeat="buoy in buoys" ng-click="clickBuoy($index)">
-            {{buoy.name}}
-        </div>
-    </div>
-    <input type="button" class="action" value="connect" ng-disabled="connect_disabled" ng-click="clickConnectToBuoy()" />
-</div>
-
-<div class="prompt" ng-show="selecting == 'room'">
+<div class="prompt">
     <h1>select a room</h1>
     <div class="rooms">
         <div class="room" ng-class="{selected: room_selected == $index}" ng-repeat="room in rooms" ng-click="$parent.room_selected = $index">
