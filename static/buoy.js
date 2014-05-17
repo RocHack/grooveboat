@@ -61,7 +61,7 @@
 
         data["e"] = event;
         this.ws.send(JSON.stringify(data));
-    }
+    };
 
     window.Buoy = Buoy;
 })();

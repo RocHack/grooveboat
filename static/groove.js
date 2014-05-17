@@ -1,6 +1,4 @@
 (function () {
-    var isChrome = 'WebKitPoint' in window;
-
     // TODO: put this in a Track class
     function exportTrack(t) {
         return {
@@ -27,73 +25,6 @@
         this.activePlaylist = 'default';
         this.activeTrack = null;
 
-        this.webrtc = new WebRTC({
-            url: '//celehner.com',
-            resource: 'signalmaster/socket.io',
-            video: false,
-            audio: false,
-            data: true,
-            autoRequestMedia: false,
-            peerConnectionConfig: {
-                iceServers: [{
-                    "url": isChrome ?
-                        "stun:stun.l.google.com:19302" : "stun:124.124.124.2"
-                }, {
-                    url: "turn:grooveboat@celehner.com",
-                    credential: "signalmaster"
-                }]
-            }
-        });
-
-        /*
-         * WebRTC events
-         */
-        this.webrtc.on('readyToCall', function () {
-            self.emit('ready');
-        });
-
-        this.webrtc.on('userid', function (id) {
-            me.id = id;
-        });
-
-        this.webrtc.on('dataOpen', function (event, conversation) {
-            var channel = conversation.channel,
-                userId = conversation.id,
-                user = users[userId] = new User(self, userId);
-            self._welcomeUser(user);
-        });
-
-        this.webrtc.on('dataClose', function (event, conversation) {
-            var channel = conversation.channel,
-                userId = conversation.id,
-                user = users[userId];
-            if (!user) {
-                return;
-            }
-            self.emit('peerDisconnected', user);
-            if (user.dj) {
-                self._acceptQuitDJ(user);
-            }
-            delete users[userId];
-        });
-
-        this.webrtc.on('dataError', function (event, conversation) {
-            var channel = conversation.channel,
-                userId = conversation.id,
-                user = users[userId];
-            console.error('data error', channel, userId);
-            self.emit('peerError', user);
-        });
-
-        this.webrtc.on('dataMessage', this._onMessage.bind(this));
-        
-        /*
-         * User events
-         */
-        this.me.on("name", function() {
-            self.buoy.send("setName", { name: self.me.name });
-        });
-
         // keep track of the seek time of the active track
         setInterval(this.clock.bind(this), 1000);
     }
@@ -114,6 +45,7 @@
         this.buoy.on("peerJoined", this.onBuoyPeerJoined.bind(this));
         this.buoy.on("peerLeft", this.onBuoyPeerLeft.bind(this));
         this.buoy.on("roomData", this.onBuoyRoomData.bind(this));
+        this.buoy.on("recvMessage", this.onBuoyRecvMessage.bind(this));
     }
 
     Groove.prototype.onBuoyWelcome = function(data) {
@@ -141,8 +73,19 @@
             this.users[user.id] = user;
             this.emit('peerConnected', user);
             console.log("Found user "+ user.name);
+            // prepare to connect to everyone in the room
+            // they will send the offer
+            user.preparePeerConnection();
         }
-    }
+    };
+
+    Groove.prototype.onBuoyRecvMessage = function(data) {
+        var user = this.users[data.from];
+        if (!user) {
+            console.error("Received message from unknown user " + user.id);
+        }
+        user.handleMessage(data.msg);
+    };
 
     Groove.prototype.onBuoyPeerLeft = function(data) {
         this.emit("peerDisconnected", this.users[data.id]);
@@ -156,9 +99,12 @@
         user.name = data.name;
 
         this.emit('peerConnected', user);
-        console.log("Found new peer: "+ data.id);
+        console.log("Found new peer: "+ data.id, data);
         console.log("User "+ user.name +" joined");
-    }
+        // let's just connect to everyone we see
+        user.preparePeerConnection();
+        user.offerConnection();
+    };
 
     Groove.prototype.sendChat = function(text) {
         this.buoy.send("sendChat", {

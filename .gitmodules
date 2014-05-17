@@ -1,9 +1,3 @@
-[submodule "static/lib/SimpleWebRTC"]
-	path = static/lib/SimpleWebRTC
-	url = https://github.com/clehner/SimpleWebRTC.git
 [submodule "static/lib/emoji"]
 	path = static/lib/emoji
 	url = https://github.com/nmbook/emoji-images.js.git
-[submodule "static/lib/webrtc.js"]
-	path = static/lib/webrtc.js
-	url = git@github.com:stevenleeg/webrtc.js.git
