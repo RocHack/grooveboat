@@ -62,7 +62,7 @@ function Buoy(server) {
 
         conn.on("close", function() {
             if(self.peers[pid]) {
-                self.peers[pid].cleanUp();
+                self.peers[pid].cleanUp.bind(self.peers[pid])();
                 delete self.peers[pid];
                 console.log("[debug] Peer "+ pid +" disconnected");
             } else {

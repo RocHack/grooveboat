@@ -22,11 +22,15 @@ Room.prototype.join = function(peer) {
     // Generate an array of peer ids
     var peers = [];
     for(var i in this.peers) {
-        peers.push(this.peers[i].id);
+        peers.push({
+            id: this.peers[i].id,
+            name: this.peers[i].name
+        });
     }
 
     this.sendAllBut(peer.id, "peerJoined", {
         id: peer.id,
+        name: peer.name
     });
 
     peer.send("roomData", {
@@ -40,8 +44,10 @@ Room.prototype.join = function(peer) {
  */
 Room.prototype.leave = function(peer) {
     var i = this.peers.indexOf(peer);
-    this.peers = this.peers.splice(i, 1);
+    this.peers.splice(i, 1);
     this.nPeers--;
+
+    console.log("[debug] "+ peer.name +" left "+ this.name);
 
     // If the last peer left, delete the room
     if(this.nPeers == 0) {
@@ -49,8 +55,8 @@ Room.prototype.leave = function(peer) {
         return;
     }
 
-    this.sendAll("peerLeft", {
-        id: peer.id,
+    this.sendAllBut(peer.id, "peerLeft", {
+        id: peer.id
     });
 }
 

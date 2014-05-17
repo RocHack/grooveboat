@@ -98,10 +98,10 @@ Peer.prototype.onSendTo = function(data) {
  */
 Peer.prototype.onJoinRoom = function(data) {
     var room = this.buoy.getRoom(data.roomName);
-    room.join(this);
+    this.name = data.peerName;
     this.room = room;
 
-    this.name = data.peerName;
+    room.join(this);
     console.log("[debug] "+ this.name +" joined "+ room.name);
 }
 
