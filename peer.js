@@ -59,6 +59,7 @@ Peer.prototype.onPing = function(data) {
  *  msg - The text of the chat message
  */
 Peer.prototype.onSendChat = function(data) {
+    console.log("[room:chat] "+ data.msg);
     if(!this.room) return;
     this.room.sendChat(this, data.msg);
 }
