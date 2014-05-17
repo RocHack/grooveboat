@@ -5,6 +5,7 @@ function Room(buoy, name) {
     this.buoy = buoy;
     this.name = name;
     this.peers = [];
+    this.djs = [];
 
     console.log("[debug] Creating new room "+ name);
 }
@@ -36,6 +37,7 @@ Room.prototype.join = function(peer) {
     peer.send("roomData", {
         name: this.name,
         peers: this.peers.map(peerToIdName),
+        djs: this.djs.map(peerToId)
     });
 };
 
@@ -45,6 +47,11 @@ Room.prototype.join = function(peer) {
 Room.prototype.leave = function(peer) {
     var i = this.peers.indexOf(peer);
     this.peers.splice(i, 1);
+
+    i = this.djs.indexOf(peer);
+    if (i > -1) {
+        this.djs.splice(i, 1);
+    }
 
     console.log("[debug] "+ peer.name +" left "+ this.name);
 
@@ -84,5 +91,32 @@ Room.prototype.sendAllBut = function(but, event, data) {
         this.peers[i].send(event, data);
     }
 }
+
+/*
+ * Adds a peer to the DJ list
+ */
+Room.prototype.addDJ = function(peer) {
+    if (this.djs.indexOf(peer) != -1) return;
+    this.djs.push(peer);
+
+    // Notify peers
+    this.sendAll("newDJ", {
+        id: peer.id
+    });
+};
+
+/*
+ * Removes a user from the DJ list
+ */
+Room.prototype.removeDJ = function(peer) {
+    var i = this.djs.indexOf(peer);
+    if (i == -1) return;
+    this.djs.splice(i, 1);
+
+    // Notify peers
+    this.sendAll("removeDJ", {
+        id: peer.id
+    });
+};
 
 exports.Room = Room;

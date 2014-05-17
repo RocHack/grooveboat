@@ -13,6 +13,8 @@ function Peer(buoy, conn) {
     this.on("joinRoom", this.onJoinRoom);
     this.on("sendChat", this.onSendChat);
     this.on("setName", this.onSetName);
+    this.on("requestDJ", this.onRequestDJ);
+    this.on("quitDJ", this.onQuitDJ);
 
     // Listen to certain events from the buoy
     this.buoy.on("newRoom", this.onBuoyNewRoom.bind(this));
@@ -104,6 +106,26 @@ Peer.prototype.onJoinRoom = function(data) {
     room.join(this);
     console.log("[debug] "+ this.name +" joined "+ room.name);
 }
+
+/*
+ * Handles a request to become DJ
+ * Expects:
+ *  nothing
+ */
+Peer.prototype.onRequestDJ = function() {
+    if(!this.room) return;
+    this.room.addDJ(this);
+};
+
+/*
+ * Handles a request to quit DJing
+ * Expects:
+ *  nothing
+ */
+Peer.prototype.onQuitDJ = function() {
+    if(!this.room) return;
+    this.room.removeDJ(this);
+};
 
 /*
  * Tell the peer when a room has been added
