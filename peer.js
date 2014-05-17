@@ -11,6 +11,9 @@ function Peer(buoy, conn) {
     this.on("sendTo", this.onSendTo);
     this.on("joinRoom", this.onJoinRoom);
     this.on("sendChat", this.onSendChat);
+
+    // Listen to certain events from the buoy
+    this.buoy.on("newRoom", this.onBuoyNewRoom.bind(this));
 }
 
 util.inherits(Peer, EventEmitter);
@@ -81,6 +84,16 @@ Peer.prototype.onJoinRoom = function(data) {
     var room = this.buoy.getRoom(data.name);
     room.join(this);
     this.room = room;
+}
+
+/*
+ * 
+ */
+Peer.prototype.onBuoyNewRoom = function(data) {
+    this.send("newRoom", {
+        name: data.room.name,
+        id: data.room.id
+    });
 }
 
 exports.Peer = Peer;

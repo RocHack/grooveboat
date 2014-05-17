@@ -4,6 +4,14 @@ var EventEmitter = require("events").EventEmitter;
 var Peer = require("./peer").Peer;
 var Room = require("./room").Room;
 
+/*
+ * Buoy class
+ *   Represents a buoy (basically a server).
+ * ----
+ * Events
+ *   Name: newRoom 
+ *   Data: { room: Room }
+ */
 function Buoy(server) {
     var self = this;
     this.svr = server;
@@ -18,9 +26,15 @@ function Buoy(server) {
         peer.id = pid;
         self.peers[pid] = peer;
 
+        var rooms = [];
+        for(var room in self.rooms) {
+            rooms.push(room);
+        }
+
         // Give the peer some info
         peer.send("welcome", {
             id: pid,
+            rooms: rooms 
         });
 
         conn.on("message", function(msg) {
@@ -79,9 +93,15 @@ Buoy.prototype.getRoom = function(name) {
     if(!room) {
         room = new Room(this, name);
         this.rooms[name] = room;
+        this.emit("newRoom", { room: room });
     }
 
     return room;
+}
+
+Buoy.prototype.deleteRoom = function(name) {
+    this.rooms[name] = undefined;
+    console.log("[debug] Deleting room "+ name);
 }
 
 exports.Buoy = Buoy;

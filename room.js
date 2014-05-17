@@ -5,6 +5,7 @@ function Room(buoy, name) {
     this.buoy = buoy;
     this.name = name;
     this.peers = [];
+    this.nPeers = 0; // Number of peers
 
     console.log("[debug] Creating new room "+ name);
 }
@@ -16,6 +17,7 @@ util.inherits(Room, EventEmitter);
  */
 Room.prototype.join = function(peer) {
     this.peers.push(peer);
+    this.nPeers++;
 
     // Generate an array of peer ids
     var peers = [];
@@ -39,6 +41,13 @@ Room.prototype.join = function(peer) {
 Room.prototype.leave = function(peer) {
     var i = this.peers.indexOf(peer);
     this.peers = this.peers.splice(i, 1);
+    this.nPeers--;
+
+    // If the last peer left, delete the room
+    if(this.nPeers == 0) {
+        this.buoy.deleteRoom(this.name);
+        return;
+    }
 
     this.sendAll("peerLeft", {
         id: peer.id,
