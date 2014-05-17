@@ -91,7 +91,7 @@
          * User events
          */
         this.me.on("name", function() {
-            // TODO: Send a message to the buoy
+            self.buoy.send("setName", { name: self.me.name });
         });
 
         // keep track of the seek time of the active track
@@ -133,7 +133,7 @@
 
     Groove.prototype.joinRoom = function(roomName) {
         this.roomName = roomName;
-        this.buoy.send("joinRoom", { name: roomName });
+        this.buoy.send("joinRoom", { roomName: roomName, peerName: this.me.name });
     };
 
     Groove.prototype.createRoom = function(roomName, cb) {
