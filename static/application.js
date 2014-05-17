@@ -182,6 +182,9 @@ function RoomListCtrl($scope, $location, groove, localStorageService) {
 }
 
 function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
+    /*
+     * Listeners on the UI
+     */
     groove.joinRoom($routeParams.room);
 
     $scope.users = [];
@@ -305,7 +308,6 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
     };
 
     $scope.$watch("files", function() {
-
         groove.addFilesToQueue($scope.files);
     });
 
@@ -313,6 +315,9 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
         groove.leaveRoom();
     });
 
+    /*
+     * Listeners from the buoy server
+     */
     groove.on("chat", function(message) {
         $scope.$apply(function($scope) { 
             if($scope.currentTab != "chat") {
