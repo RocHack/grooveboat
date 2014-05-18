@@ -208,7 +208,6 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
         activeTrack = track;
         console.log("canplay", track && track.currentTime, track);
         if (track) {
-            player.currentTime = track.currentTime;
             groove.canPlayTrack(player.duration);
             player.play();
         }
@@ -359,9 +358,8 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
         if (url) {
             console.log("got track url", url.length, url.substr(0, 256));
             player.src = url;
-            console.log('current time', track.currentTime, track);
+            player.play();
         } else {
-            console.log("no track");
             player.pause();
         }
     });

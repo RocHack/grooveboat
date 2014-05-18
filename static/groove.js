@@ -9,6 +9,21 @@
         };
     }
 
+    // create an object URL for a stream or file
+    function createObjectUrl(stream) {
+        var URL = window.URL || window.webkitURL;
+        var url =
+            window.createObjectURL ? window.createObjectURL(stream) :
+            window.createBlobURL ? window.createBlobURL(stream) :
+            URL && URL.createObjectURL ? URL.createObjectURL(stream) : null;
+        if (!url) {
+            throw new Error('Unable to make object URL for', stream);
+        }
+        return url;
+    }
+
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
+
     function Groove() {
         var self = this;
         WildEmitter.call(this);
@@ -75,9 +90,6 @@
             this.users[user.id] = user;
             this.emit('peerConnected', user);
             console.log("Found user", user.name, user.id);
-            // prepare to connect to everyone in the room
-            // they will send the offer
-            user.preparePeerConnection();
         }
         this.users[this.me.id] = this.me;
         for (i = 0; i < data.djs.length; i++) {
@@ -113,9 +125,10 @@
         this.emit('peerConnected', user);
         console.log("Found new peer: "+ data.id, data);
         console.log("User "+ user.name +" joined");
-        // let's just connect to everyone we see
-        user.preparePeerConnection();
-        user.offerConnection();
+
+        if (this.activeDJ == this.me) {
+            this.streamToPeer(user);
+        }
     };
 
     Groove.prototype.onBuoyNewDJ = function(data) {
@@ -141,7 +154,11 @@
         this.activeDJ = this.users[data.peer];
         if (this.activeDJ == this.me) {
             this.becomeActiveDJ();
+        } else if (this.activeDJ) {
+            // prepare to receive track stream
+            this.activeDJ.preparePeerConnection();
         }
+
         this.emit("activeDJ");
     };
 
@@ -231,8 +248,17 @@
         this.buoy.send('setActiveTrack', {
             track: exportTrack(track)
         });
-        // start playing locally and streaming to peers
-        this._startPlaying();
+
+        // play our active track, and send it to peers.
+
+        var peers = this.getPeers();
+        if (!peers.length) {
+            // empty room :(
+            return;
+        }
+
+        // start playing track locally
+        this._playMyTrack();
     };
 
     Groove.prototype.quitDJing = function() {
@@ -240,7 +266,7 @@
             return;
         }
         this.buoy.send('quitDJ', {});
-        setTimeout(this._onDJQuit.bind(this, this.me), 10);
+        //setTimeout(this._onDJQuit.bind(this, this.me), 10);
     };
 
     Groove.prototype._onDJStart = function(user) {
@@ -259,13 +285,25 @@
         user.dj = false;
 
         if (this.activeDJ == user) {
-            this.activeDJ = null;
-            this.activeTrack = null;
-            this.emit('activeDJ');
-            this.emit('activeTrack');
-            this.emit('activeTrackURL');
+            this.cleanupDJing();
         }
         this.emit('djs', this.djs.slice());
+    };
+
+    // remove peer connection and stream to user
+    function Groove_removePeerStream(user) {
+        //user.pc.removeStream(this.stream);
+    }
+
+    // clean up after no longer the active DJ
+    Groove.prototype.cleanupDJing = function() {
+        this.activeDJ = null;
+        this.activeTrack = null;
+        this.emit('activeDJ');
+        this.emit('activeTrack');
+        this.emit('activeTrackURL');
+        this.getPeers().forEach(Groove_removePeerStream.bind(this));
+        if (this.mediaSource) this.mediaSource.stop(0);
     };
 
     Groove.prototype._negotiateDJs = function(djs, sender, activeDJ) {
@@ -457,51 +495,57 @@
         });
     };
 
-    // play our active track, and send it to peers.
-    Groove.prototype._startPlaying = function() {
-        console.log("start playing and streaming");
-        return;
-        // prepare track if needed
-        if (!this.localTrackLoaded) {
-            this.prepareNextTrack(this._startPlaying);
-            return;
-        }
-
-        // send our active track to peers who we haven't sent it to yet
-        this.streamToPeers(this.me.activeTrack, this.getPeers());
-        // play track locally
-        this._playMyTrack();
-    };
-
     // play my track locally, as the active DJ
     Groove.prototype._playMyTrack = function() {
         var track = this.me.activeTrack;
-        var file = track.file;
-
-        // make the object url for the track file
-        var URL = window.URL || window.webkitURL;
-        track.url =
-            window.createObjectURL ? window.createObjectURL(file) :
-            window.createBlobURL ? window.createBlobURL(file) :
-            URL && URL.createObjectURL ? URL.createObjectURL(file) : null;
-        if (!track.url) {
-            throw new Error('Unable to make object URL for track file', file);
-        }
-
-        this.emit('activeTrackURL');
-
-        // start preloading next track
-        //this.requestNextTrack();
+        var reader = new FileReader();
+        this.audioContext = new AudioContext();
+        reader.readAsArrayBuffer(track.file);
+        reader.onload = function(e) {
+            this.audioContext.decodeAudioData(e.target.result,
+                Groove_gotAudioData.bind(this));
+        }.bind(this);
     };
 
-    // request a track file from the upcoming DJ, for preloading
-    Groove.prototype.requestNextTrack = function() {
-        var dj = this.getUpcomingDJ();
-        if (dj) {
-            dj.requestFile('upcoming');
-        } else {
-            console.log('No upcoming DJs');
+    // handle audio data decoded from file.
+    // should be called by active DJ beginning to play track
+    function Groove_gotAudioData(buffer) {
+        // thanks to:
+        // http://servicelab.org/2013/07/24/streaming-audio-between-browsers-with-webrtc-and-webaudio/
+
+        // create an audio source and connect it to the file buffer
+        this.mediaSource = this.audioContext.createBufferSource();
+        this.mediaSource.buffer = buffer;
+        this.mediaSource.start(0);
+
+        // connect the audio stream to the audio hardware
+        this.mediaSource.connect(this.audioContext.destination);
+
+        // create a destination for the remote browser
+        var remote = this.audioContext.createMediaStreamDestination();
+
+        // connect the remote destination to the source
+        this.mediaSource.connect(remote);
+
+        // send stream to peers
+        this.stream = remote.stream;
+        this.streamToPeers();
+    }
+
+    Groove.prototype.streamToPeer = function(user) {
+        user.preparePeerConnection();
+        // add the stream to the peer connection
+        user.addStream(this.stream);
+        // connect
+        user.offerConnection();
+    };
+
+    Groove.prototype.streamToPeers = function() {
+        if (!this.stream) {
+            console.error("No stream to send");
+            return;
         }
+        this.getPeers().forEach(this.streamToPeer.bind(this));
     };
 
     // our track was able to be loaded by the player.
@@ -510,156 +554,6 @@
             return;
         }
         this.activeTrack.duration = duration;
-        // tell peers about the track duration if this is our track
-        var event = {
-            type: 'trackDuration',
-            duration: duration
-        };
-        this.getPeers().forEach(function(peer) {
-            peer.send(event);
-        });
-    };
-
-    // load and chunk our next active track, to prepare it for streaming
-    Groove.prototype.prepareNextTrack = function(cb) {
-        var track = this.me.activeTrack;
-        if (this.localTrackLoaded == track) {
-            cb.call(this);
-            return;
-        } else if (this.localTrackLoading) {
-            this.on('localTrackLoaded', cb.bind(this));
-            return;
-        }
-        this.localTrackLoading = true;
-
-        var reader = new FileReader();
-        reader.readAsDataURL(track.file);
-        reader.onload = function() {
-            var dataURL = reader.result;
-            // split into chunks
-            var chunkSize = 900;
-            var numChunks = Math.ceil(dataURL.length / chunkSize);
-            var chunks = track.chunks = new Array(numChunks+1);
-            chunks[0] = {
-                type: 'chunkStart',
-                i: 0,
-                name: track.file.name,
-                numChunks: numChunks
-            };
-
-            for (var i = 0; i < numChunks; i++) {
-                if (i % 100 == 0) {
-                    var percent = Math.ceil(100 * i/numChunks);
-                    console.log('loading chunk', i, '(' + percent + '%)');
-                }
-                var dataURLChunk = (i == numChunks-1) ?
-                    dataURL.substr(i * chunkSize) :
-                    dataURL.substr(i * chunkSize, chunkSize);
-                chunks[i+1] = {
-                    i: i + 1,
-                    type: 'chunk',
-                    data: dataURLChunk
-                };
-            }
-            this.localTrackLoaded = track;
-            this.localTrackLoading = false;
-            this.emit('localTrackLoaded');
-            cb.call(this);
-        }.bind(this);
-    };
-
-    Groove.prototype.streamToPeers = function(track, peers, start) {
-        var chunks = track.chunks,
-            numChunks = chunks && chunks.length;
-        if (!numChunks) {
-            console.error('No active track chunks to stream.');
-            return;
-        }
-        if (track != this.me.activeTrack) {
-            console.error('Preloading tracks is unsupported');
-        }
-
-        // only send to peers we haven't already sent the track
-        peers = peers.filter(function(peer) {
-            return peer.sendingTrack != track;
-        });
-        if (!peers.length) return;
-
-        peers.forEach(function(peer) {
-            peer.sendingTrack = track;
-        });
-
-        // send data
-        var names = peers.map(function(peer) { return peer.id; }).join(', ');
-        console.log('streaming to', names);
-        this._streamToPeers(peers, chunks, start | 0); 
-    };
-
-    Groove.prototype._sendTrack = function(user, track_type) {
-        var track = this.activePlaylist[0];
-        if(track_type == "current") {
-            track = groove.activeTrack;
-        } else {
-            console.error("Only streaming the current track is supported.");
-            return;
-        }
-        this.streamToPeers(track, [user]);
-    };
-
-    Groove.prototype._sendTrackChunk = function(user, track_type) {
-        var track = this.activePlaylist[0];
-        if(track_type == "current") {
-            track = groove.activeTrack;
-        }
-
-        user.send({
-            type: "receiveChunk",
-            chunk: track.chunks[i]
-        });
-    };
-
-    Groove.prototype._streamToPeers = function(peers, chunks, start) {
-        var me = this.me,
-            users = this.users;
-
-        // weed out inactive peers
-        peers = peers.filter(function(peer) {
-            return peer != me && peer.id in users;
-        });
-        if (!peers.length) return;
-
-        // if we quit DJing, stop streaming to peers
-        if (!me.dj) {
-            peers.forEach(function(peer) {
-                peer.sendingTrack = null;
-            });
-            return;
-        }
-
-        var numChunks = chunks.length;
-        var end = Math.min(start + 200, numChunks);
-        for (var i = start; i < end; i++) {
-            var msg = chunks[i];
-            if (i % 100 == 0) {
-                var percent = (i/numChunks * 100).toFixed(1);
-                console.log('sending chunks', i, '(' + percent + '%)');
-            }
-            for (var j = 0; j < peers.length; j++) {
-                peers[j].send(msg);
-            }
-        }
-
-        // send the rest
-        if (i < chunks.length) {
-            var next = this._streamToPeers.bind(this, peers, chunks, i);
-            setTimeout(next, 50);
-
-        } else if (i >= numChunks) {
-            // done
-            peers.forEach(function(peer) {
-                peer.sendingTrack = null;
-            });
-        }
     };
 
     Groove.prototype.getPeers = function() {
@@ -671,6 +565,13 @@
             }
         }
         return peers;
+    };
+
+    // got a stream through WebRTC from the active DJ
+    Groove.prototype.gotRemoteStream = function(stream) {
+        // make the object url for the track stream
+        this.activeTrack.url = createObjectUrl(stream);
+        this.emit('activeTrackURL');
     };
 
     window.Groove = Groove;

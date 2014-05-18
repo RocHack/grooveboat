@@ -77,51 +77,6 @@
         this.groove.webrtc.send(msg, this.id);
     };
 
-    User.prototype._gotChunkStart = function(event) {
-        this.incomingFilename = event.name;
-        this.numChunks = event.numChunks | 0;
-        this.incomingChunks = new Array(this.numChunks);
-    };
-
-    User.prototype._gotChunk = function(event) {
-        if (Math.random() < 0.01) {
-            console.log('got chunk', event.i, 'out of', this.numChunks);
-        }
-        if (!this.dj) {
-            console.error('got chunk from non-dj');
-            return;
-        }
-
-        this.incomingChunks[event.i] = event.data;
-
-        // Handles final chunk
-        if (event.i >= this.numChunks) {
-            var name = this.incomingFilename;
-            // TODO: Scan for missing chunks
-            this._gotDataURL(this.incomingChunks.join(''), name);
-        }
-    };
-
-    User.prototype._cleanupChunks = function() {
-        this.incomingChunks = null;
-        this.incomingFilename = null;
-        this.numChunks = null;
-    };
-
-    User.prototype._gotDataURL = function(dataURL) {
-        console.log('got data url of length', dataURL.length,
-            'from', this.name);
-        if (this == this.groove.activeDJ) {
-            this.groove.activeTrack.url = dataURL;
-            this.groove.emit('activeTrackURL');
-            // start preloading next track
-            //this.groove.requestNextTrack();
-        } else {
-            this.upcomingTrackURL = dataURL;
-        }
-        this._cleanupChunks();
-    };
-
     User.prototype.requestFile = function(trackType) {
         console.log('requesting next track from', this.id);
         this.send({
@@ -169,6 +124,7 @@
         }
         this.pc = new PeerConnection(peerConnectionConfig, constraints);
         this.pc.on('ice', User_onIce.bind(this));
+        this.pc.on('addStream', User_onAddStream.bind(this));
     };
 
     User.prototype.offerConnection = function() {
@@ -241,6 +197,25 @@
         }
         this.pc.processIce(candidate);
     };
+
+    // add a stream to the peer connection
+    User.prototype.addStream = function(stream) {
+        if (!this.pc) {
+            console.error('Attempted to add stream without peer connection');
+            return;
+        }
+        this.pc.addStream(stream);
+    };
+
+    // got a remote audio stream over peer connection
+    function User_onAddStream(e) {
+        if (this != this.groove.activeDJ) {
+            console.error('Received stream from non-DJ');
+            return;
+        }
+        //this.emit('addStream', e.stream);
+        this.groove.gotRemoteStream(e.stream);
+    }
 
     // set default icon URL
     User.prototype.updateIconURL();
