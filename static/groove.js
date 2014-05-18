@@ -464,6 +464,25 @@
         }
     };
 
+    function parseAudioMetadata(file, cb) {
+        var reader = new FileReader();
+        reader.readAsArrayBuffer(file);
+        reader.onload = function(e) {
+            var buffer = e.target.result;
+            if (file.type == 'audio/ogg') {
+                var tags = AudioMetadata.ogg(buffer);
+                cb({
+                    Title: tags.title,
+                    Artist: tags.artist,
+                    Album: tags.album
+                });
+            } else {
+                ID3v2.parseFile(file, cb);
+            }
+            reader.onload = null;
+        };
+    }
+
     function grooveFileParsed(file, next, tags) {
         var track = {
             file: file,
@@ -487,8 +506,7 @@
         var next = grooveProcessFile.bind(this, files, i+1);
         var file = files[i];
         if (file && file.type.indexOf('audio/') == 0) {
-            ID3v2.parseFile(file,
-                grooveFileParsed.bind(this, file, next));
+            parseAudioMetadata(file, grooveFileParsed.bind(this, file, next));
         } else {
             next();
         }
