@@ -6,7 +6,6 @@ function Peer(buoy, conn) {
     this.conn = conn;
     this.room = null;
     this.name = "Anon";
-    this.activeTrack = null;
     this.gravatar = null;
 
     // All events peers can send to the signaling server are here
@@ -19,6 +18,7 @@ function Peer(buoy, conn) {
     this.on("requestDJ", this.onRequestDJ);
     this.on("quitDJ", this.onQuitDJ);
     this.on("setGravatar", this.onSetGravatar);
+    this.on("setActiveTrack", this.onSetActiveTrack);
 
     // Listen to certain events from the buoy
     this.buoy.on("newRoom", this.onBuoyNewRoom.bind(this));
@@ -129,13 +129,6 @@ Peer.prototype.onLeaveRoom = function(data) {
  */
 Peer.prototype.onRequestDJ = function(data) {
     if(!this.room) return;
-
-    this.activeTrack = {
-        artist: data.track.artist,
-        album: data.track.album,
-        title: data.track.title
-    };
-
     this.room.addDJ(this);
 };
 
@@ -162,6 +155,16 @@ Peer.prototype.onSetGravatar = function(data) {
         gravatar: this.gravatar
     });
 }
+
+/*
+ * Handles a request to set the room's active track
+ * Expects:
+ *  track: object containing artist, album, and title attrs
+ */
+Peer.prototype.onSetActiveTrack = function(data) {
+    if(!this.room || this.room.getActiveDJ() != this) return;
+    this.room.setActiveTrack(data.track);
+};
 
 /*
  * Tell the peer when a room has been added

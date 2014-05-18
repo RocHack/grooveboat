@@ -8,7 +8,8 @@ function Room(buoy, name) {
     this.name = name;
     this.peers = [];
     this.djs = [];
-    this.currentDJ = -1; // Val is an index in this.djs
+    this.activeDJ = -1; // Val is an index in this.djs
+    this.activeTrack = null;
 
     console.log("[debug] Creating new room "+ name);
 }
@@ -41,7 +42,9 @@ Room.prototype.join = function(peer) {
     peer.send("roomData", {
         name: this.name,
         peers: this.peers.map(peerToIdName),
-        djs: this.djs.map(peerToId)
+        djs: this.djs.map(peerToId),
+        activeDJ: this.activeDJ,
+        activeTrack: this.activeTrack
     });
 };
 
@@ -145,12 +148,28 @@ Room.prototype.setActiveDJ = function(peer) {
         this.sendAll("setActiveDJ", { peer: null });
         return;
     }
-    
+
+    this.activeDJ = i;
     this.sendAll("setActiveDJ", {
         peer: peer.id,
-        track: peer.activeTrack
     });
-    this.activeDJ = i;
-}
+};
+
+/*
+ * Get the current DJ of the room
+ */
+Room.prototype.getActiveDJ = function() {
+    return this.djs[this.activeDJ];
+};
+
+/*
+ * Sets the active track of the room
+ */
+Room.prototype.setActiveTrack = function(track) {
+    this.activeTrack = track;
+    this.sendAll("setActiveTrack", {
+        track: track
+    });
+};
 
 exports.Room = Room;
