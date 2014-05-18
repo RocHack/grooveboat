@@ -145,7 +145,9 @@
         }
 
         this.activeDJ = this.users[id];
+        this.activeTrack = data.track;
         this.emit("activeDJ", this.activeDJ);
+        this.emit("activeTrack", data.track);
     }
 
     Groove.prototype.sendChat = function(text) {
@@ -208,7 +210,13 @@
             this.emit('emptyPlaylist');
             return;
         }
-        this.buoy.send('requestDJ', {});
+        this.buoy.send('requestDJ', {
+            track: {
+                artist: playlist[0].artist,
+                album: playlist[0].album,
+                title: playlist[0].title
+            }
+        });
     };
 
     Groove.prototype.quitDJing = function() {
