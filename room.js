@@ -145,7 +145,10 @@ Room.prototype.setActiveDJ = function(peer) {
         return;
     }
     
-    this.sendAll("setActiveDJ", { peer: peer.id });
+    this.sendAll("setActiveDJ", {
+        peer: peer.id,
+        track: peer.activeTrack
+    });
     this.activeDJ = i;
 }
 

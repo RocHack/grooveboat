@@ -6,6 +6,7 @@ function Peer(buoy, conn) {
     this.conn = conn;
     this.room = null;
     this.name = "Anon";
+    this.activeTrack = null;
 
     // All events peers can send to the signaling server are here
     this.on("ping", this.onPing);
@@ -110,10 +111,17 @@ Peer.prototype.onJoinRoom = function(data) {
 /*
  * Handles a request to become DJ
  * Expects:
- *  nothing
+ *  track: object containing artist, album, and title attrs
  */
-Peer.prototype.onRequestDJ = function() {
+Peer.prototype.onRequestDJ = function(data) {
     if(!this.room) return;
+
+    this.activeTrack = {
+        artist: data.track.artist,
+        album: data.track.album,
+        title: data.track.title
+    };
+
     this.room.addDJ(this);
 };
 
