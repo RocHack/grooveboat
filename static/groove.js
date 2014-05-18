@@ -34,6 +34,8 @@
 
         this.me = new User(this);
         this.me.isLocal = true;
+        this.me.on('gravatar', this._onSetGravatar.bind(this));
+        this.me.on('name', this._onSetName.bind(this));
 
         this.playlists = {default: []};
         this.activePlaylist = 'default';
@@ -61,6 +63,7 @@
         this.buoy.on("removeDJ", this.onBuoyRemoveDJ.bind(this));
         this.buoy.on("setActiveDJ", this.onBuoySetActiveDJ.bind(this));
         this.buoy.on("setActiveTrack", this.onBuoySetActiveTrack.bind(this));
+        this.buoy.on("setName", this.onBuoySetName.bind(this));
         this.buoy.on("setGravatar", this.onBuoySetGravatar.bind(this));
     }
 
@@ -78,7 +81,7 @@
 
     Groove.prototype.onBuoyRoomData = function(data) {
         this.users = {};
-        for(var i in data.peers) {
+        for(var i = 0; i < data.peers.length; i++) {
             var peer = data.peers[i];
 
             if(this.me.id == peer.id) continue;
@@ -120,10 +123,9 @@
     Groove.prototype.onBuoyPeerJoined = function(data) {
         var user = this.users[data.id] = new User(this, data.id);
         user.name = data.name;
-        user.gravatar = data.gravatar;
+        user.setGravatar(data.gravatar);
 
         this.emit('peerConnected', user);
-        console.log("Found new peer: "+ data.id, data);
         console.log("User "+ user.name +" joined");
 
         if (this.activeDJ == this.me) {
@@ -172,8 +174,13 @@
     Groove.prototype.onBuoySetGravatar = function(data) {
         var user = this.users[data.peer];
         if(!user) return;
-
         user.setGravatar(data.gravatar);
+    };
+
+    Groove.prototype.onBuoySetName = function(data) {
+        var user = this.users[data.peer];
+        if(!user) return;
+        user.setName(data.name);
     };
 
     Groove.prototype.sendChat = function(text) {
@@ -185,9 +192,7 @@
     Groove.prototype.joinRoom = function(roomName) {
         this.roomName = roomName;
         this.buoy.send("joinRoom", { 
-            roomName: roomName, 
-            peerName: this.me.name,
-            gravatar: this.me.gravatar
+            roomName: roomName
         });
     };
 
@@ -223,9 +228,15 @@
         this.emit('peerConnected', user);
     };
 
-    Groove.prototype.sendGravatar = function() {
+    Groove.prototype._onSetGravatar = function() {
         this.buoy.send("setGravatar", {
             gravatar: this.me.gravatar
+        });
+    };
+
+    Groove.prototype._onSetName = function() {
+        this.buoy.send("setName", {
+            name: this.me.name
         });
     };
 

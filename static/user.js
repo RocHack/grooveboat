@@ -62,7 +62,7 @@
     User.prototype.setGravatar = function(gravatar) {
         this.gravatar = gravatar;
         this.updateIconURL();
-        this.emit('gravatar', gravatar);
+        this.emit('gravatar');
     };
 
     User.prototype.updateIconURL = function() {
