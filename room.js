@@ -37,7 +37,7 @@ function peerToId(peer) {
 Room.prototype.join = function(peer) {
     this.peers.push(peer);
 
-    this.sendAllBut(peer.id, "peerJoined", peerToIdName(peer));
+    this.sendAllBut(peer, "peerJoined", peerToIdName(peer));
 
     peer.send("roomData", {
         name: this.name,
@@ -68,7 +68,7 @@ Room.prototype.leave = function(peer) {
         return;
     }
 
-    this.sendAllBut(peer.id, "peerLeft", {
+    this.sendAllBut(peer, "peerLeft", {
         id: peer.id
     });
 }
@@ -77,7 +77,7 @@ Room.prototype.leave = function(peer) {
  * Sends out a chat to all users
  */
 Room.prototype.sendChat = function(from, message) {
-    this.sendAllBut(from.id, "chat", { msg: message, from: from.id });
+    this.sendAllBut(from, "chat", { msg: message, from: from.id });
 }
 
 /*
@@ -94,7 +94,7 @@ Room.prototype.sendAll = function(event, data) {
  */
 Room.prototype.sendAllBut = function(but, event, data) {
     for(var i = 0; i < this.peers.length; i++) {
-        if(this.peers[i].id == but) continue;
+        if(this.peers[i] == but) continue;
         this.peers[i].send(event, data);
     }
 }
