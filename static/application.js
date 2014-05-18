@@ -268,6 +268,10 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
         }
     }
 
+    $scope.$on("$destroy", function() {
+        groove.leaveRoom();
+    });
+
     function handleVote(previous, next) {
         if(previous == 1) {
             $scope.votes.yes -= 1;

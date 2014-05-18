@@ -174,8 +174,8 @@
     };
 
     Groove.prototype.leaveRoom = function() {
-        this.webrtc.leaveRoom();
         this.roomName = null;
+        this.buoy.send("leaveRoom", {});
     };
 
     Groove.prototype._welcomeUser = function(user) {
