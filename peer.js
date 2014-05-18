@@ -77,10 +77,13 @@ Peer.prototype.onSendChat = function(data) {
  *  name - The new name
  */
 Peer.prototype.onSetName = function(data) {
-    if(!this.room) return;
     this.name = data.name;
-    this.room.sendAllBut(this, "changeName", { name: data.name });
     console.log("[debug] "+ this.id +" now known as "+ data.name);
+    if(!this.room) return;
+    this.room.sendAllBut(this, "setName", {
+        peer: this.id,
+        name: data.name
+    });
 }
 
 /*
@@ -100,12 +103,9 @@ Peer.prototype.onSendTo = function(data) {
  * Creates/joins a room.
  * Expects:
  *  roomName - The name of the room
- *  peerName - The name of the peer joining the room
  */
 Peer.prototype.onJoinRoom = function(data) {
     var room = this.buoy.getRoom(data.roomName);
-    this.name = data.peerName;
-    this.gravatar = data.gravatar;
     this.room = room;
 
     room.join(this);
@@ -143,13 +143,14 @@ Peer.prototype.onQuitDJ = function() {
 };
 
 /*
- * Handles a request to quit DJing
+ * Handles a request to set the user's gravatar
  * Expects:
  *  gravatar: Gravatar md5 hash
  */
 Peer.prototype.onSetGravatar = function(data) {
     this.gravatar = data.gravatar;
 
+    if (!this.room) return;
     this.room.sendAllBut(this, "setGravatar", {
         peer: this.id,
         gravatar: this.gravatar
