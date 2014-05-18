@@ -1,11 +1,14 @@
 var util = require("util");
 var EventEmitter = require("events").EventEmitter;
 
+var MAX_DJS = 5;
+
 function Room(buoy, name) {
     this.buoy = buoy;
     this.name = name;
     this.peers = [];
     this.djs = [];
+    this.currentDJ = -1; // Val is an index in this.djs
 
     console.log("[debug] Creating new room "+ name);
 }
@@ -97,12 +100,21 @@ Room.prototype.sendAllBut = function(but, event, data) {
  */
 Room.prototype.addDJ = function(peer) {
     if (this.djs.indexOf(peer) != -1) return;
+
+    if(this.djs.length >= MAX_DJS) {
+        return false;
+    }
+    
     this.djs.push(peer);
 
     // Notify peers
     this.sendAll("newDJ", {
         id: peer.id
     });
+
+    if(this.djs.length == 1) {
+        this.setActiveDJ(peer);
+    }
 };
 
 /*
@@ -117,6 +129,24 @@ Room.prototype.removeDJ = function(peer) {
     this.sendAll("removeDJ", {
         id: peer.id
     });
+
+    if(this.activeDJ == i) {
+        this.setActiveDJ(null);
+    }
 };
+
+/*
+ * Sets the given peer to the active DJ of the room
+ */
+Room.prototype.setActiveDJ = function(peer) {
+    var i = this.djs.indexOf(peer);
+    if(i == -1) {
+        this.sendAll("setActiveDJ", { peer: null });
+        return;
+    }
+    
+    this.sendAll("setActiveDJ", { peer: peer.id });
+    this.activeDJ = i;
+}
 
 exports.Room = Room;
