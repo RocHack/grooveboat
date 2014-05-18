@@ -49,6 +49,7 @@
         this.buoy.on("newDJ", this.onBuoyNewDJ.bind(this));
         this.buoy.on("removeDJ", this.onBuoyRemoveDJ.bind(this));
         this.buoy.on("setActiveDJ", this.onBuoySetActiveDJ.bind(this));
+        this.buoy.on("setGravatar", this.onBuoySetGravatar.bind(this));
     }
 
     Groove.prototype.onBuoyWelcome = function(data) {
@@ -72,6 +73,7 @@
 
             var user = new User(this, peer.id);
             user.name = peer.name;
+            user.setGravatar(peer.gravatar);
 
             this.users[user.id] = user;
             this.emit('peerConnected', user);
@@ -109,6 +111,7 @@
     Groove.prototype.onBuoyPeerJoined = function(data) {
         var user = this.users[data.id] = new User(this, data.id);
         user.name = data.name;
+        user.gravatar = data.gravatar;
 
         this.emit('peerConnected', user);
         console.log("Found new peer: "+ data.id, data);
@@ -150,6 +153,13 @@
         this.emit("activeTrack", data.track);
     }
 
+    Groove.prototype.onBuoySetGravatar = function(data) {
+        var user = this.users[data.peer];
+        if(!user) return;
+
+        user.setGravatar(data.gravatar);
+    }
+
     Groove.prototype.sendChat = function(text) {
         this.buoy.send("sendChat", {
             msg: text
@@ -158,7 +168,11 @@
 
     Groove.prototype.joinRoom = function(roomName) {
         this.roomName = roomName;
-        this.buoy.send("joinRoom", { roomName: roomName, peerName: this.me.name });
+        this.buoy.send("joinRoom", { 
+            roomName: roomName, 
+            peerName: this.me.name,
+            gravatar: this.me.gravatar
+        });
     };
 
     Groove.prototype.createRoom = function(roomName, cb) {
@@ -194,8 +208,7 @@
     };
 
     Groove.prototype.sendGravatar = function() {
-        this.webrtc.send({
-            type: 'gravatar',
+        this.buoy.send("setGravatar", {
             gravatar: this.me.gravatar
         });
     };

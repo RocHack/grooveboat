@@ -110,7 +110,6 @@ function MainCtrl($scope, groove, localStorageService) {
     };
 
     $scope.saveGravatarEmail = function() {
-        console.log("Wat");
         if($scope.tempGravatarEmail == undefined) {
             return;
         }
