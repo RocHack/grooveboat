@@ -186,7 +186,6 @@
 
     function User_offered(err, offer) {
         if (err) return console.error("Error generating offer", err);
-        console.log('sending offer', offer);
         this.send({
             type: 'offer',
             offer: offer
@@ -219,7 +218,6 @@
             console.error("Received answer without peer connection");
             return;
         }
-        console.log('Handling answer');
         this.pc.handleAnswer(answer, User_answerHandled.bind(this));
     };
 
