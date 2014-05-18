@@ -12,6 +12,7 @@ function Peer(buoy, conn) {
     this.on("ping", this.onPing);
     this.on("sendTo", this.onSendTo);
     this.on("joinRoom", this.onJoinRoom);
+    this.on("leaveRoom", this.onLeaveRoom);
     this.on("sendChat", this.onSendChat);
     this.on("setName", this.onSetName);
     this.on("requestDJ", this.onRequestDJ);
@@ -107,6 +108,16 @@ Peer.prototype.onJoinRoom = function(data) {
     room.join(this);
     console.log("[debug] "+ this.name +" joined "+ room.name);
 }
+
+/*
+ * Leaves a room
+ * Expects:
+ *  nada
+ */
+Peer.prototype.onLeaveRoom = function(data) {
+    this.room.leave(this);
+}
+
 
 /*
  * Handles a request to become DJ
