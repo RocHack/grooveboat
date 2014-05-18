@@ -21,7 +21,8 @@ util.inherits(Room, EventEmitter);
 function peerToIdName(peer) {
     return {
         id: peer.id,
-        name: peer.name
+        name: peer.name,
+        gravatar: peer.gravatar
     };
 }
 
