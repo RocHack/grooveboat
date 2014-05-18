@@ -135,7 +135,8 @@ Room.prototype.removeDJ = function(peer) {
     });
 
     if(this.activeDJ == i) {
-        this.setActiveDJ(null);
+        var nextDJ = this.djs[i + 1] || this.djs[0];
+        this.setActiveDJ(nextDJ);
     }
 };
 
