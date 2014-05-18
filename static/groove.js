@@ -48,6 +48,7 @@
         this.buoy.on("recvMessage", this.onBuoyRecvMessage.bind(this));
         this.buoy.on("newDJ", this.onBuoyNewDJ.bind(this));
         this.buoy.on("removeDJ", this.onBuoyRemoveDJ.bind(this));
+        this.buoy.on("setActiveDJ", this.onBuoySetActiveDJ.bind(this));
     }
 
     Groove.prototype.onBuoyWelcome = function(data) {
@@ -135,6 +136,17 @@
         }
         this._onDJQuit(user);
     };
+
+    Groove.prototype.onBuoySetActiveDJ = function(data) {
+        var id = data.peer;
+        if(id == null) {
+            this.activeDJ = null;
+            return;
+        }
+
+        this.activeDJ = this.users[id];
+        this.emit("activeDJ", this.activeDJ);
+    }
 
     Groove.prototype.sendChat = function(text) {
         this.buoy.send("sendChat", {
