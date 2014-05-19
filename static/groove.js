@@ -103,7 +103,8 @@
             }
             this.djs.push(dj);
         }
-        this.activeDJ = this.users[data.activeDJ];
+        this.activeTrack = data.activeTrack;
+        this.activeDJ = this.djs[data.activeDJ];
         if (this.activeDJ) {
             // prepare to receive track stream
             this.activeDJ.preparePeerConnection();
