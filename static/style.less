@@ -3,7 +3,7 @@
 @dark: #42433F;
 @red:#E23C03;
 @green: #B8DC3C;
-@blue: #A3B6C5;
+@blue: #00B4FF;
 @default-font: Helvetica-Neue, Helvetica, Arial, sans-serif;
 
 body {
@@ -204,18 +204,21 @@ a {
         font-weight: 400;
         color: @red;
         white-space: nowrap;
+        margin-top: 15px;
+        word-spacing: .25em;
     }
 
     .now-playing-track {
         font-family: 'Pompiere', cursive; 
         font-size: 24px;
+        margin-bottom: 5px;
     }
 
     .vote {
         text-decoration: none;
         display: inline-block;
-        margin-top: 5px;
         padding: 10px 15px 10px 15px;
+        margin: 5px 10px;
     }
 
     .vote.good {
@@ -237,6 +240,8 @@ a {
     }
 
     .opinion-bar {
+        margin-top: 10px;
+
         .opinion {
             display: inline-block;
             height: 10px;
@@ -318,23 +323,29 @@ a {
         display: inline-block;
         padding: 10px;
         text-align: center;
-        padding: 10px;
+        margin: 0px 5px;
+
+        &.local-true {
+            color: @blue;
+            font-weight: 500;
+            img {
+                border: 1px solid @blue;
+            }
+        }
 
         img {
             position: relative;
-            width: 40px;
-            height: 40px;
-            border-radius: 20px;
-            border: 1px @gray solid;
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
 
             &.vote-true {
                 -webkit-animation: anim-vote-true 1.5s infinite linear;
             }
         }
 
-        &.local-true {
-            color: @blue;
-            font-weight: 500;
+        .name {
+            font-size: 14px;
         }
     }
 }
