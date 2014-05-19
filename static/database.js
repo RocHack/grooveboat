@@ -1,6 +1,16 @@
 (function() {
     var DB_VERSION = 2;
 
+    function dataURItoBlob(dataURI) {
+        var binary = atob(dataURI.split(',')[1]);
+        var array = [];
+        for(var i = 0; i < binary.length; i++) {
+            array.push(binary.charCodeAt(i));
+        }
+
+        return new Blob([new Uint8Array(array)], {type: 'image/jpeg'});
+    }
+
     function GrooveDB() {
         this._persistQueue = [];
         this._getCallbackQueue = [];
@@ -64,6 +74,7 @@
         var music = t.objectStore("music");
         console.log("Attempting to persist track");
 
+        var self = this;
         music.get(track.id).onsuccess = function(e) {
             var resultTrack = e.target.result;
             if(resultTrack) {
@@ -71,8 +82,21 @@
                 return;
             }
 
-            music.add(track);
-            console.log("[db] Track: "+ track.title +" added to persistent store");
+            // We need to convert the track to a dataURL because chrome doesn't
+            // support blobs in IndexedDB yet. See the this chrome bug:
+            // https://code.google.com/p/chromium/issues/detail?id=108012
+            var fr = new FileReader();
+            fr.onloadend = function() {
+                // Continue the transaction lifecycle
+                var t = self.db.transaction(["music"], "readwrite");
+                var music = t.objectStore("music");
+
+                track['file'] = fr.result;
+                music.add(track);
+                console.log("[db] Track: "+ track.title +" added to persistent store");
+            }
+
+            fr.readAsDataURL(track['file']);
         }
     };
 
@@ -130,6 +154,9 @@
 
             if(c) {
                 console.log("[db] Found "+ c.value.title);
+
+                c.value['file'] = dataURItoBlob(c.value['file']);
+
                 tracks.push(c.value);
                 c.continue();
             } else {
