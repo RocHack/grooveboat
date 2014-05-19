@@ -553,6 +553,8 @@
     // handle audio data decoded from file.
     // should be called by active DJ beginning to play track
     function Groove_gotAudioData(buffer) {
+        if (this.me != this.activeDJ) return;
+
         // thanks to:
         // http://servicelab.org/2013/07/24/streaming-audio-between-browsers-with-webrtc-and-webaudio/
 
