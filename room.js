@@ -135,8 +135,7 @@ Room.prototype.removeDJ = function(peer) {
     });
 
     if(this.activeDJ == i) {
-        var nextDJ = this.djs[i + 1] || this.djs[0];
-        this.setActiveDJ(nextDJ);
+        this.skip();
     }
 };
 
@@ -154,6 +153,15 @@ Room.prototype.setActiveDJ = function(peer) {
     this.sendAll("setActiveDJ", {
         peer: peer.id,
     });
+};
+
+/*
+ * Skip the active DJ and their track
+ */
+Room.prototype.skip = function() {
+    var nextDJ = this.djs[this.activeDJ + 1] || this.djs[0];
+    this.setActiveDJ(nextDJ);
+    this.setActiveTrack(null);
 };
 
 /*

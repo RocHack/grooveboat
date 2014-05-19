@@ -19,6 +19,7 @@ function Peer(buoy, conn) {
     this.on("quitDJ", this.onQuitDJ);
     this.on("setGravatar", this.onSetGravatar);
     this.on("setActiveTrack", this.onSetActiveTrack);
+    this.on("skip", this.onSkip);
 
     // Listen to certain events from the buoy
     this.buoy.on("newRoom", this.onBuoyNewRoom.bind(this));
@@ -167,6 +168,15 @@ Peer.prototype.onSetGravatar = function(data) {
 Peer.prototype.onSetActiveTrack = function(data) {
     if(!this.room || this.room.getActiveDJ() != this) return;
     this.room.setActiveTrack(data.track);
+};
+
+/*
+ * Handles the end of a DJ's segment, because they skipped it, or track ended
+ * Expects nada
+ */
+Peer.prototype.onSkip = function() {
+    if(!this.room || this.room.getActiveDJ() != this) return;
+    this.room.skip();
 };
 
 /*
