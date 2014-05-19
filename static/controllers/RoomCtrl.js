@@ -209,6 +209,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     groove.buoy.on("reconnected", function() {
         $scope.$apply(function($scope) {
             $scope.users = [groove.me];
+            $scope.djs = [];
             groove.me.setName(groove.me.name);
             groove.me.setGravatar(groove.me.gravatar);
             groove.joinRoom($routeParams.room);
