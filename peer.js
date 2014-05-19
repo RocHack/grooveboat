@@ -118,6 +118,8 @@ Peer.prototype.onJoinRoom = function(data) {
  *  nada
  */
 Peer.prototype.onLeaveRoom = function(data) {
+    if(!this.room) return;
+
     this.room.leave(this);
 }
 
