@@ -103,6 +103,13 @@
             }
             this.djs.push(dj);
         }
+        this.activeDJ = this.users[data.activeDJ];
+        if (this.activeDJ) {
+            // prepare to receive track stream
+            this.activeDJ.preparePeerConnection();
+        }
+        this.emit("djs", this.djs.slice());
+        this.emit("activeDJ");
     };
 
     Groove.prototype.onBuoyRecvMessage = function(data) {
