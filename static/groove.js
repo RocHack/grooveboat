@@ -511,8 +511,10 @@
 
     function grooveProcessFile(files, i) {
         if (i > files.length) return;
+
         var next = grooveProcessFile.bind(this, files, i+1);
         var file = files[i];
+
         if (file && file.type.indexOf('audio/') == 0) {
             parseAudioMetadata(file, grooveFileParsed.bind(this, file, next));
         } else {

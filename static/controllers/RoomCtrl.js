@@ -10,6 +10,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     $scope.currentOverlay = false;
     $scope.tracks = groove.playlists[groove.activePlaylist];
     $scope.files = [];
+    $scope.persistPlaylists = false;
 
     $scope.currentTrack = null;
     $scope.votes = { yes: 0, no: 0 };

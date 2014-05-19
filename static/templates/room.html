@@ -20,6 +20,10 @@
             </form>
         </div>
         <div class="music panel" ng-show="currentTab == 'music'">
+            <div class="persist-bar">
+                <div class="checkbox" ng-class="{checked: persistPlaylists}" ng-click="persistPlaylists = !persistPlaylists"></div> 
+                Persist music <a ng-click="setOverlay('persist-playlists')">?</a>
+            </div>
             <form class="dropzone track-upload" id="upload-zone" drop-files="files" action="#">
                 drop music
             </form>
