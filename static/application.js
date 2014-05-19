@@ -33,7 +33,6 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
         }
 
         groove.me.setName(name);
-
         return groove;
     }])
     .directive('autoScroll', function() {

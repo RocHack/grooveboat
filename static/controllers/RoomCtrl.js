@@ -11,6 +11,9 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     $scope.tracks = groove.playlists[groove.activePlaylist];
     $scope.files = [];
 
+    $scope.persistPlaylists = localStorageService.get("user:persist") || false;
+    groove.setPersist($scope.persistPlaylists);
+
     $scope.currentTrack = null;
     $scope.votes = { yes: 0, no: 0 };
     $scope.chat_messages = [];
@@ -84,6 +87,13 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         }
     }
 
+    $scope.togglePersistTracks = function() {
+        $scope.persistPlaylists = !$scope.persistPlaylists;
+        localStorageService.set("user:persist", $scope.perstistPlaylists)
+
+        groove.setPersist($scope.persistPlaylists);
+    }
+
     $scope.$on("$destroy", function() {
         groove.leaveRoom();
     });
@@ -139,6 +149,12 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     /*
      * Listeners from the buoy server
      */
+    groove.on("playlistUpdated", function(playlistName) {
+        $scope.$apply(function($scope) {
+            $scope.tracks = groove.playlists[playlistName];
+        });
+    });
+
     groove.on("chat", function(message) {
         $scope.$apply(function($scope) { 
             if($scope.currentTab != "chat") {

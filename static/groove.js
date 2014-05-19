@@ -40,6 +40,8 @@
         this.playlists = {default: []};
         this.activePlaylist = 'default';
         this.activeTrack = null;
+        this.persist = false;
+        this.db = new GrooveDB();
     }
 
     Groove.prototype = Object.create(WildEmitter.prototype, {
@@ -493,26 +495,38 @@
 
     function grooveFileParsed(file, next, tags) {
         var track = {
+            id: md5(file.name + file.size + file.type),
             file: file,
             title: tags.Title || 'Untitled',
             artist: tags.Artist || 'Unknown',
             album: tags.Album || 'Unknown',
             duration: null // don't know this yet
         };
+
         console.log('track', track, tags);
         var playlist = this.playlists[this.activePlaylist];
         playlist.push(track);
+
         if (playlist.length == 1) {
             this.me.activeTrack = track;
         }
+
+        if(this.persist) {
+            this.db.storeTrack.bind(this.db)(track);
+        }
+
         this.emit('queueUpdate');
         next();
     }
 
     function grooveProcessFile(files, i) {
-        if (i > files.length) return;
+        if (i > files.length) {
+            return;
+        }
+
         var next = grooveProcessFile.bind(this, files, i+1);
         var file = files[i];
+
         if (file && file.type.indexOf('audio/') == 0) {
             parseAudioMetadata(file, grooveFileParsed.bind(this, file, next));
         } else {
@@ -523,6 +537,31 @@
     Groove.prototype.addFilesToQueue = function(files) {
         grooveProcessFile.call(this, files, 0);
     };
+
+    Groove.prototype.setPersist = function(val) {
+        if(val) {
+            // TODO Make this support playlists
+            var playlist = this.playlists[this.activePlaylist];
+            playlist.map(this.db.storeTrack);
+
+            this.getPersistTracks();
+        } else {
+            this.db.clearDb();
+        }
+
+        this.persist = val;
+    }
+
+    Groove.prototype._persistTracksCb = function(tracks) {
+        this.playlists[this.activePlaylist] = tracks;
+        this.me.activeTrack = this.playlists[this.activePlaylist][0];
+
+        groove.emit("playlistUpdated", this.activePlaylist);
+    }
+
+    Groove.prototype.getPersistTracks = function() {
+        this.db.getTracks(this._persistTracksCb.bind(this));
+    }
 
     Groove.prototype.vote = function(direction) {
         this.me.setVote(direction);

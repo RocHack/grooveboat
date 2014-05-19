@@ -17,6 +17,7 @@
         <script src="static/lib/md5.js"></script>
         <script src="static/lib/less.js"></script>
 
+        <script src="static/database.js"></script>
         <script src="static/user.js"></script>
         <script src="static/buoy.js"></script>
         <script src="static/groove.js"></script>
@@ -54,6 +55,12 @@
                 <h1>Disconnected</h1>
                 <img class="spinning" src="static/img/favicon.png" />
                 <p>Looks like we've lost track of the buoy. Attempting to reconnect...</p>
+            </div>
+
+            <div class="persist-playlists" ng-show="currentOverlay == 'persist-playlists'">
+                <h1>Persist playlists</h1>
+                <p>Due to browser restrictions, we aren't able to save your playlists using files stored on your local filesystem.</p> 
+                <p>To get around this, we can copy your music files into a special storage system in your browser, however this will require you to have two copies of the file. In return, you'll be able to save your playlists and have them persist between sessions.</p>
             </div>
         </div>
 

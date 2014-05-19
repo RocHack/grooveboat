@@ -36,6 +36,24 @@ input[type=button] {
     cursor: pointer;
 }
 
+.checkbox {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    background: @white;
+    border: 1px solid @gray;
+    vertical-align: middle;
+    margin-right: 5px;
+    font-family: Helvetica;
+    text-align: center;
+    color: @red;
+    cursor: pointer;
+
+    &.checked:after {
+        content: "\2713";
+    }
+}
+
 button:hover,
 input[type=button]:hover {
     background: @red;
@@ -386,12 +404,17 @@ a {
             bottom: 0px;
             width: 100%;
         }
+
+        .persist-bar {
+            padding: 10px;
+            font-size: 14px;
+        }
     }
 
     .track-upload {
         display: block;
         height: 75px;
-        margin: 10px;
+        margin: 0px 10px 10px 10px;
         border: 2px dashed darken(@gray, 20%);
         text-align: center;
         line-height: 75px;
