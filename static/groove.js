@@ -512,7 +512,7 @@
         }
 
         if(this.persist) {
-            this.db.storeTrack.bind(this.db)(track);
+            this.db.storeTrack(track);
         }
 
         this.emit('queueUpdate');
@@ -542,7 +542,7 @@
         if(val) {
             // TODO Make this support playlists
             var playlist = this.playlists[this.activePlaylist];
-            playlist.map(this.db.storeTrack);
+            playlist.forEach(this.db.storeTrack.bind(this.db));
 
             this.getPersistTracks();
         } else {
