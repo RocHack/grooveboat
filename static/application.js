@@ -119,6 +119,17 @@ function MainCtrl($scope, groove, localStorageService) {
         localStorageService.set("user:gravatar", groove.me.gravatar);
     };
 
+    groove.buoy.on("disconnected", function() {
+        $scope.$apply(function($scope) {
+            $scope.setOverlay("disconnected");
+        });
+    });
+
+    groove.buoy.on("reconnected", function() {
+        $scope.$apply(function($scope) {
+            $scope.setOverlay(false);
+        });
+    });
 }
 
 function RoomListCtrl($scope, $location, groove, localStorageService) {
@@ -179,7 +190,7 @@ function RoomListCtrl($scope, $location, groove, localStorageService) {
     });
 }
 
-function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
+function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorageService) {
     /*
      * Listeners on the UI
      */
@@ -386,8 +397,17 @@ function RoomCtrl($scope, $routeParams, $window, groove, localStorageService) {
             $scope.users.splice(i, 1);
         });
     });
+
+    groove.buoy.on("reconnected", function() {
+        $scope.$apply(function($scope) {
+            $scope.users = [groove.me];
+            groove.me.setName(groove.me.name);
+            groove.me.setGravatar(groove.me.gravatar);
+            groove.joinRoom($routeParams.room);
+        });
+    });
 }
 
 RoomListCtrl.$inject = ["$scope", "$location", "groove", "localStorageService"];
-RoomCtrl.$inject = ["$scope", "$routeParams", "$window", "groove",
+RoomCtrl.$inject = ["$scope", "$routeParams", "$window", "$location", "groove",
     "localStorageService"];

@@ -143,6 +143,7 @@ a {
 
     p {
         color: @dark;
+        line-height: 1.4em;
     }
 
     .rooms, .buoys {
@@ -167,6 +168,15 @@ a {
         .selected {
             background-color: @red;
             color: @white;
+        }
+    }
+
+    .disconnected {
+        text-align: center;
+
+        img {
+            display: block;
+            margin: 15px auto;
         }
     }
 
@@ -513,6 +523,20 @@ a {
     100% {
         opacity: 1;
     }
+}
+
+@-webkit-keyframes anim-spinning {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+.spinning {
+    -webkit-animation: anim-spinning 2s infinite linear;
 }
 
 @-webkit-keyframes anim-vote-true {
