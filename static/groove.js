@@ -544,9 +544,17 @@
         }.bind(this);
     };
 
+    // local audio track finished playing
+    function Groove_onPlaybackEnded() {
+        // yield to the next DJ
+        this.buoy.send('skip', {});
+    }
+
     // handle audio data decoded from file.
     // should be called by active DJ beginning to play track
     function Groove_gotAudioData(buffer) {
+        if (this.me != this.activeDJ) return;
+
         // thanks to:
         // http://servicelab.org/2013/07/24/streaming-audio-between-browsers-with-webrtc-and-webaudio/
 
@@ -554,6 +562,9 @@
         this.mediaSource = this.audioContext.createBufferSource();
         this.mediaSource.buffer = buffer;
         this.mediaSource.start(0);
+
+        // handle end of playback
+        this.mediaSource.onended = Groove_onPlaybackEnded.bind(this);
 
         // connect the audio stream to the audio hardware
         this.mediaSource.connect(this.audioContext.destination);
