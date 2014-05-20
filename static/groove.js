@@ -43,6 +43,12 @@
         this.activeTrack = null;
         this.persist = false;
         this.db = new GrooveDB();
+
+        // get stats about incoming peer connection from DJ
+        this.statsTimestamp = 0;
+        this.incomingBytes = 0;
+        setInterval(Groove_getStats.bind(this,
+            Groove_gotStats.bind(this)), 5000);
     }
 
     Groove.prototype = Object.create(WildEmitter.prototype, {
@@ -687,6 +693,39 @@
         }
         return peers;
     };
+
+    // get stats for incoming peer connection
+    function Groove_getStats(cb) {
+        var pc = this.activeDJ && this.activeDJ.pc;
+        if (pc) pc.getStats(cb);
+    }
+
+    function statIsSrc(stat) {
+        return stat.type == 'ssrc';
+    }
+
+    // analyze bitrate from peer connection stats
+    function Groove_gotStats(err, stats) {
+        if (err) throw err;
+        var stat = stats.filter(statIsSrc)[0];
+        if (!stat) return;
+
+        var bytesNow = stat.bytesReceived;
+        if (this.statsTimestamp > 0) {
+            var bitrate = Math.round((bytesNow - this.incomingBytes) * 8 /
+                (stat.timestamp - this.statsTimestamp));
+            var fractionLost = stat.packetsLost /
+                (stat.packetsLost + stat.packetsReceived)
+
+            if (bitrate > 0) {
+                console.log('Bitrate: ' + bitrate + ' kbps.',
+                    'Packets lost: ' + Math.round(fractionLost * 100) + '%');
+            }
+        }
+
+        this.statsTimestamp = stat.timestamp;
+        this.incomingBytes = bytesNow;
+    }
 
     // got a stream through WebRTC from the active DJ
     Groove.prototype.gotRemoteStream = function(stream) {
