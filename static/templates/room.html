@@ -26,7 +26,7 @@
             <form class="dropzone track-upload" id="upload-zone" drop-files="files" action="#">
                 drop music
             </form>
-            <ul class="songs">
+            <ul class="songs" ui:sortable ng:model="tracks">
                 <li ng-repeat="track in tracks">
                     <div class="track">{{track.title}}</div>
                     <div class="artist">{{track.artist}}</div>
@@ -37,9 +37,9 @@
 </div>
 
 
-<div class="now-playing" ng-show="!currentTrack">
-    <div class="now-playing-artist">Radiohead{{currentTrack.artist}}</div>
-    <div class="now-playing-track">15 Step{{currentTrack.title}}</div>
+<div class="now-playing" ng-show="currentTrack">
+    <div class="now-playing-artist">{{currentTrack.artist}}</div>
+    <div class="now-playing-track">{{currentTrack.title}}</div>
 
     <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)"><i class="icon-thumbs-up"></i></a>
     <div class="opinion-bar">
@@ -48,7 +48,7 @@
     <a class="vote bad bfont-style: normal;ad-{{currentUser.vote == -1}}" href="" ng-click="vote(-1)"><i class="icon-thumbs-down"></i></a>
 </div>
 
-<div class="awaiting-dj" ng-hide="!currentTrack">
+<div class="awaiting-dj" ng-hide="currentTrack">
     awaiting dj
 </div>
 

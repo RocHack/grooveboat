@@ -18,6 +18,7 @@ body {
     top: 0;
     bottom: 0;
     width: 100%;
+    overflow-x: hidden;
 }
 
 //
@@ -570,6 +571,11 @@ a {
             padding: 10px;
             border-bottom: 1px dotted @gray;
             font-size: 14px;
+            background: @white;
+
+            &.ui-sortable-helper {
+                background: darken(@white, 10%);
+            }
         }
 
         .track {

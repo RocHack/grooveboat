@@ -1,4 +1,4 @@
-angular.module('grooveboat', ["LocalStorageModule", "ngSanitize"])
+angular.module('grooveboat', ["LocalStorageModule", "ngSanitize", "ui"])
     .config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
         $routeProvider
             .when("/", { 

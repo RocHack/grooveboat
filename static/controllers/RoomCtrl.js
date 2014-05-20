@@ -17,6 +17,13 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     $scope.newMessages = false;
     $scope.users.push(groove.me);
 
+    $scope.sortableOptions = {
+        update: function(e, ui) {
+            console.log("whaa");
+        },
+        axis: "x"
+    };
+
     var player = $window.document.createElement("audio");
     window.player = player;
     var activeTrack;

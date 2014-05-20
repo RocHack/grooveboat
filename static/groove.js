@@ -304,7 +304,9 @@
 
     Groove.prototype.becomeActiveDJ = function() {
         console.log('becoming active');
-        var track = this.me.activeTrack;
+        var track = this.playlists[this.activePlaylist][0];
+        this.me.activeTrack = track;
+
         this.buoy.send('setActiveTrack', {
             track: exportTrack(track)
         });
