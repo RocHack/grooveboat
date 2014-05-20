@@ -314,11 +314,7 @@
         // play our active track, and send it to peers.
 
         var peers = this.getPeers();
-        if (!peers.length) {
-            // empty room :(
-            return;
-        }
-
+        
         // start playing track locally
         this._playMyTrack();
     };
