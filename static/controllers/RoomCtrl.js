@@ -44,8 +44,9 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     }
 
     $scope.clickUser = function(user) {
+        // TODO: Maybe have this open a private chat?
         if(user == groove.me) {
-            $scope.setOverlay("change-avatar");
+            $scope.setOverlay("settings");
         } 
     }
 

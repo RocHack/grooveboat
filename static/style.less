@@ -48,6 +48,7 @@ body {
 
 .icon-thumbs-up:before   { content: "\e800"; }
 .icon-thumbs-down:before { content: "\e801"; }
+.icon-gear:before { content: "\e802"; }
 
 //
 // Generic UI stuff
@@ -135,6 +136,21 @@ a {
         color: @white;
         text-decoration: none;
         padding: 5px 20px 5px 20px;
+    }
+
+    .settings {
+        display: block;
+        float: right;
+        line-height: 40px;
+        margin: 0px 25px;
+        font-size: 18px;
+        color: @white;
+        transition: .15s;
+        cursor: pointer;
+
+        &:hover {
+            color: @red;
+        }
     }
 
     .username {
@@ -279,6 +295,8 @@ a {
         padding: 10px 15px 10px 15px;
         margin: 5px 10px;
         border-radius: 50%;
+
+        transition: .15s;
     }
 
     .vote.good {
