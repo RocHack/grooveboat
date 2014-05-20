@@ -548,6 +548,8 @@
         var playlist = this.playlists[this.activePlaylist];
         playlist.push(track);
 
+        track.playlistPosition = playlist.indexOf(track);
+
         if (playlist.length == 1) {
             this.me.activeTrack = track;
         }
@@ -594,6 +596,13 @@
     }
 
     Groove.prototype._persistTracksCb = function(tracks) {
+        tracks = tracks.sort(function(a, b) {
+            if(a.playlistPosition > b.playlistPosition)
+                return 1;
+            else 
+                return -1;
+        });
+
         this.playlists[this.activePlaylist] = tracks;
         this.me.activeTrack = this.playlists[this.activePlaylist][0];
 
@@ -602,6 +611,15 @@
 
     Groove.prototype.getPersistTracks = function() {
         this.db.getTracks(this._persistTracksCb.bind(this));
+    }
+
+    Groove.prototype.savePlaylist = function(name) {
+        if(!this.persist) return;
+
+        var self = this;
+        this.playlists[name].forEach(function(track) {
+            self.db.storeTrack(track);
+        });
     }
 
     Groove.prototype.vote = function(direction) {

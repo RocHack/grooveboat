@@ -18,10 +18,13 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     $scope.users.push(groove.me);
 
     $scope.sortableOptions = {
-        update: function(e, ui) {
-            console.log("whaa");
+        stop: function(e, ui) {
+            $scope.tracks.forEach(function(track, i) {
+                track.playlistPosition = i;
+            });
+            groove.savePlaylist(groove.activePlaylist);
         },
-        axis: "x"
+        axis: "y"
     };
 
     var player = $window.document.createElement("audio");
@@ -89,13 +92,6 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         } else {
             return "become a dj";
         }
-    }
-
-    $scope.togglePersistTracks = function() {
-        $scope.persistPlaylists = !$scope.persistPlaylists;
-        localStorageService.set("user:persist", $scope.perstistPlaylists)
-
-        groove.setPersist($scope.persistPlaylists);
     }
 
     $scope.$on("$destroy", function() {

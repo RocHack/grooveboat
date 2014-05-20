@@ -10,7 +10,8 @@
                 title: t.title,
                 artist: t.artist,
                 album: t.album,
-                file: fr.result
+                file: fr.result,
+                playlistPosition: t.playlistPosition
             });
         };
         fr.readAsDataURL(t.file);
@@ -94,10 +95,6 @@
         var self = this;
         music.get(track.id).onsuccess = function(e) {
             var resultTrack = e.target.result;
-            if(resultTrack) {
-                console.log("[db] Track:"+ resultTrack.title +" already exists. Skipping!");
-                return;
-            }
 
             // We need to convert the track to a dataURL because chrome doesn't
             // support blobs in IndexedDB yet. See the this chrome bug:
@@ -107,8 +104,13 @@
                 var t = self.db.transaction(["music"], "readwrite");
                 var music = t.objectStore("music");
 
-                music.add(trackObj);
-                console.log("[db] Track: "+ track.title +" added to persistent store");
+                if(resultTrack) {
+                    music.put(trackObj);
+                    console.log("[db] Track:"+ track.title +" updated in store."+ track.playlistPosition);
+                } else {
+                    music.add(trackObj);
+                    console.log("[db] Track: "+ track.title +" added to persistent store"+ track.playlistPosition);
+                }
             });
         }
     };
@@ -166,7 +168,7 @@
             var c = e.target.result;
 
             if(c) {
-                console.log("[db] Found "+ c.value.title);
+                console.log("[db] Found "+ c.value.title +" pos: "+ c.value.playlistPosition);
 
                 c.value.file = dataURItoBlob(c.value.file);
 

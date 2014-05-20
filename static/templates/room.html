@@ -26,7 +26,7 @@
             <form class="dropzone track-upload" id="upload-zone" drop-files="files" action="#">
                 drop music
             </form>
-            <ul class="songs" ui:sortable ng:model="tracks">
+            <ul class="songs" ui:sortable="sortableOptions" ng:model="tracks">
                 <li ng-repeat="track in tracks">
                     <div class="track">{{track.title}}</div>
                     <div class="artist">{{track.artist}}</div>

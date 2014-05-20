@@ -26,6 +26,13 @@ function MainCtrl($scope, groove, localStorageService) {
         localStorageService.set("user:gravatar", groove.me.gravatar);
     };
 
+    $scope.togglePersistTracks = function() {
+        $scope.persistPlaylists = !$scope.persistPlaylists;
+        localStorageService.set("user:persist", $scope.perstistPlaylists)
+
+        groove.setPersist($scope.persistPlaylists);
+    }
+
     groove.buoy.on("disconnected", function() {
         $scope.$apply(function($scope) {
             $scope.setOverlay("disconnected");
