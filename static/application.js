@@ -82,9 +82,9 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize", "ui"])
                 });
             }
 
-            el.bind("dragenter", dragEnter);
-            el.bind("dragover", dragOver);
-            el.bind("drop", drop);
+            el[0].addEventListener("dragenter", dragEnter, false);
+            el[0].addEventListener("dragover", dragOver, false);
+            el[0].addEventListener("drop", drop, false);
         };
     }).filter('emoji', function() {
         var emoji = window.returnExports;

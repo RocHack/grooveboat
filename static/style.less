@@ -572,9 +572,24 @@ a {
             border-bottom: 1px dotted @gray;
             font-size: 14px;
             background: @white;
+            position: relative;
 
             &.ui-sortable-helper {
                 background: darken(@white, 10%);
+            }
+        }
+
+        .delete {
+            position: absolute;
+            top: 13px;
+            right: 15px;
+            font-size: 24px;
+            color: darken(@white, 10%);
+            cursor: pointer;
+            font-weight: bold;
+
+            &:hover {
+                color: @red;
             }
         }
 
@@ -584,7 +599,9 @@ a {
         }
 
         .artist {
+            margin-top: 3px;
             display: block;
+            color: lighten(@dark, 25%);
         }
     }
 }

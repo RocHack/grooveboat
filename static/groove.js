@@ -622,6 +622,16 @@
         });
     }
 
+    Groove.prototype.deleteTrack = function(playlistName, track) {
+        var playlist = this.playlists[playlistName];
+        var i = playlist.indexOf(track);
+
+        if(i == -1) return;
+        playlist.splice(i, 1);
+
+        if(this.persist) this.db.deleteTrack(track);
+    }
+
     Groove.prototype.vote = function(direction) {
         this.me.setVote(direction);
         this.emit("setVote", this.me);

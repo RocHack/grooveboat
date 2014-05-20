@@ -30,6 +30,7 @@
                 <li ng-repeat="track in tracks">
                     <div class="track">{{track.title}}</div>
                     <div class="artist">{{track.artist}}</div>
+                    <div class="delete" ng-click="deleteTrack(track)">&times;</div>
                 </li>
             </ul>
         </div>

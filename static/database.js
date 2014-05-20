@@ -113,6 +113,17 @@
     };
 
     /*
+     * Deletes a track from the store
+     */
+    GrooveDB.prototype.deleteTrack = function(track) {
+        var t = this.db.transaction(["music"], "readwrite");
+        var music = t.objectStore("music");
+
+        music.delete(track.id);
+        console.log("[db] Deleted track "+ track.title);
+    }
+
+    /*
      * Adds a song to the persist queue if we're not connected or persists
      * it immediately if we are
      */

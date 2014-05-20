@@ -93,6 +93,10 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
             return "become a dj";
         }
     }
+    
+    $scope.deleteTrack = function(track) {
+        groove.deleteTrack(groove.activePlaylist, track);
+    };
 
     $scope.$on("$destroy", function() {
         groove.leaveRoom();
