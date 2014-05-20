@@ -13,7 +13,7 @@
                 file: fr.result
             });
         };
-        fr.readAsDataURL(track.file);
+        fr.readAsDataURL(t.file);
     }
 
     function dataURItoBlob(dataURI) {
@@ -107,7 +107,7 @@
                 var t = self.db.transaction(["music"], "readwrite");
                 var music = t.objectStore("music");
 
-                music.add(track);
+                music.add(trackObj);
                 console.log("[db] Track: "+ track.title +" added to persistent store");
             });
         }

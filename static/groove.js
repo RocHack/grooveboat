@@ -1,5 +1,15 @@
 (function () {
 
+    // turn track into object suitable for transmission
+    function exportTrack(t) {
+        return {
+            id: t.id,
+            title: t.title,
+            artist: t.artist,
+            album: t.album,
+        };
+    }
+
     // create an object URL for a stream or file
     function createObjectUrl(stream) {
         var URL = window.URL || window.webkitURL;
