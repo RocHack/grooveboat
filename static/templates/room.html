@@ -26,7 +26,7 @@
             <form class="dropzone track-upload" id="upload-zone" drop-files="files" action="#">
                 drop music
             </form>
-            <ul class="songs" ng-hide="!currentTrack">
+            <ul class="songs" ng-hide="!currentTrack || currentUser != activeDJ">
                 <li class="active">
                     <div class="track">{{currentTrack.title}}</div>
                     <div class="artist">{{currentTrack.artist}}</div>
