@@ -1,10 +1,12 @@
 <div class="sidebar">
+
     <div class="tabs">
         <div class="tab" ng-class="{active:currentTab == 'music'}" ng-click="switchTab('music')">music</div>
         <div class="tab" ng-class="{active:currentTab == 'chat','new-messages':newMessages}" ng-click="switchTab('chat')">chat</div>
     </div>
 
     <div class="sidebar-content">
+
         <div class="chat panel" ng-show="currentTab == 'chat'">
             <div class="messages" id="messages" auto-scroll="chat_messages">
                 <div class="no_messages" ng-hide="chat_messages.length">
@@ -19,6 +21,7 @@
                 <input class="new_message" placeholder="send a message" type="text" ng-model="message_text" />
             </form>
         </div>
+
         <div class="music panel" ng-show="currentTab == 'music'">
             <div class="persist-bar">
                 <div class="checkbox" ng-class="{checked: persistPlaylists}" ng-click="togglePersistTracks()"></div> 
@@ -38,19 +41,18 @@
 </div>
 
 
-<div class="now-playing" ng-show="currentTrack">
-    <div class="now-playing-artist">{{currentTrack.artist}}</div>
-    <div class="now-playing-track">{{currentTrack.title}}</div>
+<div class="now-playing" ng-show="!currentTrack">
+    <div class="now-playing-artist">Radiohead{{currentTrack.artist}}</div>
+    <div class="now-playing-track">15 Step{{currentTrack.title}}</div>
 
-    <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)">Good stuff</a>
-    <a class="vote bad bad-{{currentUser.vote == -1}}" href="" ng-click="vote(-1)">Ehhh</a>
-
+    <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)"><i class="icon-thumbs-up"></i></a>
     <div class="opinion-bar">
         <div class="opinion yes" style="width: {{10 + (votes.yes * 2)}}px">&nbsp;</div><div class="opinion no" style="width: {{10 + (votes.no * 2)}}px">&nbsp;</div>
     </div>
+    <a class="vote bad bfont-style: normal;ad-{{currentUser.vote == -1}}" href="" ng-click="vote(-1)"><i class="icon-thumbs-down"></i></a>
 </div>
 
-<div class="awaiting-dj" ng-hide="currentTrack">
+<div class="awaiting-dj" ng-hide="!currentTrack">
     awaiting dj
 </div>
 

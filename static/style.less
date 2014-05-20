@@ -21,6 +21,35 @@ body {
 }
 
 //
+// Icons stuff
+//
+@font-face {
+    font-family: "fontello";
+    src: url("fontello.ttf");
+    font-weight: normal;
+    font-style: normal;
+}
+
+[class^="icon-"]:before, [class*=" icon-"]:before {
+    font-family: "fontello";
+    font-style: normal;
+    font-weight: normal;
+    speak: none;
+    display: inline-block;
+    text-decoration: inherit;
+    width: 1em;
+    margin-right: .2em;
+    text-align: center;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1em;
+    margin-left: .2em;
+}
+
+.icon-thumbs-up:before   { content: "\e800"; }
+.icon-thumbs-down:before { content: "\e801"; }
+
+//
 // Generic UI stuff
 //
 button,
@@ -221,9 +250,9 @@ a {
 }
 
 .now-playing {
-    text-align: center;
     padding-bottom: 10px;
     margin: 0px;
+    text-align: center;
 
     .now-playing-artist {
         font-family: 'Monoton', cursive;
@@ -239,14 +268,17 @@ a {
     .now-playing-track {
         font-family: 'Pompiere', cursive; 
         font-size: 24px;
-        margin-bottom: 5px;
     }
 
     .vote {
+        display: inline-block;
+        text-align: center;
         text-decoration: none;
+        font-size: 32px;
         display: inline-block;
         padding: 10px 15px 10px 15px;
         margin: 5px 10px;
+        border-radius: 50%;
     }
 
     .vote.good {
@@ -269,6 +301,8 @@ a {
 
     .opinion-bar {
         margin-top: 10px;
+        display: inline-block;
+        width: 250px;
 
         .opinion {
             display: inline-block;
