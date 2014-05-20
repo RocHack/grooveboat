@@ -54,9 +54,10 @@
      * or existing w/old version)
      */
     GrooveDB.prototype._onUpgradeNeeded = function(e) {
-        this.db = e.target.result;
+        var db = e.target.result;
+        // don't expose the db until the upgrade transaction is finished
 
-        var musicStore = this.db.createObjectStore("music", { keyPath: "id" });
+        var musicStore = db.createObjectStore("music", { keyPath: "id" });
         console.log("[db] Initiated music database");
     };
 
