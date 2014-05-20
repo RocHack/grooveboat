@@ -55,12 +55,9 @@ Room.prototype.leave = function(peer) {
     var i = this.peers.indexOf(peer);
     this.peers.splice(i, 1);
 
-    i = this.djs.indexOf(peer);
-    if (i > -1) {
-        this.djs.splice(i, 1);
-    }
-
     console.log("[debug] "+ peer.name +" left "+ this.name);
+
+    this.removeDJ(peer);
 
     // If the last peer left, delete the room
     if(this.peers.length == 0) {
