@@ -90,7 +90,6 @@
     GrooveDB.prototype._persistTrack = function(track) {
         var t = this.db.transaction(["music"], "readwrite");
         var music = t.objectStore("music");
-        console.log("Attempting to persist track");
 
         var self = this;
         music.get(track.id).onsuccess = function(e) {
@@ -106,10 +105,8 @@
 
                 if(resultTrack) {
                     music.put(trackObj);
-                    console.log("[db] Track:"+ track.title +" updated in store."+ track.playlistPosition);
                 } else {
                     music.add(trackObj);
-                    console.log("[db] Track: "+ track.title +" added to persistent store"+ track.playlistPosition);
                 }
             });
         }
@@ -159,8 +156,6 @@
             return;
         }
 
-        console.log("[db] Loading persisted tracks");
-        
         var music = this.db.transaction(["music"], "readwrite").objectStore("music");
         var self = this;
         var tracks = [];
@@ -168,8 +163,6 @@
             var c = e.target.result;
 
             if(c) {
-                console.log("[db] Found "+ c.value.title +" pos: "+ c.value.playlistPosition);
-
                 c.value.file = dataURItoBlob(c.value.file);
 
                 tracks.push(c.value);
