@@ -653,6 +653,14 @@
     function Groove_onPlaybackEnded() {
         // yield to the next DJ
         this.buoy.send('skip', {});
+
+        // Swap out songs
+        var playlist = this.playlists[this.activePlaylist];
+        if(playlist.length == 1) return;
+        
+        var tmp = playlist.shift();
+        playlist.push(tmp);
+        this.emit("playlistUpdated", this.activePlaylist);
     }
 
     // handle audio data decoded from file.
