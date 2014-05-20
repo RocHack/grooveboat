@@ -97,7 +97,9 @@
             this.emit('peerConnected', user);
             console.log("Found user", user.name, user.id);
         }
+
         this.users[this.me.id] = this.me;
+
         for (i = 0; i < data.djs.length; i++) {
             var dj = this.users[data.djs[i]];
             if (!dj) {
@@ -106,6 +108,7 @@
             }
             this.djs.push(dj);
         }
+
         this.activeTrack = data.activeTrack;
         this.activeDJ = this.djs[data.activeDJ];
         if (this.activeDJ) {
@@ -114,6 +117,7 @@
         }
         this.emit("djs", this.djs.slice());
         this.emit("activeDJ");
+        this.emit("activeTrack");
     };
 
     Groove.prototype.onBuoyRecvMessage = function(data) {
