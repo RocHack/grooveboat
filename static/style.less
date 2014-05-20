@@ -100,7 +100,7 @@ input[type=button]:disabled {
     color: @dark;
 }
 
-input[type=text] {
+input[type=text], textarea {
     display: block;
     font-family: @default-font;
     font-size: 16px;
@@ -556,7 +556,7 @@ a {
         vertical-align: middle;
     }
 
-    .new_message {
+    .new-message {
         border-bottom: 0px;
         border-left: 0px;
         border-right: 0px;
@@ -565,7 +565,16 @@ a {
         position: absolute;
         bottom: 0px;
         outline: 0px;
-        height: 30px;
+        height: 60px;
+        padding-top: 20px;
+        background: darken(@white, 2%);
+
+        text-align: center;
+
+        &:focus {
+            padding-top: 5px;
+            text-align: left;
+        }
     }
 
     .upload {

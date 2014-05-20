@@ -116,7 +116,8 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         });
     }
 
-    $scope.newMessage = function() {
+    $scope.newMessage = function(e) {
+        e.preventDefault();
         var text = $scope.message_text;
         var last = groove.lastChatAuthor;
 

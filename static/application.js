@@ -92,4 +92,3 @@ angular.module('grooveboat', ["LocalStorageModule", "ngSanitize", "ui"])
             return emoji(text, 'static/lib/emoji/pngs');
         };
     });
-

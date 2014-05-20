@@ -20,9 +20,14 @@
                     <div class="text" ng-bind-html-unsafe="message.text | linky | emoji"></div>
                 </div>
             </div>
-            <form ng-submit="newMessage()">
-                <input class="new_message" placeholder="send a message" type="text" ng-model="message_text" />
-            </form>
+            <textarea class="new-message" 
+                ng-init="msgPlaceholder = 'send a message'; iMsgPlaceholder = msgPlaceholder;"
+                ui:keydown="{13: 'newMessage($event)'}" 
+                ui-event="{focus: 'msgPlaceholder = null', blur: 'msgPlaceholder = iMsgPlaceholder'}"
+                placeholder="{{msgPlaceholder}}" 
+                ng-model="message_text">
+                type="text" 
+            </textarea>
         </div>
 
         <div class="music panel" ng-show="currentTab == 'music'">
