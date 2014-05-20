@@ -20,6 +20,7 @@ function Peer(buoy, conn) {
     this.on("setGravatar", this.onSetGravatar);
     this.on("setActiveTrack", this.onSetActiveTrack);
     this.on("skip", this.onSkip);
+    this.on("setVote", this.onSetVote);
 
     // Listen to certain events from the buoy
     this.buoy.on("newRoom", this.onBuoyNewRoom.bind(this));
@@ -178,6 +179,34 @@ Peer.prototype.onSkip = function() {
     if(!this.room || this.room.getActiveDJ() != this) return;
     this.room.skip();
 };
+
+/*
+ * Triggered when the user votes on the currently active track
+ * Expects:
+ *  vote: -1, 0, 1 (down, neutral, up)
+ */
+Peer.prototype.onSetVote = function(data) {
+    if(!this.room.activeTrack) return;
+
+    var incYes = 0,
+        incNo  = 0;
+
+    if(data.vote > 0) {
+        incYes = 1;
+        if(this.vote != 0) incNo = -1;
+    } else if(data.vote < 0) {
+        incNo = 1;
+        if(this.vote != 0) incYes = -1;
+    }
+    
+    this.vote = data.vote < 0 ? -1 : data.vote > 0 ? 1 : 0;
+
+    console.log("[room:"+ this.room.name +"] "+ this.name +" voted "+ this.vote);
+    this.room.sendAllBut(this, "setVote", {
+        peer: this.id,
+        vote: this.vote
+    });
+}
 
 /*
  * Tell the peer when a room has been added

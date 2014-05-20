@@ -179,6 +179,11 @@ Room.prototype.setActiveTrack = function(track) {
     this.sendAll("setActiveTrack", {
         track: track
     });
+
+    // Reset user votes
+    this.peers.forEach(function(peer) {
+        peer.vote = 0;
+    });
 };
 
 exports.Room = Room;
