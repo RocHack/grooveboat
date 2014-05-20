@@ -49,7 +49,11 @@ body {
 
 .icon-thumbs-up:before   { content: "\e800"; }
 .icon-thumbs-down:before { content: "\e801"; }
-.icon-gear:before { content: "\e802"; }
+.icon-gear:before        { content: "\e802"; }
+.icon-volume-off:before  { content: '\e803'; } 
+.icon-volume-down:before { content: '\e804'; } 
+.icon-volume:before      { content: '\e805'; } 
+.icon-volume-up:before   { content: '\e806'; } 
 
 //
 // Generic UI stuff
@@ -139,11 +143,11 @@ a {
         padding: 5px 20px 5px 20px;
     }
 
-    .settings {
+    .right-btn {
         display: block;
         float: right;
         line-height: 40px;
-        margin: 0px 25px;
+        margin: 0px 15px 0px 0px;
         font-size: 18px;
         color: @white;
         transition: .15s;
@@ -568,7 +572,7 @@ a {
 
         li {
             list-style-type: none;
-            padding: 10px;
+            padding: 10px 25px 10px 10px;
             border-bottom: 1px dotted @gray;
             font-size: 14px;
             background: @white;
@@ -592,7 +596,7 @@ a {
 
         .delete {
             position: absolute;
-            top: 13px;
+            top: 5px;
             right: 15px;
             font-size: 24px;
             color: darken(@white, 10%);

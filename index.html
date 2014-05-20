@@ -65,7 +65,11 @@
 
         <div class="container top">
             <a href="#" class="title">grooveboat</a>
-            <a class="settings" ng-click="setOverlay('settings')"><i class="icon-gear"></i></a>
+            <a class="right-btn settings" ng-click="setOverlay('settings')"><i class="icon-gear"></i></a>
+            <a class="right-btn volume" ng-click="toggleMute()">
+                <i ng-show="!muted" class="icon-volume"></i>
+                <i ng-show="muted" class="icon-volume-off"></i>
+            </a>
         </div>
         <div class="content" ng-view></div>
     </body>

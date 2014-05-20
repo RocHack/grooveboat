@@ -2,6 +2,7 @@ function MainCtrl($scope, groove, localStorageService) {
     $scope.currentUser = groove.me;
     $scope.currentOverlay = false;
     $scope.tempGravatarEmail = groove.me.gravatar;
+    $scope.muted = false;
 
     $scope.persistPlaylists = localStorageService.get("user:persist") || false;
     groove.setPersist($scope.persistPlaylists);
@@ -14,6 +15,11 @@ function MainCtrl($scope, groove, localStorageService) {
         $scope.currentUser.setName($scope.tempUsername);
         localStorageService.set("user:name", $scope.tempUsername);
         $scope.setOverlay(false);
+    };
+
+    $scope.toggleMute = function() {
+        $scope.muted = !$scope.muted;
+        // TODO: Make this actually mute
     };
 
     $scope.saveGravatarEmail = function() {
