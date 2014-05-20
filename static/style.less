@@ -355,20 +355,22 @@ a {
     margin: 0px;
     padding: 0px;
     min-height: 40px;
+    height: 78px;
 
     .dj {
         display: inline-block;
-        padding: 5px 20px 5px 20px;
-        line-height: 30px;
+        padding: 10px 20px;
         cursor: pointer;
+        margin: -1px 0px;
+        text-align: center;
 
         img {
-            display: inline-block;
-            margin-right: 5px;
-            width: 1.75em;
-            height: 1.75em;
-            border-radius: .875em;
+            display: block;
+            width: 35px;
+            height: 35px;
+            margin: 0px auto 5px auto;
             vertical-align: middle;
+            border-radius: 5px;
 
             &.vote-true {
                 -webkit-animation: anim-vote-true 1.5s infinite linear;
@@ -395,9 +397,10 @@ a {
         display: block;
         float: right;
         color: @red;
-        padding: 5px 20px 5px 20px;
-        line-height: 30px;
+        padding: 0px 20px 0px 20px;
+        line-height: 78px;
         cursor: pointer;
+        transition: .15s;
 
         &:hover {
             background: @red;
