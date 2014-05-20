@@ -24,6 +24,9 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
             });
             groove.savePlaylist(groove.activePlaylist);
         },
+        update: function(e, ui) {
+            console.log("wee");
+        },
         axis: "y"
     };
 

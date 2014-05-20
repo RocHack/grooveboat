@@ -573,9 +573,20 @@ a {
             font-size: 14px;
             background: @white;
             position: relative;
+            cursor: default;
 
             &.ui-sortable-helper {
                 background: darken(@white, 10%);
+            }
+
+            &.active {
+                background: @blue;
+                color: @white;
+                border-bottom: none;
+
+                .artist {
+                    color: @white;
+                }
             }
         }
 

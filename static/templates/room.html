@@ -26,8 +26,15 @@
             <form class="dropzone track-upload" id="upload-zone" drop-files="files" action="#">
                 drop music
             </form>
+            <ul class="songs" ng-hide="!currentTrack">
+                <li class="active">
+                    <div class="track">{{currentTrack.title}}</div>
+                    <div class="artist">{{currentTrack.artist}}</div>
+                    <div class="delete" ng-click="deleteTrack(track)">&times;</div>
+                </li>
+            </ul>
             <ul class="songs" ui:sortable="sortableOptions" ng:model="tracks">
-                <li ng-repeat="track in tracks">
+                <li ng-repeat="track in tracks" ng-hide="track.id == currentTrack.id">
                     <div class="track">{{track.title}}</div>
                     <div class="artist">{{track.artist}}</div>
                     <div class="delete" ng-click="deleteTrack(track)">&times;</div>
