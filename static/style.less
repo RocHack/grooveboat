@@ -415,9 +415,10 @@ a {
         text-align: center;
         margin: 0px 5px;
 
-        &.local-true {
+        &.local {
             color: @blue;
             font-weight: 500;
+
             img {
                 border: 1px solid @blue;
             }
@@ -523,13 +524,21 @@ a {
 
     .message {
         padding: 5px 10px 2px 10px;
-        line-height: 1.4;
 
         .author {
-            display: inline;
             font-weight: 400;
+            margin: 5px 0px 7px 0px;
 
-            &.local-true {
+            img {
+                display: inline-block;
+                margin-right: 5px;
+                width: 25px;
+                height: 25px;
+                border-radius: 5px;
+                vertical-align: middle;
+            }
+
+            &.local {
                 color: @blue;
                 font-weight: 500;
             }
@@ -537,7 +546,8 @@ a {
 
         .text {
             display: block;
-            padding-left: 15px;
+            line-height: 1.2;
+            font-size: 14px;
         }
     }
 

@@ -119,6 +119,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     $scope.newMessage = function() {
         var text = $scope.message_text;
         var last = groove.lastChatAuthor;
+
         if(text && text.trim()) {
             $scope.chat_messages.push({
                 from: groove.me,
@@ -128,6 +129,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
             groove.lastChatAuthor = groove.me;
             groove.sendChat(text);
         }
+
         $scope.message_text = "";
     };
 
@@ -142,18 +144,6 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     /*
      * Listeners from the buoy server
      */
-    groove.on("setVote", function(user) {
-        $scope.$apply(function() {
-            $scope.votes = groove.getVotes();
-        });
-    });
-
-    groove.on("playlistUpdated", function(playlistName) {
-        $scope.$apply(function($scope) {
-            $scope.tracks = groove.playlists[playlistName];
-        });
-    });
-
     groove.on("chat", function(message) {
         $scope.$apply(function($scope) { 
             if($scope.currentTab != "chat") {
@@ -164,6 +154,18 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
             message.isContinuation = (last && last == message.from);
             groove.lastChatAuthor = message.from;
             $scope.chat_messages.push(message);
+        });
+    });
+
+    groove.on("setVote", function(user) {
+        $scope.$apply(function() {
+            $scope.votes = groove.getVotes();
+        });
+    });
+
+    groove.on("playlistUpdated", function(playlistName) {
+        $scope.$apply(function($scope) {
+            $scope.tracks = groove.playlists[playlistName];
         });
     });
 
