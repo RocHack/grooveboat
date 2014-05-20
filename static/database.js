@@ -1,6 +1,21 @@
 (function() {
     var DB_VERSION = 2;
 
+    // turn a track into something we can put in the db
+    function exportTrack(t, cb) {
+        var fr = new FileReader();
+        fr.onloadend = function() {
+            cb({
+                id: t.id,
+                title: t.title,
+                artist: t.artist,
+                album: t.album,
+                file: fr.result
+            });
+        };
+        fr.readAsDataURL(track.file);
+    }
+
     function dataURItoBlob(dataURI) {
         var split = dataURI.split(',');
         var binary = atob(split[1]);
@@ -87,18 +102,14 @@
             // We need to convert the track to a dataURL because chrome doesn't
             // support blobs in IndexedDB yet. See the this chrome bug:
             // https://code.google.com/p/chromium/issues/detail?id=108012
-            var fr = new FileReader();
-            fr.onloadend = function() {
+            exportTrack(track, function(trackObj) {
                 // Continue the transaction lifecycle
                 var t = self.db.transaction(["music"], "readwrite");
                 var music = t.objectStore("music");
 
-                track['file'] = fr.result;
                 music.add(track);
                 console.log("[db] Track: "+ track.title +" added to persistent store");
-            }
-
-            fr.readAsDataURL(track['file']);
+            });
         }
     };
 
@@ -157,7 +168,7 @@
             if(c) {
                 console.log("[db] Found "+ c.value.title);
 
-                c.value['file'] = dataURItoBlob(c.value['file']);
+                c.value.file = dataURItoBlob(c.value.file);
 
                 tracks.push(c.value);
                 c.continue();

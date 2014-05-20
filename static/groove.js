@@ -1,13 +1,4 @@
 (function () {
-    // TODO: put this in a Track class
-    function exportTrack(t) {
-        return {
-            title: t.title,
-            artist: t.artist,
-            album: t.album,
-            duration: t.duration
-        };
-    }
 
     // create an object URL for a stream or file
     function createObjectUrl(stream) {
