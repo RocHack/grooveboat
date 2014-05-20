@@ -253,6 +253,11 @@ a {
     &.overlay {
         z-index: 3;
     }
+
+    .persist-bar {
+        padding: 0px 0px 10px 0px;
+        font-size: 14px;
+    }
 }
 
 .awaiting-dj {
@@ -456,17 +461,12 @@ a {
             bottom: 0px;
             width: 100%;
         }
-
-        .persist-bar {
-            padding: 10px;
-            font-size: 14px;
-        }
     }
 
     .track-upload {
         display: block;
         height: 75px;
-        margin: 0px 10px 10px 10px;
+        margin: 10px;
         border: 2px dashed darken(@gray, 20%);
         text-align: center;
         line-height: 75px;

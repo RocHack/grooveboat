@@ -3,6 +3,9 @@ function MainCtrl($scope, groove, localStorageService) {
     $scope.currentOverlay = false;
     $scope.tempGravatarEmail = groove.me.gravatar;
 
+    $scope.persistPlaylists = localStorageService.get("user:persist") || false;
+    groove.setPersist($scope.persistPlaylists);
+
     $scope.setOverlay = function(overlay) {
         $scope.currentOverlay = overlay;
     };

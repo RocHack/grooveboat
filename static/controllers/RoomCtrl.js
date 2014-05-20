@@ -11,9 +11,6 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     $scope.tracks = groove.playlists[groove.activePlaylist];
     $scope.files = [];
 
-    $scope.persistPlaylists = localStorageService.get("user:persist") || false;
-    groove.setPersist($scope.persistPlaylists);
-
     $scope.currentTrack = null;
     $scope.votes = { yes: 0, no: 0 };
     $scope.chat_messages = [];
