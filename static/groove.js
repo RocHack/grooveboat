@@ -67,6 +67,7 @@
         this.buoy.on("setActiveTrack", this.onBuoySetActiveTrack.bind(this));
         this.buoy.on("setName", this.onBuoySetName.bind(this));
         this.buoy.on("setGravatar", this.onBuoySetGravatar.bind(this));
+        this.buoy.on("setVote", this.onBuoySetVote.bind(this));
     }
 
     Groove.prototype.onBuoyWelcome = function(data) {
@@ -179,12 +180,24 @@
         this.emit("activeTrack");
         // the active DJ will now stream the track to us
         // (unless we are the active DJ)
+
+        for(var id in this.users) {
+            var user = this.users[id];
+            user.vote = 0;
+            this.emit("setVote", user);
+        }
     };
 
     Groove.prototype.onBuoySetGravatar = function(data) {
         var user = this.users[data.peer];
         if(!user) return;
         user.setGravatar(data.gravatar);
+    };
+
+    Groove.prototype.onBuoySetVote = function(data) {
+        this.users[data.peer].vote = data.vote;
+        this.emit("setVote", this.users[data.peer]);
+        console.log(this.users[data.peer].name +" voted "+ vote);
     };
 
     Groove.prototype.onBuoySetName = function(data) {
@@ -249,6 +262,21 @@
             name: this.me.name
         });
     };
+
+    Groove.prototype.getVotes = function() {
+        var yes = 0,
+            no  = 0;
+        for(var id in this.users) {
+            var user = this.users[id];
+            if(user.vote > 0) yes++;
+            else if(user.vote < 0) no++;
+        }
+
+        return {
+            yes: yes,
+            no: no
+        }
+    }
 
     Groove.prototype.becomeDJ = function() {
         if (this.me.dj) {
@@ -565,9 +593,10 @@
 
     Groove.prototype.vote = function(direction) {
         this.me.setVote(direction);
-        this.webrtc.send({
-            type: 'vote',
-            direction: direction
+        this.emit("setVote", this.me);
+
+        this.buoy.send("setVote", {
+            vote: this.me.vote
         });
     };
 

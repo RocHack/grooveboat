@@ -75,7 +75,6 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
             return;
         }
 
-        handleVote(groove.me.vote, direction);
         groove.vote(direction);
     }
 
@@ -97,20 +96,6 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     $scope.$on("$destroy", function() {
         groove.leaveRoom();
     });
-
-    function handleVote(previous, next) {
-        if(previous == 1) {
-            $scope.votes.yes -= 1;
-        } else if(previous == -1) {
-            $scope.votes.no -= 1;
-        }
-
-        if(next == 1) {
-            $scope.votes.yes += 1;
-        } else if(next == -1) {
-            $scope.votes.no += 1;
-        }
-    }
 
     var digest = $scope.$digest.bind($scope);
     function watchUser(user) {
@@ -149,6 +134,12 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     /*
      * Listeners from the buoy server
      */
+    groove.on("setVote", function(user) {
+        $scope.$apply(function() {
+            $scope.votes = groove.getVotes();
+        });
+    });
+
     groove.on("playlistUpdated", function(playlistName) {
         $scope.$apply(function($scope) {
             $scope.tracks = groove.playlists[playlistName];
