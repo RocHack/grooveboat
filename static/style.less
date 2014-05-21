@@ -297,7 +297,6 @@ a {
     }
 
     .vote {
-        display: inline-block;
         text-align: center;
         text-decoration: none;
         font-size: 32px;
@@ -307,19 +306,19 @@ a {
         border-radius: 50%;
 
         transition: .15s;
-    }
 
-    .vote.good {
-        color: @green;
+        &.good {
+            color: @green;
+        }
+
+        &.bad {
+            color: @red;
+        }
     }
 
     .vote.good:hover, .vote.good-true {
         background: @green;
         color: @white;
-    }
-
-    .vote.bad {
-        color: @red;
     }
 
     .vote.bad:hover, .vote.bad-true {
@@ -361,7 +360,6 @@ a {
         display: inline-block;
         padding: 10px 20px;
         cursor: pointer;
-        margin: -1px 0px;
         text-align: center;
 
         img {
@@ -457,7 +455,25 @@ a {
     border-bottom: 1px solid @gray;
     z-index: 1;
 
+    .sidebar-btn {
+        text-align: center;
+        padding: 10px 0px;
+        border-top: 1px solid @gray;
+
+        &.half {
+            display: inline-block;
+            width: 50%;
+        }
+
+        &:hover {
+            color: @white;
+            background: @red;
+            cursor: default;
+        }
+    }
+
     .sidebar-content {
+        font-size: 16px;
         clear: both;
         position: absolute;
         top: 30px;
@@ -518,7 +534,7 @@ a {
     .messages {
         position: absolute;
         top: 0px;
-        bottom: 30px;
+        bottom: 60px;
         width: 100%;
         overflow-y: auto;
         overflow-x: hidden;

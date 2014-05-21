@@ -34,6 +34,9 @@
             <form class="dropzone track-upload" id="upload-zone" drop-files="files" action="#">
                 drop music
             </form>
+
+            <div ng-class="{'sidebar-btn': true, half: currentUser == activeDJ}" ng-click="becomeDJ()">{{getJoinText()}}</div><div class="sidebar-btn half" ng-show="currentUser == activeDJ" ng-click="skipSong()">skip song</div>
+
             <ul class="songs" ng-hide="!currentTrack || currentUser != activeDJ">
                 <li class="active">
                     <div class="track">{{currentTrack.title}}</div>
@@ -54,14 +57,16 @@
 
 
 <div class="now-playing" ng-show="currentTrack">
-    <div class="now-playing-artist">{{currentTrack.artist}}</div>
+    <div class="center-piece">
+        <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)"><i class="icon-thumbs-up"></i></a>
+        <span class="now-playing-artist">{{currentTrack.artist}}</span>
+        <a class="vote bad bfont-style: normal;ad-{{currentUser.vote == -1}}" href="" ng-click="vote(-1)"><i class="icon-thumbs-down"></i></a>
+    </div>
     <div class="now-playing-track">{{currentTrack.title}}</div>
 
-    <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)"><i class="icon-thumbs-up"></i></a>
     <div class="opinion-bar">
         <div class="opinion yes" style="width: {{10 + (votes.yes * 2)}}px">&nbsp;</div><div class="opinion no" style="width: {{10 + (votes.no * 2)}}px">&nbsp;</div>
     </div>
-    <a class="vote bad bfont-style: normal;ad-{{currentUser.vote == -1}}" href="" ng-click="vote(-1)"><i class="icon-thumbs-down"></i></a>
 </div>
 
 <div class="awaiting-dj" ng-hide="currentTrack">
@@ -69,7 +74,6 @@
 </div>
 
 <div class="stage">
-    <div class="become-dj" ng-click="becomeDJ()">{{getJoinText()}}</div>
     <div ng-class="{dj: true, active: dj == activeDJ, local: dj.isLocal}" ng-repeat="dj in djs">
         <img ng-class="{'vote-true': dj.vote == 1}" ng-src="{{dj.iconURL}}" /> {{dj.name}}
     </div>

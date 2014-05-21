@@ -81,6 +81,13 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         }
     }
 
+    $scope.skipSong = function() {
+        // TODO: Seeing a weird error of two songs being played at once
+        // when I try to use .skip(). Disabling this for the time being.
+        return;
+        groove.skip();
+    }
+
     $scope.vote = function(direction) {
         if(groove.activeDJ == groove.me) {
             return;
@@ -91,7 +98,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
 
     $scope.getJoinText = function() {
         if(groove.me.dj) {
-            return "leave";
+            return "step down";
         } else {
             return "become a dj";
         }
@@ -110,10 +117,6 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         user.on("name", digest);
         user.on("vote", digest);
         user.on("gravatar", digest);
-        user.on("vote", function(previous, next) {
-            handleVote(previous, next);
-            digest();
-        });
     }
 
     $scope.newMessage = function(e) {
@@ -159,9 +162,13 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     });
 
     groove.on("setVote", function(user) {
-        $scope.$apply(function() {
+        if($scope.$$phase) {
             $scope.votes = groove.getVotes();
-        });
+        } else {
+            $scope.$apply(function() {
+                $scope.votes = groove.getVotes();
+            });
+        }
     });
 
     groove.on("playlistUpdated", function(playlistName) {
@@ -177,15 +184,23 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     });
 
     groove.on("activeDJ", function() {
-        $scope.$apply(function($scope) {
+        if($scope.$$phase) {
             $scope.activeDJ = groove.activeDJ;
-        });
+        } else {
+            $scope.$apply(function($scope) {
+                $scope.activeDJ = groove.activeDJ;
+            });
+        }
     });
 
     groove.on("activeTrack", function() {
-        $scope.$apply(function($scope) {
+        if($scope.$$phase) {
             $scope.currentTrack = groove.activeTrack;
-        });
+        } else {
+            $scope.$apply(function($scope) {
+                $scope.currentTrack = groove.activeTrack;
+            });
+        }
     });
 
     groove.on("activeTrackURL", function() {

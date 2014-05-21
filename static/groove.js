@@ -208,7 +208,6 @@
     Groove.prototype.onBuoySetVote = function(data) {
         this.users[data.peer].vote = data.vote;
         this.emit("setVote", this.users[data.peer]);
-        console.log(this.users[data.peer].name +" voted "+ vote);
     };
 
     Groove.prototype.onBuoySetName = function(data) {
@@ -347,6 +346,11 @@
         }
         this.emit('djs', this.djs.slice());
     };
+
+    Groove.prototype.skip = function() {
+        this.buoy.send('skip', {});
+        this.cleanupDJing();
+    }
 
     // remove peer connection and stream to user
     function Groove_removePeerStream(user) {
