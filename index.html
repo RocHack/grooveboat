@@ -39,7 +39,7 @@
             <div class="settings" ng-show="currentOverlay == 'settings'">
                 <h1>Settings</h1>
                 <p>Change your nickname:</p>
-                <input type="text" class="full" name="gravatar" placeholder="{{currentUser.name}}" ng-model="tempUsername" />
+                <input type="text" class="full" name="gravatar" ng-model="tempUsername" />
                 <p>Grooveboat uses <a target="_blank" href="//gravatar.com">Gravatar</a> to provide users with avatars. If you have a Gravatar account, enter your email address here:</p>
                 <input type="text" class="full" name="gravatar" placeholder="Gravatar email address" ng-model="tempGravatarEmail" />
 
@@ -49,7 +49,7 @@
                     <div class="checkbox" ng-class="{checked: persistPlaylists}" ng-click="togglePersistTracks()"></div> 
                     Persist music
                 </div>
-                <input type="button" value="save it" class="action" ng-click="saveName();saveGravatarEmail();" />
+                <input type="button" value="save it" class="action" ng-click="saveSettings();" />
             </div>
 
             <div class="no-tracks" ng-show="currentOverlay == 'no-tracks'">

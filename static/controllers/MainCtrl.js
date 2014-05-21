@@ -2,6 +2,7 @@ function MainCtrl($scope, groove, localStorageService) {
     $scope.currentUser = groove.me;
     $scope.currentOverlay = false;
     $scope.tempGravatarEmail = groove.me.gravatar;
+    $scope.tempUsername = groove.me.name;
     $scope.muted = false;
 
     $scope.persistPlaylists = localStorageService.get("user:persist") || false;
@@ -11,25 +12,27 @@ function MainCtrl($scope, groove, localStorageService) {
         $scope.currentOverlay = overlay;
     };
 
-    $scope.saveName = function() {
-        $scope.currentUser.setName($scope.tempUsername);
-        localStorageService.set("user:name", $scope.tempUsername);
-        $scope.setOverlay(false);
-    };
-
-    $scope.toggleMute = function() {
-        $scope.muted = !$scope.muted;
-        // TODO: Make this actually mute
-    };
-
-    $scope.saveGravatarEmail = function() {
+    $scope.saveSettings = function() {
+        // Gravatar
         if($scope.tempGravatarEmail == undefined) {
             return;
         }
 
         groove.me.setGravatar($scope.tempGravatarEmail);
-        $scope.setOverlay(false);
         localStorageService.set("user:gravatar", groove.me.gravatar);
+
+        // Name
+        if($scope.tempUsername && $scope.tempUsername.trim()) {
+            $scope.currentUser.setName($scope.tempUsername);
+            localStorageService.set("user:name", $scope.tempUsername);
+        }
+        $scope.tempUsername = groove.me.name;
+        $scope.setOverlay(false);
+    }
+
+    $scope.toggleMute = function() {
+        $scope.muted = !$scope.muted;
+        // TODO: Make this actually mute
     };
 
     $scope.togglePersistTracks = function() {
