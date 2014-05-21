@@ -23,6 +23,9 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         "Show the room some love",
         "*crickets*",
         "*tumbleweed rolls across the stage*",
+        "We'll just be waiting...",
+        "*zzz*",
+        "*jeopardy thinking music*",
     ];
     $scope.noDjMessages.sort( function() { return 0.5 - Math.random() } );
 
