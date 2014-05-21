@@ -127,6 +127,14 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         groove.leaveRoom();
     });
 
+    $scope.$on("toggleMute", function() {
+        // set the volume for the local stream
+        groove.setVolume($scope.muted ? 0 : 1);
+        // set the volume for the remote stream
+        player.muted = $scope.muted;
+        // these are seperate because of reasons.
+    });
+
     var digest = $scope.$digest.bind($scope);
     function watchUser(user) {
         user.on("name", digest);
