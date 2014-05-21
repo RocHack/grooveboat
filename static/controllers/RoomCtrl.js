@@ -1,4 +1,4 @@
-function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorageService) {
+function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorageService, $interval) {
     /*
      * Listeners on the UI
      */
@@ -16,6 +16,21 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     $scope.chat_messages = [];
     $scope.newMessages = false;
     $scope.users.push(groove.me);
+
+    $scope.noDjMessages = [
+        "Why not Zoidberg?",
+        "You could be next",
+        "Show the room some love",
+        "*crickets*",
+        "*tumbleweed rolls across the stage*",
+    ];
+    $scope.noDjMessages.sort( function() { return 0.5 - Math.random() } );
+
+    $interval(function() {
+        if($scope.currentTrack) return;
+
+        $scope.noDjMessages.sort( function() { return 0.5 - Math.random() } );
+    }, 30 * 1000);
 
     $scope.sortableOptions = {
         stop: function(e, ui) {
@@ -247,4 +262,4 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     });
 }
 
-RoomCtrl.$inject = ["$scope", "$routeParams", "$window", "$location", "groove", "localStorageService"];
+RoomCtrl.$inject = ["$scope", "$routeParams", "$window", "$location", "groove", "localStorageService", "$interval"];

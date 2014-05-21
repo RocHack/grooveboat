@@ -267,12 +267,21 @@ a {
 
 .awaiting-dj {
     text-align: center;
-    font-family: 'Monoton', cursive;
-    font-size: 52px;
     color: @red;
-    text-transform: lowercase;
     padding: 15px;
     word-spacing: .5em;
+
+    .title {
+        font-family: 'Monoton', cursive;
+        font-size: 52px;
+        text-transform: lowercase;
+    }
+
+    .subtitle {
+        font-family: 'Pompiere', cursive; 
+        font-size: 24px;
+        color: @dark;
+    }
 }
 
 .now-playing {
@@ -348,13 +357,24 @@ a {
 
 .stage {
     position: relative;
-    border-bottom: 1px solid @gray;
-    border-top: 1px solid @gray;
+    background: darken(@white, 5%);
     text-align: center;
-    margin: 0px;
+    margin-right: 25%;
     padding: 0px;
     min-height: 40px;
     height: 78px;
+
+    .no-djs {
+        text-align: center;
+        font-size: 18px;
+        line-height: 78px;
+
+        img {
+            height: 50px;
+            width: 50px;
+            vertical-align: middle;
+        }
+    }
 
     .dj {
         display: inline-block;
@@ -688,6 +708,10 @@ a {
 
 .spinning {
     -webkit-animation: anim-spinning 2s infinite linear;
+}
+
+.spinning.slowly {
+    -webkit-animation: anim-spinning 20s infinite linear;
 }
 
 @-webkit-keyframes anim-vote-true {
