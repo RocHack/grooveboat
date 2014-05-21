@@ -44,6 +44,11 @@
         this.persist = false;
         this.db = new GrooveDB();
 
+        this.audioContext = new AudioContext();
+        // gainNode control volume for local stream.
+        // volume for incoming stream is set on the player object in RoomCtrl
+        this.gainNode = this.audioContext.createGain();
+
         // get stats about incoming peer connection from DJ
         this.statsTimestamp = 0;
         this.incomingBytes = 0;
@@ -642,11 +647,15 @@
         });
     };
 
+    // set volume of local (DJ's) stream
+    Groove.prototype.setVolume = function(volume) {
+        this.gainNode.gain.value = volume;
+    };
+
     // play my track locally, as the active DJ
     Groove.prototype._playMyTrack = function() {
         var track = this.me.activeTrack;
         var reader = new FileReader();
-        this.audioContext = new AudioContext();
         reader.readAsArrayBuffer(track.file);
         reader.onload = function(e) {
             this.audioContext.decodeAudioData(e.target.result,
@@ -685,7 +694,8 @@
         this.mediaSource.onended = Groove_onPlaybackEnded.bind(this);
 
         // connect the audio stream to the audio hardware
-        this.mediaSource.connect(this.audioContext.destination);
+        this.mediaSource.connect(this.gainNode);
+        this.gainNode.connect(this.audioContext.destination);
 
         // create a destination for the remote browser
         var remote = this.audioContext.createMediaStreamDestination();

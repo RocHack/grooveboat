@@ -32,7 +32,7 @@ function MainCtrl($scope, groove, localStorageService) {
 
     $scope.toggleMute = function() {
         $scope.muted = !$scope.muted;
-        // TODO: Make this actually mute
+        $scope.$broadcast("toggleMute");
     };
 
     $scope.togglePersistTracks = function() {
