@@ -113,6 +113,7 @@
                 console.error("Unknown DJ", data.djs[i]);
                 continue;
             }
+            dj.dj = true;
             this.djs.push(dj);
         }
 
