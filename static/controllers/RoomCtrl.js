@@ -142,6 +142,13 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         user.on("gravatar", digest);
     }
 
+    function pruneChat() {
+        var count = $scope.chat_messages.length;
+        if(count > 75) {
+            $scope.chat_messages.splice(0, count - 75);
+        }
+    }
+
     $scope.newMessage = function(e) {
         e.preventDefault();
         var text = $scope.message_text;
@@ -157,6 +164,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
             groove.sendChat(text);
         }
 
+        pruneChat();
         $scope.message_text = "";
     };
 
@@ -181,6 +189,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
             message.isContinuation = (last && last == message.from);
             groove.lastChatAuthor = message.from;
             $scope.chat_messages.push(message);
+            pruneChat();
         });
     });
 
