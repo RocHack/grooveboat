@@ -14,12 +14,10 @@ function MainCtrl($scope, groove, localStorageService) {
 
     $scope.saveSettings = function() {
         // Gravatar
-        if($scope.tempGravatarEmail == undefined) {
-            return;
+        if($scope.tempGravatarEmail != undefined) {
+            groove.me.setGravatar($scope.tempGravatarEmail);
+            localStorageService.set("user:gravatar", groove.me.gravatar);
         }
-
-        groove.me.setGravatar($scope.tempGravatarEmail);
-        localStorageService.set("user:gravatar", groove.me.gravatar);
 
         // Name
         if($scope.tempUsername && $scope.tempUsername.trim()) {

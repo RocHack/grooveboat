@@ -38,16 +38,20 @@
 
             <div class="settings" ng-show="currentOverlay == 'settings'">
                 <h1>Settings</h1>
-                <p>Change your nickname:</p>
+
+                <h2>Nickname</h2>
                 <input type="text" class="full" name="gravatar" ng-model="tempUsername" />
+
+                <h2>Avatar</h2>
                 <p>Grooveboat uses <a target="_blank" href="//gravatar.com">Gravatar</a> to provide users with avatars. If you have a Gravatar account, enter your email address here:</p>
                 <input type="text" class="full" name="gravatar" placeholder="Gravatar email address" ng-model="tempGravatarEmail" />
 
+                <h2>Playlist persistence</h2>
                 <p>Due to browser restrictions, we aren't able to save your playlists using files stored on your local filesystem.</p> 
                 <p>To get around this, we can copy your music files into a special storage system in your browser, however this will require you to have two copies of the file. In return, you'll be able to save your playlists and have them persist between sessions.</p>
                 <div class="persist-bar">
                     <div class="checkbox" ng-class="{checked: persistPlaylists}" ng-click="togglePersistTracks()"></div> 
-                    Persist music
+                    Save playlists
                 </div>
                 <input type="button" value="save it" class="action" ng-click="saveSettings();" />
             </div>
