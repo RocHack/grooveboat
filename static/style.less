@@ -655,6 +655,10 @@ a {
             position: relative;
             cursor: default;
 
+            &:nth-child(2n + 2) {
+                background: darken(@white, 1%);
+            }
+
             &.ui-sortable-helper {
                 background: darken(@white, 10%);
             }
@@ -673,7 +677,7 @@ a {
         .right {
             position: absolute;
             top: 2px;
-            right: 15px;
+            right: 5px;
             font-size: 24px;
             color: darken(@white, 7%);
             cursor: pointer;
