@@ -120,7 +120,7 @@
     // create peerconnection and send offer
     User.prototype.preparePeerConnection = function() {
         if (this.pc) {
-            console.error('Already have peer connection to ' + this.id);
+            console.log('Already have peer connection to ' + this.id);
         }
         this.pc = new PeerConnection(peerConnectionConfig, constraints);
         this.pc.on('ice', User_onIce.bind(this));
