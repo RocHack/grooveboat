@@ -49,7 +49,10 @@
                 <li ng-repeat="track in tracks" ng-hide="track.id == currentTrack.id">
                     <div class="track">{{track.title}}</div>
                     <div class="artist">{{track.artist}}</div>
-                    <div class="delete" ng-click="deleteTrack(track)">&times;</div>
+                    <div class="right">
+                        <div ng-click="deleteTrack(track)">&times;</div>
+                        <div ng-click="bumpTrack(track)"><i class="icon-up-arrow"></i></div>
+                    </div>
                 </li>
             </ul>
         </div>

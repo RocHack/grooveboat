@@ -55,6 +55,7 @@ body {
 .icon-volume-down:before { content: '\e804'; } 
 .icon-volume:before      { content: '\e805'; } 
 .icon-volume-up:before   { content: '\e806'; } 
+.icon-up-arrow:before   { content: '\e807'; } 
 
 //
 // Generic UI stuff
@@ -663,16 +664,23 @@ a {
             }
         }
 
-        .delete {
+        .right {
             position: absolute;
-            top: 5px;
+            top: 2px;
             right: 15px;
             font-size: 24px;
-            color: darken(@white, 10%);
+            color: darken(@white, 7%);
             cursor: pointer;
             font-weight: bold;
+            text-align: center;
+            line-height: 1em;
 
-            &:hover {
+            .icon-up-arrow {
+                font-size: 16px;
+                font-weight: normal;
+            }
+
+            div:hover {
                 color: @red;
             }
         }

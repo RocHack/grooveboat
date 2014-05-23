@@ -64,6 +64,15 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         }
     }, false);
 
+    $scope.bumpTrack = function(track) {
+        var i =  $scope.tracks.indexOf(track);
+        if(i == -1) return;
+        $scope.tracks.splice(i, 1);
+        $scope.tracks.unshift(track);
+
+        groove.savePlaylist(groove.activePlaylist);
+    }
+
     $scope.playSoundEffect = function(sound) {
         var a = soundEffects[sound];
         a.pause();
