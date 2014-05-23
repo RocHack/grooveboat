@@ -406,7 +406,10 @@ a {
         &.active {
             background: @red;
             color: @white;
-            -webkit-animation: anim-dj-active 2s infinite linear;
+
+            img {
+                -webkit-animation: anim-dancing 1.5s infinite linear;
+            }
         }
 
         &.local {
@@ -460,7 +463,7 @@ a {
             border-radius: 5px;
 
             &.vote-true {
-                -webkit-animation: anim-vote-true 1.5s infinite linear;
+                -webkit-animation: anim-dancing 1.5s infinite linear;
             }
         }
 
@@ -542,6 +545,7 @@ a {
             border-bottom: 1px solid @gray;
             cursor: pointer;
             background-color: @gray;
+            transition: .15s;
         }
 
         .tab.active {
@@ -552,6 +556,7 @@ a {
         .tab.new-messages {
             background: @red;
             color: @white;
+            -webkit-animation: anim-msg-glow 2s infinite linear;
         }
     }
 
@@ -702,20 +707,6 @@ a {
 /*
 * Animations
 */
-@-webkit-keyframes anim-dj-active {
-    0% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: .85;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
 @-webkit-keyframes anim-spinning {
     0% {
         -webkit-transform: rotate(0deg);
@@ -734,7 +725,7 @@ a {
     -webkit-animation: anim-spinning 20s infinite linear;
 }
 
-@-webkit-keyframes anim-vote-true {
+@-webkit-keyframes anim-dancing {
     0% {
         -webkit-transform: rotate(0deg) translate(0px, 0px) scale(1);
     }
@@ -753,5 +744,19 @@ a {
 
     100% {
         -webkit-transform: rotate(0deg) translate(0px, 0px) scale(1);
+    }
+}
+
+@-webkit-keyframes anim-msg-glow {
+    0% {
+        background: @red;
+    }
+
+    50% {
+        background: lighten(@red, 10%);
+    }
+
+    100% {
+        background: @red;
     }
 }
