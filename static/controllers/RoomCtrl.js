@@ -73,6 +73,14 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         groove.savePlaylist(groove.activePlaylist);
     }
 
+    $scope.dragEnter = function() {
+        $scope.currentlyDragging = true;
+    }
+
+    $scope.dragLeave = function() {
+        $scope.currentlyDragging = false;
+    }
+
     $scope.playSoundEffect = function(sound) {
         var a = soundEffects[sound];
         a.pause();

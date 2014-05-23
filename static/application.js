@@ -60,29 +60,49 @@ angular.module('grooveboat', ["ngRoute", "LocalStorageModule", "ngSanitize", "ui
             });
         };
     }).directive('dropFiles', function() {
-        function dragEnter(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            console.log("Enter");
-        }
-
-        function dragOver(e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }
-
         return function(scope, el, attr) {
+            function dragEnter(e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                if(!attr.dragEnter) return;
+
+                scope.$apply(function() {
+                    scope.$eval(attr.dragEnter);
+                });
+            }
+
+            function dragLeave(e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                if(!attr.dragLeave) return;
+
+                scope.$apply(function() {
+                    scope.$eval(attr.dragLeave);
+                });
+            }
+
+            function dragOver(e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
             function drop(e) {
                 e.stopPropagation();
                 e.preventDefault();
 
-                console.log("Drop");
+                scope.$apply(function() {
+                    scope.$eval(attr.dragLeave);
+                });
+
                 scope.$apply(function() {
                     scope.files = e.dataTransfer.files;
                 });
             }
 
             el[0].addEventListener("dragenter", dragEnter, false);
+            el[0].addEventListener("dragleave", dragLeave, false);
             el[0].addEventListener("dragover", dragOver, false);
             el[0].addEventListener("drop", drop, false);
         };
