@@ -173,7 +173,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
 
     function pruneChat() {
         var count = $scope.chat_messages.length;
-        if(count > 75) {
+        if(count > 76) {
             $scope.chat_messages.splice(0, count - 75);
         }
     }

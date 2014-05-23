@@ -2,7 +2,7 @@
 
     // turn track into object suitable for transmission
     function exportTrack(t) {
-        return {
+        return t && {
             id: t.id,
             title: t.title,
             artist: t.artist,
@@ -311,6 +311,10 @@
         console.log('becoming active');
         var track = this.playlists[this.activePlaylist][0];
         this.me.activeTrack = track;
+
+        if (!track) {
+            this.quitDJing();
+        }
 
         this.buoy.send('setActiveTrack', {
             track: exportTrack(track)
