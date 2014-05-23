@@ -133,6 +133,8 @@ Room.prototype.removeDJ = function(peer) {
 
     if(this.activeDJ == i) {
         this.skip();
+    } else if(this.activeDJ > i) {
+        this.activeDJ--;
     }
 };
 
