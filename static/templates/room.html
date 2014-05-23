@@ -38,23 +38,25 @@
             
             <div ng-class="{'sidebar-btn': true, half: currentUser == activeDJ}" ng-click="becomeDJ()">{{getJoinText()}}</div><div class="sidebar-btn half" ng-show="currentUser == activeDJ" ng-click="skipSong()">skip song</div>
 
-            <ul class="songs" ng-hide="!currentTrack || currentUser != activeDJ">
-                <li class="active">
-                    <div class="track">{{currentTrack.title}}</div>
-                    <div class="artist">{{currentTrack.artist}}</div>
-                </li>
-            </ul>
+            <div class="songs-container">
+                <ul class="songs" ng-hide="!currentTrack || currentUser != activeDJ">
+                    <li class="active">
+                        <div class="track">{{currentTrack.title}}</div>
+                        <div class="artist">{{currentTrack.artist}}</div>
+                    </li>
+                </ul>
 
-            <ul class="songs" ui:sortable="sortableOptions" ng:model="tracks">
-                <li ng-repeat="track in tracks" ng-hide="track.id == currentTrack.id">
-                    <div class="track">{{track.title}}</div>
-                    <div class="artist">{{track.artist}}</div>
-                    <div class="right">
-                        <div ng-click="deleteTrack(track)">&times;</div>
-                        <div ng-click="bumpTrack(track)"><i class="icon-up-arrow"></i></div>
-                    </div>
-                </li>
-            </ul>
+                <ul class="songs" ui:sortable="sortableOptions" ng:model="tracks">
+                    <li ng-repeat="track in tracks" ng-hide="track.id == currentTrack.id">
+                        <div class="track">{{track.title}}</div>
+                        <div class="artist">{{track.artist}}</div>
+                        <div class="right">
+                            <div ng-click="deleteTrack(track)">&times;</div>
+                            <div ng-click="bumpTrack(track)"><i class="icon-up-arrow"></i></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
