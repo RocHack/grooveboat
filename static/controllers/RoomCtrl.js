@@ -45,6 +45,11 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         axis: "y"
     };
 
+    // Set up sound effects
+    var soundEffects = {
+        "ping": new Audio("static/ping.wav")
+    };
+
     var player = $window.document.createElement("audio");
     window.player = player;
     var activeTrack;
@@ -58,6 +63,13 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
             player.play();
         }
     }, false);
+
+    $scope.playSoundEffect = function(sound) {
+        var a = soundEffects[sound];
+        a.pause();
+        a.currentTime = 0;
+        a.play();
+    }
 
     $scope.switchTab = function(tab) {
         if(tab == "chat" && $scope.newMessages) {
@@ -183,6 +195,10 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         $scope.$apply(function($scope) { 
             if($scope.currentTab != "chat") {
                 $scope.newMessages = true;
+            }
+
+            if(message.text.indexOf(groove.me.name) != -1) {
+                $scope.playSoundEffect("ping");
             }
 
             var last = groove.lastChatAuthor;

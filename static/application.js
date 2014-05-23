@@ -91,4 +91,8 @@ angular.module('grooveboat', ["ngRoute", "LocalStorageModule", "ngSanitize", "ui
         return function(text) {
             return emoji(text, 'static/lib/emoji/pngs');
         };
+    }).filter("mention", function() {
+        return function(text, name) {
+            return text.replace(name, "<span class=\"mention\">"+ name +"</span>");
+        };
     });
