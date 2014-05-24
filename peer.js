@@ -167,7 +167,7 @@ Peer.prototype.onSetGravatar = function(data) {
  *  track: object containing artist, album, and title attrs
  */
 Peer.prototype.onSetActiveTrack = function(data) {
-    if(!this.room || this.room.getActiveDJ() != this) return;
+    if(!this.room || this.room.getActiveDJ() != this || !data.track) return;
     this.room.setActiveTrack(data.track);
 };
 
