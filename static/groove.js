@@ -493,14 +493,12 @@
     }
 
     function grooveProcessFile(files, i) {
-        if (i > files.length) {
-            return;
-        }
-
-        var next = grooveProcessFile.bind(this, files, i+1);
         var file = files[i];
+        if (!file) return;
+        var next = grooveProcessFile.bind(this, files, i+1);
 
-        if (file && file.type.indexOf('audio/') == 0) {
+        if (file.type.indexOf('audio/') === 0 ||
+            file.type.indexOf('video/') === 0) {
             parseAudioMetadata(file, grooveFileParsed.bind(this, file, next));
         } else {
             next();
