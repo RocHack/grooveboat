@@ -253,21 +253,6 @@
         this.buoy.send("leaveRoom", {});
     };
 
-    Groove.prototype._welcomeUser = function(user) {
-        var amDJ = this.me == this.activeDJ;
-        this.webrtc.send({
-            type: 'welcome',
-            name: this.me.name,
-            gravatar: this.me.gravatar,
-            vote: this.me.vote,
-            djs: this.djs.filter(Boolean)
-                .map(function(user) { return user.id; }),
-            active: this.activeDJ ? this.djs.indexOf(this.activeDJ) : -1,
-            myActiveTrack: amDJ ? exportTrack(this.activeTrack) : null
-        }, user.id);
-        this.emit('peerConnected', user);
-    };
-
     Groove.prototype._onSetGravatar = function() {
         this.buoy.send("setGravatar", {
             gravatar: this.me.gravatar
@@ -381,67 +366,6 @@
         if (this.mediaSource) {
             this.mediaSource.disconnect();
             this.mediaSource.stop(0);
-        }
-    };
-
-    Groove.prototype._negotiateDJs = function(djs, sender, activeDJ) {
-        djs = djs.filter(Boolean);
-        if (!djs.length) return;
-        // todo: reconcile with other data known about DJs
-        this.djs.forEach(function(user) {
-            user.dj = false;
-        });
-        this.djs = djs;
-        djs.forEach(function(user) {
-            user.dj = true;
-        });
-        this.emit('djs', this.djs.slice());
-        var activeTrack = activeDJ.activeTrack;
-        if (activeTrack) {
-            this._acceptActiveTrack(activeTrack, activeDJ);
-        }
-        console.log('got dj list', djs, 'from', sender.name);
-    };
-
-    // get the next DJ to play
-    Groove.prototype.getUpcomingDJ = function() {
-        var activeDJI = this.djs.indexOf(this.activeDJ);
-        var nextDJ;
-        if (activeDJI != -1) {
-            var nextDJI = (activeDJI+1) % this.djs.length;
-            nextDJ = this.djs[nextDJI];
-        }
-        console.log('active DJ', activeDJI, 'next dj', nextDJ);
-    };
-
-    // is it a DJ's valid turn to start playing
-    Groove.prototype.isUpcomingDJ = function(user) {
-        //console.log('activeDJI', activeDJI, 'nextDJI', nextDJI);
-        var upcomingDJ = this.getUpcomingDJ();
-        return !upcomingDJ || upcomingDJ == user;
-    };
-
-    // process a user claiming the active DJ spot
-    Groove.prototype._negotiateActiveTrack = function(track, user) {
-        // remember the track they are sending, in case they become dj
-        user.activeTrack = track;
-        if (this.isUpcomingDJ(user)) {
-            this._acceptActiveTrack(track, user);
-        } else {
-            console.error('User is not an up dj');
-        }
-    };
-
-    // update the active track and DJ
-    Groove.prototype._acceptActiveTrack = function(track, user) {
-        console.log('accept active dj');
-        this.activeTrack = track;
-        this.activeDJ = user;
-
-        this.emit('activeDJ');
-        this.emit('activeTrack');
-        if (user != this.me) {
-            user.requestFile('current');
         }
     };
 
