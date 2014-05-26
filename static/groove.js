@@ -48,6 +48,7 @@
         // gainNode control volume for local stream.
         // volume for incoming stream is set on the player object in RoomCtrl
         this.gainNode = this.audioContext.createGain();
+        this.gainNode.connect(this.audioContext.destination);
 
         // get stats about incoming peer connection from DJ
         this.statsTimestamp = 0;
@@ -613,7 +614,6 @@
 
         // connect the audio stream to the audio hardware
         this.mediaSource.connect(this.gainNode);
-        this.gainNode.connect(this.audioContext.destination);
 
         // create a destination for the remote browser
         var remote = this.audioContext.createMediaStreamDestination();
