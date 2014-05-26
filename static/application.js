@@ -101,10 +101,24 @@ angular.module('grooveboat', ["ngRoute", "LocalStorageModule", "ngSanitize", "ui
                 });
             }
 
+            function click() {
+                var input = document.createElement("input");
+                input.type = "file";
+                function onChange() {
+                    scope.$apply(function() {
+                        scope.files = input.files;
+                    });
+                    input.removeEventListener("change", onChange);
+                }
+                input.addEventListener("change", onChange, false);
+                input.click();
+            }
+
             el[0].addEventListener("dragenter", dragEnter, false);
             el[0].addEventListener("dragleave", dragLeave, false);
             el[0].addEventListener("dragover", dragOver, false);
             el[0].addEventListener("drop", drop, false);
+            el[0].addEventListener("click", click, false);
         };
     }).filter('emoji', function() {
         var emoji = window.returnExports;
