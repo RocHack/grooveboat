@@ -365,7 +365,7 @@
 
     // remove peer connection and stream to user
     function Groove_removePeerStream(user) {
-        //user.pc.removeStream(this.stream);
+        user.removeStream(this.stream);
     }
 
     // clean up after no longer the active DJ
@@ -375,8 +375,13 @@
         this.emit('activeDJ');
         this.emit('activeTrack');
         this.emit('activeTrackURL');
-        this.getPeers().forEach(Groove_removePeerStream.bind(this));
-        if (this.mediaSource) this.mediaSource.stop(0);
+        if (this.stream) {
+            this.getPeers().forEach(Groove_removePeerStream.bind(this));
+        }
+        if (this.mediaSource) {
+            this.mediaSource.disconnect();
+            this.mediaSource.stop(0);
+        }
     };
 
     Groove.prototype._negotiateDJs = function(djs, sender, activeDJ) {

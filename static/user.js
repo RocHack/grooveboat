@@ -125,6 +125,7 @@
         this.pc = new PeerConnection(peerConnectionConfig, constraints);
         this.pc.on('ice', User_onIce.bind(this));
         this.pc.on('addStream', User_onAddStream.bind(this));
+        this.pc.on('removeStream', User_onRemoveStream.bind(this));
     };
 
     User.prototype.offerConnection = function() {
@@ -213,8 +214,28 @@
             console.error('Received stream from non-DJ');
             return;
         }
-        //this.emit('addStream', e.stream);
         this.groove.gotRemoteStream(e.stream);
+    }
+
+    // remove a stream from the peer connection
+    User.prototype.removeStream = function(stream) {
+        if (!this.pc) {
+            console.error('Attempted to remove stream without peer connection');
+            return;
+        }
+        if (!stream) {
+            console.error('Attempted to remove null stream');
+            return;
+        }
+        // our PeerConnection doesn't expose the underlying removeStream method
+        if (this.pc.pc) {
+            this.pc.pc.removeStream(stream);
+        }
+    };
+
+    // remote audio stream over peer connection closed
+    function User_onRemoveStream() {
+        console.log("stream removed");
     }
 
     // set default icon URL
