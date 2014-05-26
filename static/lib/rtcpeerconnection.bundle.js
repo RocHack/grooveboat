@@ -1362,7 +1362,6 @@ function dumpSDP(description) {
 }
 
 function TraceablePeerConnection(config, constraints) {
-    console.log('tp init');
     var self = this;
     WildEmitter.call(this);
 
