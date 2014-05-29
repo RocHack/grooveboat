@@ -105,6 +105,7 @@
             var user = new User(this, peer.id);
             user.name = peer.name;
             user.setGravatar(peer.gravatar);
+            user.setVote(peer.vote);
 
             this.users[user.id] = user;
             this.emit('peerConnected', user);
