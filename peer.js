@@ -7,6 +7,7 @@ function Peer(buoy, conn) {
     this.room = null;
     this.name = "Anon";
     this.gravatar = null;
+    this.vote = 0;
 
     // All events peers can send to the signaling server are here
     this.on("ping", this.onPing);

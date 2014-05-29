@@ -19,11 +19,12 @@ util.inherits(Room, EventEmitter);
 /*
  * Peer object serialization
  */
-function peerToIdName(peer) {
+function peerData(peer) {
     return {
         id: peer.id,
         name: peer.name,
-        gravatar: peer.gravatar
+        gravatar: peer.gravatar,
+        votes: peer.vote
     };
 }
 
@@ -37,11 +38,11 @@ function peerToId(peer) {
 Room.prototype.join = function(peer) {
     this.peers.push(peer);
 
-    this.sendAllBut(peer, "peerJoined", peerToIdName(peer));
+    this.sendAllBut(peer, "peerJoined", peerData(peer));
 
     peer.send("roomData", {
         name: this.name,
-        peers: this.peers.map(peerToIdName),
+        peers: this.peers.map(peerData),
         djs: this.djs.map(peerToId),
         activeDJ: this.activeDJ,
         activeTrack: this.activeTrack
