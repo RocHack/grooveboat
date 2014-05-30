@@ -20,6 +20,7 @@ function Peer(buoy, conn) {
     this.on("quitDJ", this.onQuitDJ);
     this.on("setGravatar", this.onSetGravatar);
     this.on("setActiveTrack", this.onSetActiveTrack);
+    this.on("setActiveTrackDuration", this.onSetActiveTrackDuration);
     this.on("skip", this.onSkip);
     this.on("setVote", this.onSetVote);
 
@@ -170,6 +171,17 @@ Peer.prototype.onSetGravatar = function(data) {
 Peer.prototype.onSetActiveTrack = function(data) {
     if(!this.room || this.room.getActiveDJ() != this || !data.track) return;
     this.room.setActiveTrack(data.track);
+};
+
+/*
+ * Handles a request to set the duration of the room's active track
+ * Should be called once by the DJ.
+ * Expects:
+ *  duration: number in ms of duration of active track
+ */
+Peer.prototype.onSetActiveTrackDuration = function(data) {
+    if(!this.room || this.room.getActiveDJ() != this || !data.duration) return;
+    this.room.setActiveTrackDuration(data.duration);
 };
 
 /*

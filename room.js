@@ -186,4 +186,19 @@ Room.prototype.setActiveTrack = function(track) {
     });
 };
 
+/*
+ * Sets the duration (ms) of the active track of the room
+ */
+Room.prototype.setActiveTrackDuration = function(duration) {
+    if (!this.activeTrack) {
+        console.error("Got active track duration without active track");
+        return;
+    }
+
+    this.activeTrack.duration = duration;
+    this.sendAll("setDuration", {
+        duration: duration
+    });
+};
+
 exports.Room = Room;
