@@ -52,17 +52,6 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
 
     var player = $window.document.createElement("audio");
     window.player = player;
-    var activeTrack;
-    player.addEventListener("canplay", function() {
-        var track = groove.activeTrack;
-        if (track == activeTrack) return;
-        activeTrack = track;
-        console.log("canplay", track && track.currentTime, track);
-        if (track) {
-            groove.canPlayTrack(player.duration);
-            player.play();
-        }
-    }, false);
 
     $scope.bumpTrack = function(track) {
         var i =  $scope.tracks.indexOf(track);
@@ -278,6 +267,10 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         } else {
             player.pause();
         }
+    });
+
+    groove.on("activeTrackDuration", function() {
+        // console.log("Duration!", groove.activeTrack.duration);
     });
 
     groove.on("emptyPlaylist", function() {

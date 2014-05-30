@@ -86,13 +86,6 @@
         });
     };
 
-    User.prototype._gotTrackDuration = function(duration) {
-        console.log('got track duration', duration);
-        if (this == this.groove.activeDJ) {
-            this.activeTrack.duration = duration;
-        }
-    };
-
     // send data via server
     User.prototype.send = function (data) {
         this.groove.buoy.send('sendTo', {

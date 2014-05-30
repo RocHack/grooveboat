@@ -7,6 +7,7 @@
             title: t.title,
             artist: t.artist,
             album: t.album,
+            duration: t.duration
         };
     }
 
@@ -32,6 +33,7 @@
         this.users = {};
         this.djs = [];
         this.activeDJ = null;
+        this.currentTrackTime = 0;
 
         this.me = new User(this);
         this.me.isLocal = true;
@@ -78,6 +80,7 @@
         this.buoy.on("removeDJ", this.onBuoyRemoveDJ.bind(this));
         this.buoy.on("setActiveDJ", this.onBuoySetActiveDJ.bind(this));
         this.buoy.on("setActiveTrack", this.onBuoySetActiveTrack.bind(this));
+        this.buoy.on("setDuration", this.onBuoySetDuration.bind(this));
         this.buoy.on("setName", this.onBuoySetName.bind(this));
         this.buoy.on("setGravatar", this.onBuoySetGravatar.bind(this));
         this.buoy.on("setVote", this.onBuoySetVote.bind(this));
@@ -133,6 +136,13 @@
         this.emit("djs", this.djs.slice());
         this.emit("activeDJ");
         this.emit("activeTrack");
+        if (this.activeTrack) {
+            this.emit("activeTrackDuration");
+        }
+
+        // get track current time
+        this.currentTrackTime = data.currentTime;
+        this.emit("currentTime");
     };
 
     Groove.prototype.onBuoyRecvMessage = function(data) {
@@ -205,6 +215,15 @@
             user.vote = 0;
             this.emit("setVote", user);
         }
+    };
+
+    Groove.prototype.onBuoySetDuration = function(data) {
+        if (!this.activeTrack) {
+            console.error("Got active track duration without active track");
+            return;
+        }
+        this.activeTrack.duration = data.duration;
+        this.emit("activeTrackDuration");
     };
 
     Groove.prototype.onBuoySetGravatar = function(data) {
@@ -527,7 +546,10 @@
     // handle audio data decoded from file.
     // should be called by active DJ beginning to play track
     function Groove_gotAudioData(buffer) {
-        if (this.me != this.activeDJ) return;
+        if (this.me != this.activeDJ || !this.activeTrack) return;
+
+        // notify server about track duration
+        this._setActiveTrackDuration(buffer.duration);
 
         // thanks to:
         // http://servicelab.org/2013/07/24/streaming-audio-between-browsers-with-webrtc-and-webaudio/
@@ -568,6 +590,16 @@
             return;
         }
         this.getPeers().forEach(this.streamToPeer.bind(this));
+    };
+
+    Groove.prototype._setActiveTrackDuration = function(duration) {
+        var durationMs = duration * 1000;
+        this.activeTrack.duration = durationMs;
+        // notify server and everyone about duration of active track
+        this.emit("activeTrackDuration");
+        this.buoy.send("setActiveTrackDuration", {
+            duration: durationMs
+        });
     };
 
     // our track was able to be loaded by the player.
