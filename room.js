@@ -10,6 +10,7 @@ function Room(buoy, name) {
     this.djs = [];
     this.activeDJ = -1; // Val is an index in this.djs
     this.activeTrack = null;
+    this.trackStartTime = null;
 
     console.log("[debug] Creating new room "+ name);
 }
@@ -45,7 +46,8 @@ Room.prototype.join = function(peer) {
         peers: this.peers.map(peerData),
         djs: this.djs.map(peerToId),
         activeDJ: this.activeDJ,
-        activeTrack: this.activeTrack
+        activeTrack: this.activeTrack,
+        currentTime: this.getCurrentTime()
     });
 };
 
@@ -175,6 +177,14 @@ Room.prototype.getActiveDJ = function() {
  * Sets the active track of the room
  */
 Room.prototype.setActiveTrack = function(track) {
+    if (!track) {
+        // if the track is being cleared, clear the start time
+        this.trackStartTime = null;
+    } else if (!this.activeTrack) {
+        // if this is a new track, reset the start time
+        this.trackStartTime = new Date();
+    }
+
     this.activeTrack = track;
     this.sendAll("setActiveTrack", {
         track: track
@@ -199,6 +209,14 @@ Room.prototype.setActiveTrackDuration = function(duration) {
     this.sendAll("setDuration", {
         duration: duration
     });
+};
+
+/*
+ * Gets the time (ms) into the current track
+ * Returns null if there is no current track or start time is unknown
+ */
+Room.prototype.getCurrentTime = function() {
+    return this.trackStartTime && (new Date() - this.trackStartTime);
 };
 
 exports.Room = Room;
