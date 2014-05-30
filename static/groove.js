@@ -127,7 +127,8 @@
             this.djs.push(dj);
         }
 
-        this.activeTrack = data.activeTrack;
+        // get active track and DJ
+        this._setActiveTrack(data.activeTrack);
         this.activeDJ = this.djs[data.activeDJ];
         if (this.activeDJ) {
             // prepare to receive track stream
@@ -205,7 +206,7 @@
     };
 
     Groove.prototype.onBuoySetActiveTrack = function(data) {
-        this.activeTrack = data.track;
+        this._setActiveTrack(data.track);
         this.emit("activeTrack");
         // the active DJ will now stream the track to us
         // (unless we are the active DJ)
@@ -314,23 +315,17 @@
     };
 
     Groove.prototype.becomeActiveDJ = function() {
-        console.log('becoming active');
-        var track = this.playlists[this.activePlaylist][0];
-        this.me.activeTrack = track;
-
+        var track = this.getMyTrack();
         if (!track) {
             this.quitDJing();
         }
 
+        console.log("set active track", track);
         this.buoy.send('setActiveTrack', {
             track: exportTrack(track)
         });
 
-        // play our active track, and send it to peers.
-
-        var peers = this.getPeers();
-        
-        // start playing track locally
+        // play our active track, and stream it to peers.
         this._playMyTrack();
     };
 
@@ -376,7 +371,7 @@
     // clean up after no longer the active DJ
     Groove.prototype.cleanupDJing = function() {
         this.activeDJ = null;
-        this.activeTrack = null;
+        this._setActiveTrack(null);
         this.emit('activeDJ');
         this.emit('activeTrack');
         this.emit('activeTrackURL');
@@ -423,10 +418,6 @@
         playlist.push(track);
 
         track.playlistPosition = playlist.indexOf(track);
-
-        if (playlist.length == 1) {
-            this.me.activeTrack = track;
-        }
 
         if(this.persist) {
             this.db.storeTrack(track);
@@ -476,7 +467,6 @@
         });
 
         this.playlists[this.activePlaylist] = tracks;
-        this.me.activeTrack = this.playlists[this.activePlaylist][0];
 
         groove.emit("playlistUpdated", this.activePlaylist);
     }
@@ -518,9 +508,14 @@
         this.gainNode.gain.value = volume;
     };
 
+    // get our upcoming track (or active track, if we are the active DJ)
+    Groove.prototype.getMyTrack = function() {
+        return this.playlists[this.activePlaylist][0];
+    };
+
     // play my track locally, as the active DJ
     Groove.prototype._playMyTrack = function() {
-        var track = this.me.activeTrack;
+        var track = this.getMyTrack();
         var reader = new FileReader();
         reader.readAsArrayBuffer(track.file);
         reader.onload = function(e) {
@@ -590,6 +585,10 @@
             return;
         }
         this.getPeers().forEach(this.streamToPeer.bind(this));
+    };
+
+    Groove.prototype._setActiveTrack = function(track) {
+        this.activeTrack = track;
     };
 
     Groove.prototype._setActiveTrackDuration = function(duration) {
