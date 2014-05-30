@@ -33,7 +33,6 @@
         this.users = {};
         this.djs = [];
         this.activeDJ = null;
-        this.currentTrackTime = 0;
 
         this.me = new User(this);
         this.me.isLocal = true;
@@ -43,6 +42,8 @@
         this.playlists = {default: []};
         this.activePlaylist = 'default';
         this.activeTrack = null;
+        this.trackClock = null;
+        this.trackStartTime = -1;
         this.persist = false;
         this.db = new GrooveDB();
 
@@ -62,6 +63,14 @@
     Groove.prototype = Object.create(WildEmitter.prototype, {
         constructor: {value: Groove}
     });
+
+    /*
+     * Update the clock
+     */
+    function Groove_clock() {
+        // let the UI update the current track time
+        this.emit("currentTrackTime");
+    }
 
     /*
      * Connects to a buoy server and instantiates this.buoy
@@ -99,6 +108,7 @@
     }
 
     Groove.prototype.onBuoyRoomData = function(data) {
+        // get peer data
         this.users = {};
         for(var i = 0; i < data.peers.length; i++) {
             var peer = data.peers[i];
@@ -117,6 +127,7 @@
 
         this.users[this.me.id] = this.me;
 
+        // get DJs
         for (i = 0; i < data.djs.length; i++) {
             var dj = this.users[data.djs[i]];
             if (!dj) {
@@ -128,7 +139,9 @@
         }
 
         // get active track and DJ
-        this._setActiveTrack(data.activeTrack);
+        var trackStartTime = data.currentTime ?
+            new Date().getTime() - data.currentTime : -1;
+        this._setActiveTrack(data.activeTrack, trackStartTime);
         this.activeDJ = this.djs[data.activeDJ];
         if (this.activeDJ) {
             // prepare to receive track stream
@@ -140,10 +153,6 @@
         if (this.activeTrack) {
             this.emit("activeTrackDuration");
         }
-
-        // get track current time
-        this.currentTrackTime = data.currentTime;
-        this.emit("currentTime");
     };
 
     Groove.prototype.onBuoyRecvMessage = function(data) {
@@ -156,6 +165,7 @@
 
     Groove.prototype.onBuoyPeerLeft = function(data) {
         this.emit("peerDisconnected", this.users[data.id]);
+
         console.log("User "+ this.users[data.id].name +" disconnected");
 
         delete this.users[data.id];
@@ -206,7 +216,10 @@
     };
 
     Groove.prototype.onBuoySetActiveTrack = function(data) {
-        this._setActiveTrack(data.track);
+        // assume zero latency from DJ to server to us, for purposes of
+        // computing start time
+        var trackStartTime = new Date().getTime();
+        this._setActiveTrack(data.track, trackStartTime)
         this.emit("activeTrack");
         // the active DJ will now stream the track to us
         // (unless we are the active DJ)
@@ -371,7 +384,7 @@
     // clean up after no longer the active DJ
     Groove.prototype.cleanupDJing = function() {
         this.activeDJ = null;
-        this._setActiveTrack(null);
+        this._setActiveTrack(null, null);
         this.emit('activeDJ');
         this.emit('activeTrack');
         this.emit('activeTrackURL');
@@ -410,10 +423,8 @@
             title: tags.Title || 'Untitled',
             artist: tags.Artist || 'Unknown',
             album: tags.Album || 'Unknown',
-            duration: null // don't know this yet
         };
 
-        console.log('track', track, tags);
         var playlist = this.playlists[this.activePlaylist];
         playlist.push(track);
 
@@ -587,8 +598,19 @@
         this.getPeers().forEach(this.streamToPeer.bind(this));
     };
 
-    Groove.prototype._setActiveTrack = function(track) {
+    Groove.prototype._setActiveTrack = function(track, startTime) {
         this.activeTrack = track;
+        if (this.trackClock) {
+            clearInterval(this.trackClock);
+        }
+        if (track) {
+            this.trackStartTime = startTime;
+            this.trackClock = setInterval(Groove_clock.bind(this), 1000);
+        } else {
+            this.trackStartTime = -1;
+            this.trackClock = null;
+        }
+        this.emit("currentTrackTime");
     };
 
     Groove.prototype._setActiveTrackDuration = function(duration) {
@@ -599,14 +621,6 @@
         this.buoy.send("setActiveTrackDuration", {
             duration: durationMs
         });
-    };
-
-    // our track was able to be loaded by the player.
-    Groove.prototype.canPlayTrack = function(duration) {
-        if (this.me != this.activeDJ) {
-            return;
-        }
-        this.activeTrack.duration = duration;
     };
 
     Groove.prototype.getPeers = function() {
@@ -658,6 +672,12 @@
         // make the object url for the track stream
         this.activeTrack.url = createObjectUrl(stream);
         this.emit('activeTrackURL');
+    };
+
+    // Get the current time (ms) in playback of the active track
+    Groove.prototype.getCurrentTrackTime = function() {
+        return this.trackStartTime ?
+            (new Date().getTime() - this.trackStartTime) : -1;
     };
 
     window.Groove = Groove;

@@ -273,6 +273,10 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         // console.log("Duration!", groove.activeTrack.duration);
     });
 
+    groove.on("currentTrackTime", function() {
+        // console.log("Current time!", groove.getCurrentTrackTime());
+    });
+
     groove.on("emptyPlaylist", function() {
         alert("Add some music to your playlist first.");
     });
