@@ -11,7 +11,7 @@ Written by [Charles Lehner](https://celehner.com/) and [Steve Gattuso](http://st
 npm install
 ```
 
-* Build the JS and CSS
+* Build the JS and CSS for production
 ```
 npm run build
 ```
