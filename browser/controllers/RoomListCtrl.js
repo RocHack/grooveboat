@@ -57,3 +57,5 @@ function RoomListCtrl($scope, $location, groove, localStorageService) {
 }
 
 RoomListCtrl.$inject = ["$scope", "$location", "groove", "localStorageService"];
+
+module.exports = RoomListCtrl;
