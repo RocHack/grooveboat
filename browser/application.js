@@ -1,5 +1,5 @@
 /* global angular */
-require('jquery');
+window.jQuery = require('jquery');
 require('jquery-ui/sortable');
 require('angular/angular');
 require('angular-route/angular-route');
