@@ -32,6 +32,7 @@
     "watchify": "^0.4.1",
     "catw": "^0.2.0",
     "uglify-js": "^2.4.13",
+    "clean-css": "^2.1.8",
     "napa": "^0.4.1"
   },
   "napa": {
@@ -47,7 +48,7 @@
     "watch-css": "catw -c 'lessc -' 'style/*.less' -o static/bundle.css -v",
     "watch-js": "watchify browser/*.js -o static/bundle.js --debug --verbose",
     "watch": "npm run watch-css & npm run watch-js",
-    "build-css": "catw -c 'lessc -' 'style/*.less' > static/bundle.css",
+    "build-css": "catw -c 'lessc -' 'style/*.less' | cleancss > static/bundle.css",
     "build-js": "browserify browser/*.js | uglifyjs -c > static/bundle.js",
     "build": "npm run build-css && npm run build-js"
   },
