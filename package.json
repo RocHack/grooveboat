@@ -6,11 +6,6 @@
     "type": "git",
     "url": "git@github.com:RocHack/grooveboat.git"
   },
-  "contributors": [
-    "Charles Lehner <cel@celehner.com> (http://celehner.com/)",
-    "Steve Gattuso <steve@stevegattuso.me> (http://stevegattuso.me)",
-    "Nate Book (http://www.natembook.com/)"
-  ],
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/RocHack/grooveboat/issues"
