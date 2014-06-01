@@ -16,7 +16,7 @@
     "url": "https://github.com/RocHack/grooveboat/issues"
   },
   "dependencies": {
-    "browserify": "^2.36.1",
+    "browserify": "^4.1.6",
     "watchify": "^0.10.2",
     "less": "^1.5.1",
     "md5-jkmyers": "^0.0.1",
@@ -39,6 +39,7 @@
     "angular-route": "angular/bower-angular-route",
     "angular-sanitize": "angular/bower-angular-sanitize",
     "angular-ui-sortable": "angular-ui/ui-sortable",
+    "angular-ui-utils": "angular-ui/ui-utils",
     "emoji-images": "nmbook/emoji-images.js"
   },
   "scripts": {

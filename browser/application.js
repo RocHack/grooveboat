@@ -6,6 +6,8 @@ require('angular-route/angular-route');
 require('angular-sanitize/angular-sanitize');
 require('angular-local-storage/angular-local-storage');
 require('angular-ui-sortable/src/sortable');
+require('angular-ui-utils/modules/event/event');
+require('angular-ui-utils/modules/keypress/keypress');
 var emoji = require('emoji-images');
 
 var MainCtrl = require('./controllers/MainCtrl');
@@ -14,8 +16,9 @@ var RoomCtrl = require('./controllers/RoomCtrl');
 
 var Groove = require('./groove');
 
-var requires = ['ngRoute', 'LocalStorageModule', 'ngSanitize', 'ui.sortable'];
-angular.module('grooveboat', requires)
+angular.module('grooveboat',
+    ['ngRoute', 'LocalStorageModule', 'ngSanitize', 'ui.sortable',
+        'ui.keypress', 'ui.event'])
     .controller('MainCtrl', MainCtrl) 
     .config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
         $routeProvider
