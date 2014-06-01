@@ -2,3 +2,4 @@
 .DS_Store
 style.css
 node_modules
+npm-debug.log
