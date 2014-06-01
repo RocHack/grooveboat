@@ -4,19 +4,16 @@ A WebRTC powered peer-to-peer implementation of the late [Turntable.fm](http://t
 
 Written by [Charles Lehner](https://celehner.com/) and [Steve Gattuso](http://stevegattuso.me) with the brilliant design talents of [Krisi Hinova](http://twitter.com/krisishinova).
 
-## Development
-
-* Gather dependencies
+## Installation
 ```
 npm install
-```
-
-* Build the JS and CSS for production
-```
 npm run build
+npm start
 ```
 
-* Auto-rebuild while developing
+## Development
+
+Start the server with auto-rebuild and auto-restart:
 ```
 npm run watch
 ```
