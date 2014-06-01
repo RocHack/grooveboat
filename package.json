@@ -26,7 +26,9 @@
     "angular-local-storage": "grevory/angular-local-storage#0.0.5",
     "jquery": "^2.1.1",
     "jquery-ui": "^1.10.5",
-    "rtcpeerconnection": "^2.3.3"
+    "rtcpeerconnection": "^2.3.3",
+    "websocket": "1.0.x",
+    "node-uuid": "1.4.x"
   },
   "devDependencies": {
     "watchify": "^0.4.1",
@@ -50,7 +52,9 @@
     "watch": "npm run watch-css & npm run watch-js",
     "build-css": "catw -c 'lessc -' 'style/*.less' | cleancss > static/bundle.css",
     "build-js": "browserify browser/*.js | uglifyjs -c > static/bundle.js",
-    "build": "npm run build-css && npm run build-js"
+    "build": "npm run build-css && npm run build-js",
+    "start": "node server/groovebuoy.js",
+    "start-dev": "npm run watch & npm start"
   },
   "browserify": {
     "transform": [
