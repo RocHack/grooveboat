@@ -30,7 +30,8 @@
     "catw": "^0.2.0",
     "uglify-js": "^2.4.13",
     "clean-css": "^2.1.8",
-    "napa": "^0.4.1"
+    "napa": "^0.4.1",
+    "nodemon": "^1.1.1"
   },
   "napa": {
     "angular": "angular/bower-angular",
@@ -44,13 +45,12 @@
     "install": "napa",
     "watch-css": "catw -c 'lessc -' 'style/*.less' -o static/bundle.css -v",
     "watch-js": "watchify browser/*.js -o static/bundle.js --debug --verbose",
-    "watch": "npm run watch-css & npm run watch-js",
+    "watch-server": "nodemon --watch server server/groovebuoy.js",
+    "watch": "npm run watch-css & npm run watch-js & npm run watch-server",
     "build-css": "catw -c 'lessc -' 'style/*.less' | cleancss > static/bundle.css",
     "build-js": "browserify browser/*.js | uglifyjs -c > static/bundle.js",
     "build": "npm run build-css && npm run build-js",
-    "start": "node server/groovebuoy.js",
-    "start-build": "npm run build && npm start",
-    "start-watch": "npm run watch & npm start"
+    "start": "node server/groovebuoy.js"
   },
   "browserify": {
     "transform": [

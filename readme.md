@@ -13,9 +13,9 @@ npm start
 
 ## Development
 
-Start the server while auto-rebuilding the JS/CSS as you make changes to it.
+Start the server with auto-rebuild and auto-restart:
 ```
-npm run start-watch
+npm run watch
 ```
 
 ## License
