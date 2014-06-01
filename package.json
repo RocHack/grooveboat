@@ -54,7 +54,8 @@
     "build-js": "browserify browser/*.js | uglifyjs -c > static/bundle.js",
     "build": "npm run build-css && npm run build-js",
     "start": "node server/groovebuoy.js",
-    "start-dev": "npm run watch & npm start"
+    "start-build": "npm run build && npm start",
+    "start-watch": "npm run watch & npm start"
   },
   "browserify": {
     "transform": [
