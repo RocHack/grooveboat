@@ -51,5 +51,8 @@ function MainCtrl($scope, groove, localStorageService) {
             $scope.setOverlay(false);
         });
     });
-}
+};
 
+MainCtrl.$inject = ["$scope", "groove", "localStorageService"];
+
+module.exports = MainCtrl;

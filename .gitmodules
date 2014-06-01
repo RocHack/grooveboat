@@ -1,3 +1,0 @@
-[submodule "static/lib/emoji"]
-	path = static/lib/emoji
-	url = https://github.com/nmbook/emoji-images.js.git

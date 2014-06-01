@@ -313,3 +313,5 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
 }
 
 RoomCtrl.$inject = ["$scope", "$routeParams", "$window", "$location", "groove", "localStorageService", "$interval"];
+
+module.exports = RoomCtrl;

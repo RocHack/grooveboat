@@ -1,13 +1,34 @@
-angular.module('grooveboat', ["ngRoute", "LocalStorageModule", "ngSanitize", "ui"])
+/* global angular */
+window.jQuery = require('jquery');
+require('jquery-ui/sortable');
+require('angular/angular');
+require('angular-route/angular-route');
+require('angular-sanitize/angular-sanitize');
+require('angular-local-storage/angular-local-storage');
+require('angular-ui-sortable/src/sortable');
+require('angular-ui-utils/modules/event/event');
+require('angular-ui-utils/modules/keypress/keypress');
+var emoji = require('emoji-images');
+
+var MainCtrl = require('./controllers/MainCtrl');
+var RoomListCtrl = require('./controllers/RoomListCtrl');
+var RoomCtrl = require('./controllers/RoomCtrl');
+
+var Groove = require('./groove');
+
+angular.module('grooveboat',
+    ['ngRoute', 'LocalStorageModule', 'ngSanitize', 'ui.sortable',
+        'ui.keypress', 'ui.event'])
+    .controller('MainCtrl', MainCtrl) 
     .config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
         $routeProvider
             .when("/", { 
                 controller: RoomListCtrl, 
-                templateUrl: "static/templates/room_list.html"
+                template: require("./templates/room_list.html")
             })
             .when("/room/:room", { 
                 controller: RoomCtrl, 
-                templateUrl: "static/templates/room.html"
+                template: require("./templates/room.html")
             })
             .otherwise({redirect_to: "/"});
 
@@ -121,9 +142,8 @@ angular.module('grooveboat', ["ngRoute", "LocalStorageModule", "ngSanitize", "ui
             el[0].addEventListener("click", click, false);
         };
     }).filter('emoji', function() {
-        var emoji = window.returnExports;
         return function(text) {
-            return emoji(text, 'static/lib/emoji/pngs');
+            return emoji(text, 'static/img/emoji');
         };
     }).filter("mention", function() {
         return function(text, name) {

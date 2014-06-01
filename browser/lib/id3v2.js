@@ -1,3 +1,5 @@
+// ID3v2 tag parser
+// pulled from antimatter15's in-browser mp3 player
 // https://github.com/antimatter15/player/raw/master/id3v2.js
 ID3v2 = {
 	parseStream: function(stream, onComplete){
@@ -667,3 +669,5 @@ function guessSong(n){
 		Album: album
 	}
 }
+
+module.exports = ID3v2;
