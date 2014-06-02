@@ -52,6 +52,7 @@ function Groove() {
     this.trackStartTime = -1;
     this.persist = false;
     this.db = new GrooveDB();
+    this.getPersistTracks();
 
     this.audioContext = new AudioContext();
     // gainNode control volume for local stream.
