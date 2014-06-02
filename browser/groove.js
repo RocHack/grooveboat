@@ -614,8 +614,6 @@ Groove.prototype.streamToPeer = function(user) {
     user.preparePeerConnection();
     // add the stream to the peer connection
     user.addStream(this.stream);
-    // connect
-    user.offerConnection();
 };
 
 Groove.prototype.streamToPeers = function() {
