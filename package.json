@@ -53,7 +53,8 @@
     "build-css": "catw -c 'lessc -' 'style/*.less' | cleancss > static/bundle.css",
     "build-js": "browserify browser/*.js | uglifyjs -c > static/bundle.js",
     "build": "npm run build-css && npm run build-js",
-    "start": "node server/groovebuoy.js"
+    "start": "node server/groovebuoy.js",
+    "test": "mocha -R spec --recursive spec/"
   },
   "browserify": {
     "transform": [
