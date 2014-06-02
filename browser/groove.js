@@ -35,6 +35,7 @@ var AudioContext = window.AudioContext || window.webkitAudioContext;
 function Groove() {
     Emitter.call(this);
 
+    this.rooms = [];
     this.users = {};
     this.djs = [];
     this.activeDJ = null;
@@ -85,6 +86,8 @@ Groove.prototype.connectToBuoy = function(url) {
 
     // Setup buoy events
     this.buoy.on("welcome", this.onBuoyWelcome.bind(this));
+    this.buoy.on("newRoom", this.onBuoyNewRoom.bind(this));
+    this.buoy.on("deleteRoom", this.onBuoyDeleteRoom.bind(this));
     this.buoy.on("chat", this.onBuoyChat.bind(this));
     this.buoy.on("peerJoined", this.onBuoyPeerJoined.bind(this));
     this.buoy.on("peerLeft", this.onBuoyPeerLeft.bind(this));
@@ -103,6 +106,25 @@ Groove.prototype.connectToBuoy = function(url) {
 Groove.prototype.onBuoyWelcome = function(data) {
     console.log("Assigned PID: "+ data.id);
     this.me.id = data.id;
+
+    this.rooms.length = 0;
+    for(var i in data.rooms) {
+        this.rooms.push(data.rooms[i]);
+    }
+    this.emit('welcome');
+    this.emit('roomsChanged');
+};
+
+Groove.prototype.onBuoyNewRoom = function(data) {
+    this.rooms.push(data.name);
+    this.emit('roomsChanged');
+};
+
+Groove.prototype.onBuoyDeleteRoom = function(data) {
+    var i = this.rooms.indexOf(data.name);
+    if(i == -1) return;
+    this.rooms.splice(i, 1);
+    this.emit('roomsChanged');
 };
 
 Groove.prototype.onBuoyChat = function(data) {
