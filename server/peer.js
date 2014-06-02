@@ -24,9 +24,13 @@ function Peer(buoy, conn) {
     this.on("skip", this.onSkip);
     this.on("setVote", this.onSetVote);
 
+    // Bind some methods so we can remove them in cleanUp
+    this.onBuoyNewRoom = this.onBuoyNewRoom.bind(this);
+    this.onBuoyDeleteRoom = this.onBuoyDeleteRoom.bind(this);
+
     // Listen to certain events from the buoy
-    this.buoy.on("newRoom", this.onBuoyNewRoom.bind(this));
-    this.buoy.on("deleteRoom", this.onBuoyDeleteRoom.bind(this));
+    this.buoy.on("newRoom", this.onBuoyNewRoom);
+    this.buoy.on("deleteRoom", this.onBuoyDeleteRoom);
 }
 
 util.inherits(Peer, EventEmitter);
@@ -38,6 +42,8 @@ Peer.prototype.cleanUp = function() {
     if(this.room) {
         this.room.leave(this);
     }
+    this.buoy.removeListener("newRoom", this.onBuoyNewRoom);
+    this.buoy.removeListener("deleteRoom", this.onBuoyDeleteRoom);
 }
 
 /*
