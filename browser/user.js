@@ -79,14 +79,6 @@ User.prototype.send = function(msg) {
     this.groove.webrtc.send(msg, this.id);
 };
 
-User.prototype.requestFile = function(trackType) {
-    console.log('requesting next track from', this.id);
-    this.send({
-        type: 'requestTrack',
-        track: trackType
-    });
-};
-
 // send data via server
 User.prototype.send = function (data) {
     this.groove.buoy.send('sendTo', {
