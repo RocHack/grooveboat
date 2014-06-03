@@ -32,7 +32,7 @@ angular.module('grooveboat',
             })
             .otherwise({redirect_to: "/"});
 
-        $locationProvider.html5Mode(false).hashPrefix("!");
+        $locationProvider.html5Mode(true);
     }])
     .run(function($rootScope, $location) {
         $rootScope.location = $location;
