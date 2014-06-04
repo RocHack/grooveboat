@@ -1,3 +1,23 @@
+var Ractive = require("ractive/build/ractive.runtime");
+
+module.exports = Ractive.extend({
+    template: require("../templates/main.html"),
+    partials: {
+        overlay: require("../templates/overlay.html")
+    },
+
+    data: {
+    },
+
+    init: function () {
+        this.on({
+            showOverlay: function(e, overlay) {
+                console.log('set overlay1', overlay);
+            }
+        });
+    }
+});
+
 function MainCtrl($scope, groove, localStorageService) {
     $scope.currentUser = groove.me;
     $scope.currentOverlay = false;
@@ -66,7 +86,3 @@ function MainCtrl($scope, groove, localStorageService) {
         }
     });
 }
-
-MainCtrl.$inject = ["$scope", "groove", "localStorageService"];
-
-module.exports = MainCtrl;

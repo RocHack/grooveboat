@@ -7,44 +7,46 @@ module.exports = Ractive.extend({
 
     data: {
         room_selected: -1,
+        new_room_name: '',
         creating_room: false,
+        username: 'Guest',
         rooms: []
     },
 
-    init: function () {
-        this.on({
-            joinRoom: this.joinRoom.bind(this)
-        });
-        this.observe("username", function (name) {
-            // tell Groove to set name
-            console.log("name:", name);
+    init: function(options) {
+        this.groove = options.groove;
+        this.router = options.router;
+
+        this.on(this.eventHandlers);
+        this.observe('username', function (name) {
+            console.log('name:', name);
+            //this.groove.me.setName(name):
             //localStorage["user:name"] = groove.me.name;
             //currentUser.name
         });
-        //groove.on("roomsChanged", this.update.bind(this));
+        this.groove.on('roomsChanged', this.update.bind(this, 'rooms'));
     },
 
-    joinRoom: function() {
-        var room;
-        if(this.room_selected == this.rooms.length) {
-            room = this.new_room_name;
-        } else {
-            room = this.rooms[this.room_selected];
+    eventHandlers: {
+        joinRoom: function() {
+            var room;
+            if (this.data.room_selected == 'new') {
+                room = this.data.new_room_name;
+            } else {
+                room = this.data.rooms[this.data.room_selected];
+            }
+            var roomId = room.replace(/\s/g, "-");
+            this.router.navigate("/room/" + roomId);
+            //var title = room + " | grooveboat";
+        },
+
+        selectRoom: function(e, i) {
+            this.set('room_selected', i);
         }
-        var roomId = room.replace(/\s/g, "-");
-        var title = room + " | grooveboat";
-        //groove.me.updateIconURL(room);
-        window.history.pushState({}, title, "/room/" + roomId);
     }
 });
 
-    /*
-    $scope.rooms = groove.rooms;
-
-    $scope.joinRoom = function() {
-    }
-
-    /*
-     * Listeners
-     */
-    // Listen for any new rooms being created or removed
+/*
+* Listeners
+*/
+// Listen for any new rooms being created or removed

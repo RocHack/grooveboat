@@ -2,15 +2,15 @@
     <h1>select a room</h1>
     <div class="rooms">
         {{#rooms:i}}
-        <div class="room {{room_selected == i ? 'selected' : ''}}" on-click="room_selected = i">
+        <div class="room {{room_selected == i ? 'selected' : ''}}" on-click="selectRoom:{{i}}">
             {{.}}
         </div>
         {{/rooms}}
-        <div class="room {{room_selected == rooms.length ? 'selected' : ''}}" on-click="room_selected = rooms.length">create room</div>
+        <div class="room {{room_selected == 'new' ? 'selected' : ''}}" on-click="selectRoom:new">create room</div>
     </div>
-    {{# room_selected == rooms.length && room_selected != -1 }}
+    {{# room_selected == 'new' }}
     <input type="text" maxlength="32" placeholder="new room name" class="full no_border" value="{{new_room_name}}">
     {{/ room_selected}}
     <input type="text" name="user" maxlength="32" placeholder="nickname" class="full no_border" value="{{username}}">
-    <input type="button" class="action" value="join room" disabled="{{room_selected == -1 || (room_selected == rooms.length && new_room_name.length < 3)}}" on-click="joinRoom" />
+    <input type="button" class="action" value="join room" disabled="{{room_selected == -1 || (room_selected == 'new' && new_room_name.length < 3)}}" on-click="joinRoom" />
 </div>

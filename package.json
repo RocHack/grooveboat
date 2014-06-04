@@ -35,7 +35,6 @@
     "sinon": "^1.10.1"
   },
   "napa": {
-    "satnav": "f5io/satnav-js",
     "emoji-images": "nmbook/emoji-images.js"
   },
   "scripts": {

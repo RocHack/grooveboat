@@ -8,9 +8,8 @@ require('angular-ui-utils/modules/keypress/keypress');
 */
 
 var Ractive = require('ractive/build/ractive.runtime');
-require('satnav/dist/satnav');
-var Satnav = window.Satnav;
 //var emoji = require('emoji-images');
+var Router = Ractive.extend(require('./router'));
 
 var MainCtrl = require('./controllers/MainCtrl');
 var RoomListCtrl = require('./controllers/RoomListCtrl');
@@ -41,32 +40,58 @@ groove.me.setName(name);
 
 // Set up UI
 
-var ractive = new Ractive({
-    template: require('./templates/main.html'),
-    partials: {
-        overlay: require('./templates/overlay.html')
-    }
+var main = new MainCtrl({
+    groove: groove
 });
-window.ractive = ractive;
+window.ractive = main;
 
 document.addEventListener('DOMContentLoaded', function() {
-    ractive.insert(document.body);
+    main.insert(document.body);
 }, false);
 
 // Set up routing
 
-return;
-Satnav({html5: true})
+var router = new Router({
+    el: main.nodes.content,
+    handler: function(path) {
+        if (path == '/') {
+            return new RoomListCtrl({
+                groove: groove,
+                router: router
+            });
+        } else if (path.indexOf('/room/') === 0) {
+            var room = path.substr(6);
+            return new RoomCtrl({
+                groove: groove,
+                router: router,
+                room: room
+            });
+        }
+    }
+});
+
+/*
+new routes()
+.get("/:category", function(req) {
+      alert("In " + req.params.category);
+});
     .navigate({
         path: '/',
-        directions: RoomListCtrl
+        directions: function() {
+            setPage(new RoomListCtrl({
+                groove: groove
+            }));
+        }
     })
     .navigate({
         path: '/room/{room}',
-        directions: RoomCtrl
+        directions: function(params) {
+            setPage(new RoomCtrl(params.room));
+        }
     })
     .otherwise('/')
     .go();
+*/
 
         /*
     .directive('autoScroll', function() {
