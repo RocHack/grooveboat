@@ -14,17 +14,16 @@
     "md5-jkmyers": "^0.0.1",
     "audio-metadata": "^0.3.0",
     "wildemitter": "^1.0.1",
-    "angular-local-storage": "grevory/angular-local-storage#0.0.5",
-    "jquery": "^2.1.1",
-    "jquery-ui": "^1.10.5",
     "rtcpeerconnection": "clehner/rtcpeerconnection",
     "websocket": "1.0.x",
-    "node-uuid": "1.4.x"
+    "node-uuid": "1.4.x",
+    "ractive": "^0.4.0"
   },
   "devDependencies": {
     "browserify": "^4.1.6",
     "watchify": "^0.10.2",
     "partialify": "^3.1.1",
+    "ractify": "git://github.com/jrajav/ractify",
     "catw": "^0.2.0",
     "uglify-js": "^2.4.13",
     "less": "^1.5.1",
@@ -36,11 +35,7 @@
     "sinon": "^1.10.1"
   },
   "napa": {
-    "angular": "angular/bower-angular",
-    "angular-route": "angular/bower-angular-route",
-    "angular-sanitize": "angular/bower-angular-sanitize",
-    "angular-ui-sortable": "angular-ui/ui-sortable",
-    "angular-ui-utils": "angular-ui/ui-utils",
+    "satnav": "f5io/satnav-js",
     "emoji-images": "nmbook/emoji-images.js"
   },
   "scripts": {
@@ -57,7 +52,7 @@
   },
   "browserify": {
     "transform": [
-      "partialify"
+      "ractify"
     ]
   }
 }

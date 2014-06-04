@@ -1,61 +1,74 @@
-/* global angular */
-window.jQuery = require('jquery');
+/*
 require('jquery-ui/sortable');
-require('angular/angular');
-require('angular-route/angular-route');
 require('angular-sanitize/angular-sanitize');
 require('angular-local-storage/angular-local-storage');
 require('angular-ui-sortable/src/sortable');
 require('angular-ui-utils/modules/event/event');
 require('angular-ui-utils/modules/keypress/keypress');
-var emoji = require('emoji-images');
+*/
+
+var Ractive = require('ractive/build/ractive.runtime');
+require('satnav/dist/satnav');
+var Satnav = window.Satnav;
+//var emoji = require('emoji-images');
 
 var MainCtrl = require('./controllers/MainCtrl');
 var RoomListCtrl = require('./controllers/RoomListCtrl');
 var RoomCtrl = require('./controllers/RoomCtrl');
 
+// Set up Groove
+
 var Groove = require('./groove');
 
-angular.module('grooveboat',
-    ['ngRoute', 'LocalStorageModule', 'ngSanitize', 'ui.sortable',
-        'ui.keypress', 'ui.event'])
-    .controller('MainCtrl', MainCtrl) 
-    .config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
-        $routeProvider
-            .when("/", { 
-                controller: RoomListCtrl, 
-                template: require("./templates/room_list.html")
-            })
-            .when("/room/:room", { 
-                controller: RoomCtrl, 
-                template: require("./templates/room.html")
-            })
-            .otherwise({redirect_to: "/"});
+var groove = new Groove();
+window.groove = groove;
 
-        $locationProvider.html5Mode(true);
-    }])
-    .run(function($rootScope, $location) {
-        $rootScope.location = $location;
+/*
+groove.connectToBuoy("ws://" + location.hostname + ":8844");
+
+var name = localStorage["user:name"];
+var gravatar = localStorage["user:gravatar"];
+if (!name) {
+    name = "Guest " + Math.floor(Math.random()*101);
+    localStorage["user:name"] = name;
+}
+if(gravatar) {
+    groove.me.setGravatar(gravatar);
+}
+
+groove.me.setName(name);
+*/
+
+// Set up UI
+
+var ractive = new Ractive({
+    template: require('./templates/main.html'),
+    partials: {
+        overlay: require('./templates/overlay.html')
+    }
+});
+window.ractive = ractive;
+
+document.addEventListener('DOMContentLoaded', function() {
+    ractive.insert(document.body);
+}, false);
+
+// Set up routing
+
+return;
+Satnav({html5: true})
+    .navigate({
+        path: '/',
+        directions: RoomListCtrl
     })
-    .factory("groove", ["localStorageService", function(localStorageService) {
-        var groove = new Groove();
-        window.groove = groove;
+    .navigate({
+        path: '/room/{room}',
+        directions: RoomCtrl
+    })
+    .otherwise('/')
+    .go();
 
-        groove.connectToBuoy("ws://"+ window.location.hostname +":8844");
-
-        var name = localStorageService.get("user:name");
-        var gravatar = localStorageService.get("user:gravatar");
-        if (!name) {
-            name = "Guest " + Math.floor(Math.random()*101);
-            localStorageService.set("user:name", name);
-        }
-        if(gravatar) {
-            groove.me.setGravatar(gravatar);
-        }
-
-        groove.me.setName(name);
-        return groove;
-    }])
+        /*
     .directive('autoScroll', function() {
         return function(scope, elements, attrs) {
             var el = elements[0];
@@ -150,3 +163,4 @@ angular.module('grooveboat',
             return text.replace(name, "<span class=\"mention\">"+ name +"</span>");
         };
     });
+*/

@@ -1,0 +1,12 @@
+{{>overlay}}
+
+<div class="container top">
+	<a href="/" class="title">grooveboat</a>
+	<a class="right-btn settings" on-click="setOverlay('settings')"><i class="icon-gear"></i></a>
+	<a class="right-btn volume" on-click="toggleMute()">
+		{{#muted}}<i class="icon-volume"></i>{{/muted}}
+		{{^muted}}<i class="icon-volume-off"></i>{{/muted}}
+	</a>
+</div>
+
+<div id="content" class="content"></div>
