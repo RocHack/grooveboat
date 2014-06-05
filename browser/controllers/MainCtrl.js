@@ -2,12 +2,10 @@ var Ractive = require("ractive/build/ractive.runtime");
 
 module.exports = Ractive.extend({
     template: require("../templates/main.html"),
-    partials: {
-        overlay: require("../templates/overlay.html")
-    },
 
     data: {
         currentOverlay: false,
+        persistPlaylists: false,
         tempGravatarEmail: null,
         tempUsername: null,
         muted: false
@@ -44,8 +42,8 @@ module.exports = Ractive.extend({
     },
 
     observers: {
-        'persistPlaylists': function(persist) {
-            localStorage['user:persist'] = persist;
+        persistPlaylists: function(persist) {
+            localStorage['user:persist'] = persist || '';
             this.groove.setPersist(persist);
         }
     },

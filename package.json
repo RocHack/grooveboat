@@ -18,7 +18,8 @@
     "websocket": "1.0.x",
     "node-uuid": "1.4.x",
     "ractive": "^0.4.0",
-    "ractive-events-keys": "git://github.com/ractivejs/ractive-events-keys"
+    "ractive-events-keys": "git://github.com/ractivejs/ractive-events-keys",
+    "html-linkify": "^1.1.0"
   },
   "devDependencies": {
     "browserify": "^4.1.6",

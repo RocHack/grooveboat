@@ -32,8 +32,11 @@
             </div>
             <textarea class="new-message" 
                 on-enter="newMessage"
+                on-focus="newMessageFocus"
+                on-blur="newMessageBlur"
                 placeholder="{{msgPlaceholder}}"
-                value="{{message_text}}">
+                value="{{message_text}}"
+                required>
             </textarea>
         </div>
         {{/chat}}
@@ -97,9 +100,7 @@
 {{^currentTrack}}
 <div class="awaiting-dj">
     <div class="title">awaiting dj</div>
-    <div class="subtitle">
-        {{ noDjMessages[0] }}
-    </div>
+    <div class="subtitle">{{noDjMessage}}</div>
 </div>
 {{/currentTrack}}
 

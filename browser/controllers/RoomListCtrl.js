@@ -18,7 +18,8 @@ module.exports = Ractive.extend({
         this.router = options.router;
 
         this.on(this.eventHandlers);
-        this.groove.on('roomsChanged', this.update.bind(this, 'rooms'));
+        this.updateRooms = this.update.bind(this, 'rooms');
+        this.groove.on('roomsChanged', this.updateRooms);
 
         this.set('username', this.groove.me.name);
         this.set('rooms', this.groove.rooms);
@@ -27,6 +28,7 @@ module.exports = Ractive.extend({
     eventHandlers: {
         teardown: function() {
             this.groove.me.setName(this.data.username);
+            this.groove.off('roomsChanged', this.updateRooms);
         },
 
         joinRoom: function() {
