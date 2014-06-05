@@ -31,13 +31,10 @@ module.exports = Ractive.extend({
         this.on(this.eventHandlers);
         this.observe(this.observers);
 
-        var buoy = this.groove.buoy;
-        buoy.on('disconnected', this.setOverlay.bind(this, 'disconnected'));
-        buoy.on('reconnected', this.clearOverlay.bind(this));
-
-        var db = this.groove.db;
-        db.on('blocked', this.setOverlay.bind(this, 'blocked'));
-        db.on('open', this.clearOverlay.bind(this, 'blocked'));
+        this.groove.buoy.on('disconnected', this, this.setOverlay.bind(this, 'disconnected'));
+        this.groove.buoy.on('reconnected', this, this.clearOverlay.bind(this, 'disconnected'));
+        this.groove.db.on('blocked', this, this.setOverlay.bind(this, 'blocked'));
+        this.groove.db.on('open', this, this.clearOverlay.bind(this, 'blocked'));
     },
 
     observers: {
@@ -48,6 +45,11 @@ module.exports = Ractive.extend({
     },
 
     eventHandlers: {
+        teardown: function() {
+            this.groove.buoy.releaseGroup(this);
+            this.groove.db.releaseGroup(this);
+        },
+
         setOverlay: function(e, overlay) {
             this.setOverlay(overlay);
         },

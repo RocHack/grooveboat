@@ -70,7 +70,6 @@ module.exports = Ractive.extend({
      * Listeners on the UI
      */
     init: function(options) {
-        var self = this;
         this.groove = options.groove;
         this.router = options.router;
         this.app = options.app;
@@ -110,91 +109,10 @@ module.exports = Ractive.extend({
         /*
         * Listeners from the buoy server
         */
-        this.groove.on('chat', function(message) {
-            if (self.data.currentTab != 'chat') {
-                self.set('newMessages', true);
-            }
-
-            if (message.text.indexOf(self.groove.me.name) != -1) {
-                self.playSoundEffect('ping');
-            }
-
-            var last = self.groove.lastChatAuthor;
-            message.isContinuation = (last && last == message.from);
-            self.groove.lastChatAuthor = message.from;
-            self.data.chat_messages.push(message);
-            self.pruneChat();
-        });
-
-        this.groove.on('peerConnected', function(user) {
-            self.data.users.push(user);
-            self.watchUser(user);
-        });
-
-        this.groove.on('peerDisconnected', function(user) {
-            var i = self.data.users.indexOf(user);
-            if (i == -1) return;
-            self.data.users.splice(i, 1);
-        });
-
-        self.groove.buoy.on('reconnected', function() {
-            self.set({
-                users: [self.groove.me],
-                djs: []
-            });
-            // Remind the server of who/where we are
-            self.groove.me.setName(self.groove.me.name);
-            self.groove.me.setGravatar(self.groove.me.gravatar);
-            self.groove.joinRoom(self.room);
-        });
-
-        this.groove.on('queueUpdate', function() {
-            self.update('tracks');
-        });
-
-        this.groove.on('setVote', function() {
-            self.set('votes', self.groove.getVotes());
-        });
-
-        this.groove.on('playlistUpdated', function(playlistName) {
-            self.set('tracks', self.groove.playlists[playlistName]);
-        });
-
-        this.groove.on('djs', function(djs) {
-            self.set('djs', djs);
-        });
-
-        this.groove.on('activeDJ', function() {
-            self.set('activeDJ', self.groove.activeDJ);
-        });
-
-        this.groove.on('activeTrack', function() {
-            self.set('currentTrack', self.groove.activeTrack);
-        });
-
-        this.groove.on('activeTrackURL', function() {
-            var track = self.groove.activeTrack;
-            var url = track && track.url;
-            if (url) {
-                console.log("got track url", url.length, url.substr(0, 256));
-                self.player.src = url;
-                self.player.play();
-            } else {
-                self.player.pause();
-            }
-        });
-
-        this.groove.on("activeTrackDuration", function() {
-            // console.log("Duration!", groove.activeTrack.duration);
-        });
-
-        this.groove.on("currentTrackTime", function() {
-            // console.log("Current time!", groove.getCurrentTrackTime());
-        });
-
-        this.groove.on("emptyPlaylist", function() {
-            alert("Add some music to your playlist first.");
-        });
+        for (var event in this.grooveEventHandlers) {
+            var handler = this.grooveEventHandlers[event].bind(this);
+            this.groove.on(event, this, handler);
+        }
     },
 
     observers: {
@@ -232,6 +150,7 @@ module.exports = Ractive.extend({
             this.groove.leaveRoom();
             this.appObservers.cancel();
             clearTimeout(this.pickInterval);
+            this.groove.releaseGroup(this);
         },
 
         switchTab: function(e, tab) {
@@ -391,6 +310,94 @@ module.exports = Ractive.extend({
                     node.removeEventListener('click', click, false);
                 }
             };
+        }
+    },
+
+    grooveEventHandlers: {
+        chat: function(message) {
+            if (this.data.currentTab != 'chat') {
+                this.set('newMessages', true);
+            }
+
+            if (message.text.indexOf(this.groove.me.name) != -1) {
+                this.playSoundEffect('ping');
+            }
+
+            var last = this.groove.lastChatAuthor;
+            message.isContinuation = (last && last == message.from);
+            this.groove.lastChatAuthor = message.from;
+            this.data.chat_messages.push(message);
+            this.pruneChat();
+        },
+
+        peerConnected: function(user) {
+            this.data.users.push(user);
+            this.watchUser(user);
+        },
+
+        peerDisconnected: function(user) {
+            var i = this.data.users.indexOf(user);
+            if (i == -1) return;
+            this.data.users.splice(i, 1);
+        },
+
+        reconnected: function() {
+            this.set({
+                users: [this.groove.me],
+                djs: []
+            });
+            // Remind the server of who/where we are
+            this.groove.me.setName(this.groove.me.name);
+            this.groove.me.setGravatar(this.groove.me.gravatar);
+            this.groove.joinRoom(this.room);
+        },
+
+        queueUpdate: function() {
+            this.update('tracks');
+        },
+
+        setVote: function() {
+            this.set('votes', this.groove.getVotes());
+        },
+
+        playlistUpdated: function(playlistName) {
+            this.set('tracks', this.groove.playlists[playlistName]);
+        },
+
+        djs: function(djs) {
+            this.set('djs', djs);
+        },
+
+        activeDJ: function() {
+            this.set('activeDJ', this.groove.activeDJ);
+        },
+
+        activeTrack: function() {
+            this.set('currentTrack', this.groove.activeTrack);
+        },
+
+        activeTrackURL: function() {
+            var track = this.groove.activeTrack;
+            var url = track && track.url;
+            if (url) {
+                console.log('got track url', url.length, url.substr(0, 256));
+                this.player.src = url;
+                this.player.play();
+            } else {
+                this.player.pause();
+            }
+        },
+
+        activeTrackDuration: function() {
+            // console.log('Duration!', groove.activeTrack.duration);
+        },
+
+        currentTrackTime: function() {
+            // console.log('Current time!', groove.getCurrentTrackTime());
+        },
+
+        emptyPlaylist: function() {
+            alert('Add some music to your playlist first.');
         }
     },
 
