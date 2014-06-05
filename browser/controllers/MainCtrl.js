@@ -22,12 +22,11 @@ module.exports = Ractive.extend({
         this.groove = options.groove;
         this.router = options.router;
 
-        var persist = localStorage["user:persist"];
-        this.set('persistPlaylists', persist);
-        this.groove.setPersist(persist);
-
-        this.set('tempGravatarEmail', this.groove.me.gravatar);
-        this.set('tempUsername', this.groove.me.name);
+        this.set({
+            persistPlaylists: !!localStorage["user:persist"],
+            tempGravatarEmail: this.groove.me.gravatar,
+            tempUsername: this.groove.me.name
+        });
 
         this.on(this.eventHandlers);
         this.observe(this.observers);
