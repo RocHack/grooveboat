@@ -131,6 +131,7 @@ Peer.prototype.onLeaveRoom = function(data) {
     if(!this.room) return;
 
     this.room.leave(this);
+    this.room = null;
 }
 
 

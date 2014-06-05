@@ -56,6 +56,7 @@ Room.prototype.join = function(peer) {
  */
 Room.prototype.leave = function(peer) {
     var i = this.peers.indexOf(peer);
+    if (i == -1) return;
     this.peers.splice(i, 1);
 
     console.log("[debug] "+ peer.name +" left "+ this.name);

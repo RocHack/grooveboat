@@ -79,14 +79,6 @@ User.prototype.send = function(msg) {
     this.groove.webrtc.send(msg, this.id);
 };
 
-User.prototype.requestFile = function(trackType) {
-    console.log('requesting next track from', this.id);
-    this.send({
-        type: 'requestTrack',
-        track: trackType
-    });
-};
-
 // send data via server
 User.prototype.send = function (data) {
     this.groove.buoy.send('sendTo', {
@@ -121,6 +113,7 @@ User.prototype.preparePeerConnection = function() {
     this.pc.on('ice', User_onIce.bind(this));
     this.pc.on('addStream', User_onAddStream.bind(this));
     this.pc.on('removeStream', User_onRemoveStream.bind(this));
+    this.pc.on('negotiationNeeded', User_onNegotiationNeeded.bind(this));
 };
 
 User.prototype.offerConnection = function() {
@@ -231,6 +224,11 @@ User.prototype.removeStream = function(stream) {
 // remote audio stream over peer connection closed
 function User_onRemoveStream() {
     console.log("stream removed");
+}
+
+// (re-)negotiate the peer connection
+function User_onNegotiationNeeded() {
+    this.offerConnection();
 }
 
 // set default icon URL

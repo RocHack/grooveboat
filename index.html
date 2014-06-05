@@ -4,10 +4,9 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>grooveboat</title>
         <link href='//fonts.googleapis.com/css?family=Amatic+SC|Pompiere|Monoton' rel='stylesheet' type='text/css'>
-        <link rel="icon" type="image/png" href="static/img/favicon.png" />
-        <link rel="stylesheet" type="text/css" href="static/bundle.css">
-
-        <script src="static/bundle.js"></script>
+        <link rel="icon" type="image/png" href="/static/img/favicon.png" />
+        <link rel="stylesheet" type="text/css" href="/static/bundle.css">
+        <script src="/static/bundle.js"></script>
     </head>
     <body ng-controller="MainCtrl">
         <div class="screen" ng-show="currentOverlay" ng-click="setOverlay(false)">&nbsp;</div>
@@ -41,7 +40,7 @@
 
             <div class="disconnected" ng-show="currentOverlay == 'disconnected'">
                 <h1>Disconnected</h1>
-                <img class="spinning" src="static/img/favicon.png" />
+                <img class="spinning" src="/static/img/favicon.png" />
                 <p>Looks like we've lost track of the buoy. Attempting to reconnect...</p>
             </div>
         </div>
