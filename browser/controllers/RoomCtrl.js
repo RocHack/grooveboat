@@ -115,9 +115,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     }
 
     $scope.skipSong = function() {
-        // TODO: Seeing a weird error of two songs being played at once
-        // when I try to use .skip(). Disabling this for the time being.
-        return;
+        // TODO: Fix race condition of two songs being played at once
         groove.skip();
     }
 

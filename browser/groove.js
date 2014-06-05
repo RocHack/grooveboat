@@ -400,8 +400,18 @@ Groove.prototype._onDJQuit = function(user) {
 };
 
 Groove.prototype.skip = function() {
+    // yield to the next DJ
     this.buoy.send('skip', {});
     this.cleanupDJing();
+
+    // Swap out songs
+    var playlist = this.playlists[this.activePlaylist];
+    if(playlist.length == 1) return;
+
+    playlist.push(playlist.shift());
+    setTimeout(function() {
+        this.emit("playlistUpdated", this.activePlaylist);
+    }.bind(this), 10);
 };
 
 // remove peer connection and stream to user
@@ -565,16 +575,7 @@ Groove.prototype._playMyTrack = function() {
 
 // local audio track finished playing
 function Groove_onPlaybackEnded() {
-    // yield to the next DJ
-    this.buoy.send('skip', {});
-
-    // Swap out songs
-    var playlist = this.playlists[this.activePlaylist];
-    if(playlist.length == 1) return;
-    
-    var tmp = playlist.shift();
-    playlist.push(tmp);
-    this.emit("playlistUpdated", this.activePlaylist);
+    this.skip();
 }
 
 // handle audio data decoded from file.
