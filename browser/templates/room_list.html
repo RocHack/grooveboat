@@ -12,5 +12,5 @@
     <input type="text" maxlength="32" placeholder="new room name" class="full no_border" value="{{new_room_name}}">
     {{/ room_selected}}
     <input type="text" name="user" maxlength="32" placeholder="nickname" class="full no_border" value="{{username}}">
-    <input type="button" class="action" value="join room" disabled="{{room_selected == -1 || (room_selected == 'new' && new_room_name.length < 3)}}" on-click="joinRoom" />
+    <button class="action" disabled="{{room_selected == -1 || (room_selected == 'new' && new_room_name.length < 3)}}" on-click="joinRoom">join room</button>
 </div>

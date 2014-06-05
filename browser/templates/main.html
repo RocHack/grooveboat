@@ -20,7 +20,7 @@
 			<div class="checkbox {{persistPlaylists ? 'checked' : ''}}" on-click="togglePersistTracks"></div> 
 			Save playlists
 		</div>
-		<input type="button" value="save it" class="action" on-click="saveSettings" />
+		<button class="action" on-click="saveSettings">save it</button>
 	</div>
 	{{/ settings}}
 
@@ -28,7 +28,7 @@
 	<div class="no-tracks">
 		<h1>Empty queue</h1>
 		<p>Add some tracks to your DJ queue before taking to the stage!</p>
-		<input type="button" value="righto" class="action" on-click="clearOverlay" />
+		<button class="action" on-click="clearOverlay">righto</button>
 	</div>
 	{{/ no-tracks}}
 
