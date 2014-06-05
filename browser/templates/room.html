@@ -43,17 +43,17 @@
 
         {{# currentTab == 'music'}}
         <div class="music panel">
-            <form class="dropzone track-upload {{currentlyDragging ? 'active' : ''}}" id="upload-zone" action="" drop-files="files" drag-enter="currentlyDragging = true" drag-leave="currentlyDragging = false">
+            <form class="dropzone track-upload {{currentlyDragging ? 'active' : ''}}" id="upload-zone" action="" on-dropfiles="queueFiles" on-dragenter="setCurrentlyDragging:yes" on-dragend="setCurrentlyDragging:no">
                 drop music
             </form>
             
-            <div class="sidebar-btn {{me == activeDJ ? 'half : ''}}" on-click="becomeDJ">{{joinText}}</div>
-            {{# me == activeDJ}}
+            <div class="sidebar-btn {{isActiveDJ ? 'half' : ''}}" on-click="becomeDJ">{{joinText}}</div>
+            {{#isActiveDJ}}
             <div class="sidebar-btn half" on-click="skipSong">skip song</div>
-            {{/ activeDJ}}
+            {{/isActiveDJ}}
 
             <div class="songs-container">
-                {{# currentTrack && me == activeDJ }}
+                {{# currentTrack && isActiveDJ }}
                 <ul class="songs">
                     <li class="active">
                         <div class="track">{{currentTrack.title}}</div>
@@ -63,9 +63,9 @@
                 {{/ currentTrack}}
 
                 <ul class="songs">
-                {{#tracks}}
-                <!--{{^track.id == currentTrack.id}-->
-                    <li decorator="sortable">
+                {{#tracks:i}}
+                {{# id != currentTrack.id}}
+                    <li>
                         <div class="track">{{title}}</div>
                         <div class="artist">{{artist}}</div>
                         <div class="right">
@@ -73,6 +73,7 @@
                             <div on-click="bumpTrack"><i class="icon-up-arrow"></i></div>
                         </div>
                     </li>
+                {{/ currentTrack}}
                 {{/tracks}}
                 </ul>
             </div>

@@ -3,7 +3,6 @@ require('../lib/ractive-events-keys');
 var emoji = require('emoji-images');
 var linkify = require('html-linkify');
 
-
 function isAudience(user) {
     return !user.dj;
 }
@@ -29,6 +28,7 @@ module.exports = Ractive.extend({
     data: {
         currentTab: null,
         currentTrack: null,
+        activeDJ: null,
         votes: {yes: 0, no: 0},
         newMessages: false,
 
@@ -49,9 +49,12 @@ module.exports = Ractive.extend({
             return this.get('users').filter(isAudience);
         },
 
+        isActiveDJ: function() {
+            return this.get('activeDJ') == this.get('me');
+        },
+
         joinText: function() {
-            var isDJ = this.groove && this.groove.me.dj;
-            return isDJ ? 'step down' : 'become a dj';
+            return this.get('isActiveDJ') ? 'step down' : 'become a dj';
         },
 
         msgPlaceholder: function() {
@@ -150,7 +153,7 @@ module.exports = Ractive.extend({
         });
 
         this.groove.on('setVote', function() {
-            self.set('votes', this.groove.getVotes());
+            self.set('votes', self.groove.getVotes());
         });
 
         this.groove.on('playlistUpdated', function(playlistName) {
@@ -208,6 +211,19 @@ module.exports = Ractive.extend({
             this.groove.setVolume(muted ? 0 : 1);
             // set the volume for the remote stream
             this.player.muted = muted;
+        },
+
+        'chat_messages.length': function() {
+            var el = this.nodes.messages;
+            function scrollToBottom() {
+                el.scrollTop = el.scrollHeight;
+            }
+            var lastElHeight = el.lastElementChild.offsetHeight;
+            var isScrolledToBottom = (el.scrollHeight - el.scrollTop -
+                el.clientHeight - lastElHeight) < lastElHeight;
+            if (isScrolledToBottom) {
+                scrollToBottom();
+            }
         }
     },
 
@@ -270,20 +286,30 @@ module.exports = Ractive.extend({
             this.groove.skip();
         },
 
+        queueFiles: function(e) {
+            this.groove.addFilesToQueue(e.files);
+        },
+
+        setCurrentlyDragging: function(e, well) {
+            this.set('currentlyDragging', well == 'yes');
+        },
+
         deleteTrack: function(e) {
-            var track = this.get('tracks')[e.index];
-            console.log('delete track', track, e.index);
+            var i = e.index.i;
+            var track = this.get('tracks')[i];
+            console.log('delete track', track, i);
             this.groove.deleteTrack(this.groove.activePlaylist, track);
         },
 
         bumpTrack: function(e) {
-            var i = e.index;
-            if (i == null || i < 0) return;
+            var i = e.index.i;
             var track = this.data.tracks[i];
-            this.data.tracks.splice(i, 1);
-            this.data.tracks.unshift(track);
-
-            this.groove.savePlaylist(this.groove.activePlaylist);
+            if (!track) {
+                console.error('Unknown track');
+                return;
+            }
+            track.playlistPosition = -1;
+            this.updatePlaylistPositions();
         },
 
         vote: function(e, direction) {
@@ -303,6 +329,71 @@ module.exports = Ractive.extend({
         }
     },
 
+    events: {
+        dragend: function(node, fire) {
+            function shoot(e) {
+                fire({
+                    node: node,
+                    original: e
+                });
+            }
+            node.addEventListener('dragleave', shoot, false);
+            node.addEventListener('drop', shoot, false);
+            return {
+                teardown: function() {
+                    node.removeEventListener('dragleave', shoot, false);
+                    node.removeEventListener('drop', shoot, false);
+                }
+            };
+        },
+
+        dropfiles: function(node, fire) {
+            function resolve(e, files) {
+                fire({
+                    node: node,
+                    original: e,
+                    files: files
+                });
+            }
+
+            function preventDefault(e) {
+                e.preventDefault();
+            }
+
+            function drop(e) {
+                e.preventDefault();
+                resolve(e, e.dataTransfer.files);
+            }
+
+            function click() {
+                var input = document.createElement('input');
+                input.type = 'file';
+                function onChange(e) {
+                    resolve(e, input.files);
+                    input.removeEventListener('change', onChange);
+                }
+                input.addEventListener('change', onChange, false);
+                input.click();
+            }
+
+            node.addEventListener('dragenter', preventDefault, false);
+            node.addEventListener('dragleave', preventDefault, false);
+            node.addEventListener('dragover', preventDefault, false);
+            node.addEventListener('drop', drop, false);
+            node.addEventListener('click', click, false);
+
+            return {
+                teardown: function() {
+                    node.removeEventListener('dragenter', preventDefault,false);
+                    node.removeEventListener('dragleave', preventDefault,false);
+                    node.removeEventListener('dragover', preventDefault, false);
+                    node.removeEventListener('drop', drop, false);
+                    node.removeEventListener('click', click, false);
+                }
+            };
+        }
+    },
+
     pickNoDjMessage: function() {
         this.set('noDjMessage', pick(noDjMessages));
     },
@@ -314,9 +405,9 @@ module.exports = Ractive.extend({
     },
 
     pruneChat: function() {
-        var count = this.data.chat_messages.length;
-        if (count > 76) {
-            this.data.chat_messages.splice(0, count - 75);
+        var msgs = this.data.chat_messages;
+        if (msgs.length > 76) {
+            msgs.splice(0, msgs.length - 75);
         }
     },
 
@@ -326,33 +417,15 @@ module.exports = Ractive.extend({
         a.pause();
         a.currentTime = 0;
         a.play();
+    },
+
+    updatePlaylistPositions: function() {
+        this.data.tracks.sort(function(a, b) {
+            return a.playlistPosition|0 - b.playlistPosition|0;
+        });
+        this.data.tracks.forEach(function(track, i) {
+            track.playlistPosition = i;
+        });
+        this.groove.savePlaylist(this.groove.activePlaylist);
     }
 });
-
-    /*
-    $scope.sortableOptions = {
-        stop: function(e, ui) {
-            $scope.tracks.forEach(function(track, i) {
-                track.playlistPosition = i;
-            });
-            groove.savePlaylist(groove.activePlaylist);
-        },
-        axis: "y"
-    };
-    */
-
-/*
-ng-init="msgPlaceholder = 'send a message'; iMsgPlaceholder = msgPlaceholder;"
-on-focus=""
-ui-event="{focus: 'msgPlaceholder = null', blur: 'msgPlaceholder = iMsgPlaceholder'}"
-*/
-
-/*
-$scope.dragEnter = function() {
-    $scope.currentlyDragging = true;
-}
-
-$scope.dragLeave = function() {
-    $scope.currentlyDragging = false;
-}
-*/
