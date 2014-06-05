@@ -429,10 +429,14 @@ Groove.prototype.cleanupDJing = function() {
     if (this.stream) {
         this.getPeers().forEach(Groove_removePeerStream.bind(this));
     }
-    if (this.mediaSource) {
-        this.mediaSource.disconnect();
-        this.mediaSource.stop(0);
-    }
+    this.disconnectMediaSource();
+};
+
+Groove.prototype.disconnectMediaSource = function() {
+    if (!this.mediaSource) return;
+    this.mediaSource.disconnect();
+    this.mediaSource.stop(0);
+    this.mediaSource = null;
 };
 
 function parseAudioMetadata(file, cb) {
@@ -590,6 +594,7 @@ function Groove_gotAudioData(buffer) {
     // http://servicelab.org/2013/07/24/streaming-audio-between-browsers-with-webrtc-and-webaudio/
 
     // create an audio source and connect it to the file buffer
+    this.disconnectMediaSource();
     this.mediaSource = this.audioContext.createBufferSource();
     this.mediaSource.buffer = buffer;
     this.mediaSource.start(0);
