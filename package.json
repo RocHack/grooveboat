@@ -17,7 +17,8 @@
     "rtcpeerconnection": "clehner/rtcpeerconnection",
     "websocket": "1.0.x",
     "node-uuid": "1.4.x",
-    "ractive": "^0.4.0"
+    "ractive": "^0.4.0",
+    "ractive-events-keys": "git://github.com/ractivejs/ractive-events-keys"
   },
   "devDependencies": {
     "browserify": "^4.1.6",

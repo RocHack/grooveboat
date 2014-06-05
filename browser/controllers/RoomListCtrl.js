@@ -18,16 +18,17 @@ module.exports = Ractive.extend({
         this.router = options.router;
 
         this.on(this.eventHandlers);
-        this.observe('username', function (name) {
-            console.log('name:', name);
-            //this.groove.me.setName(name):
-            //localStorage["user:name"] = groove.me.name;
-            //currentUser.name
-        });
         this.groove.on('roomsChanged', this.update.bind(this, 'rooms'));
+
+        this.set('username', this.groove.me.name);
+        this.set('rooms', this.groove.rooms);
     },
 
     eventHandlers: {
+        teardown: function() {
+            this.groove.me.setName(this.data.username);
+        },
+
         joinRoom: function() {
             var room;
             if (this.data.room_selected == 'new') {
@@ -37,7 +38,6 @@ module.exports = Ractive.extend({
             }
             var roomId = room.replace(/\s/g, "-");
             this.router.navigate("/room/" + roomId);
-            //var title = room + " | grooveboat";
         },
 
         selectRoom: function(e, i) {

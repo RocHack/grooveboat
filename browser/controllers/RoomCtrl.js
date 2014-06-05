@@ -1,40 +1,223 @@
-function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorageService, $interval) {
+var Ractive = require('ractive/build/ractive.runtime');
+require('../lib/ractive-events-keys');
+var emoji = require('emoji-images');
+
+var noDjMessages = [
+    "Why not Zoidberg?",
+    "You could be next",
+    "Show the room some love",
+    "*crickets*",
+    "*tumbleweed rolls across the stage*",
+    "We'll just be waiting...",
+    "*zzz*",
+    "*jeopardy thinking music*",
+];
+noDjMessages.sort(Math.random);
+
+// periodically shuffle the no-DJ messages
+setInterval(noDjMessages.sort.bind(noDjMessages, Math.random), 30 * 1000);
+//if($scope.currentTrack) return;
+
+
+function isAudience(user) {
+    return !user.dj;
+}
+
+module.exports = Ractive.extend({
+    template: require("../templates/room.html"),
+
+    data: {
+        currentTab: null,
+        currentTrack: null,
+        votes: {yes: 0, no: 0},
+        newMessages: false,
+
+        messageToHTML: function(text) {
+            var myName = this.groove.me.name;
+            return emoji(text, 'static/img/emoji').
+                replace(myName, "<span class=\"mention\">"+ myName +"</span>");
+            // TODO: linky
+        }
+    },
+
+    computed: {
+        audience: function() {
+            return this.get('users').filter(isAudience);
+        },
+
+        joinText: function() {
+            var isDJ = this.groove && this.groove.me.dj;
+            return isDJ ? 'step down' : 'become a dj';
+        }
+    },
+
+    soundEffects: {
+        "ping": new Audio("static/ping.wav")
+    },
+
     /*
      * Listeners on the UI
      */
-    groove.joinRoom($routeParams.room);
+    init: function(options) {
+        this.groove = options.groove;
+        this.router = options.router;
+        this.app = options.app;
+        this.room = options.room;
+        this.groove.joinRoom(this.room);
 
-    $scope.users = [];
-    $scope.djs = [];
-    $scope.currentTab = localStorageService.get("user:tab") || "music";
-    $scope.currentOverlay = false;
-    $scope.tracks = groove.playlists[groove.activePlaylist];
-    $scope.files = [];
+        this.set({
+            djs: [],
+            files: [],
+            users: [this.groove.me],
+            me: this.groove.me,
+            chat_messages: [],
+            currentTab: localStorage['user:tab'] || 'music',
+            tracks: this.groove.playlists[this.groove.activePlaylist],
+        });
 
-    $scope.currentTrack = null;
-    $scope.votes = { yes: 0, no: 0 };
-    $scope.chat_messages = [];
-    $scope.newMessages = false;
-    $scope.users.push(groove.me);
+        this.player = document.createElement('audio');
+        window.player = this.player;  // for debugging
 
-    $scope.noDjMessages = [
-        "Why not Zoidberg?",
-        "You could be next",
-        "Show the room some love",
-        "*crickets*",
-        "*tumbleweed rolls across the stage*",
-        "We'll just be waiting...",
-        "*zzz*",
-        "*jeopardy thinking music*",
-    ];
-    $scope.noDjMessages.sort( function() { return 0.5 - Math.random() } );
+        this.on(this.eventHandlers);
+        this.observe(this.observers);
 
-    $interval(function() {
-        if($scope.currentTrack) return;
+        this.appObservers = this.app.observe({
+            muted: this.onMuted.bind(this)
+        });
 
-        $scope.noDjMessages.sort( function() { return 0.5 - Math.random() } );
-    }, 30 * 1000);
+        /*
+        * Listeners from the buoy server
+        */
+        this.groove.on('chat', function(message) {
+            console.log('chat', message);
+            if (this.currentTab != 'chat') {
+                this.set('newMessages', true);
+            }
 
+            if (message.text.indexOf(this.groove.me.name) != -1) {
+                this.playSoundEffect('ping');
+            }
+
+            var last = this.groove.lastChatAuthor;
+            message.isContinuation = (last && last == message.from);
+            this.groove.lastChatAuthor = message.from;
+            this.data.chat_messages.push(message);
+            this.pruneChat();
+        });
+    },
+
+    observers: {
+        currentTab: function(tab) {
+            localStorage["user:tab"] = tab;
+        }
+    },
+
+    eventHandlers: {
+        teardown: function() {
+            this.groove.leaveRoom();
+            this.appObservers.cancel();
+        },
+
+        switchTab: function(e, tab) {
+            if (tab == 'chat' && this.data.newMessages) {
+                this.set('newMessages', false);
+            }
+            this.set('currentTab', tab);
+        },
+
+        clickUser: function(e) {
+            var user = e.context;
+            if (user == this.groove.me) {
+                this.app.setOverlay('settings');
+            } else {
+                // TODO: Maybe have this open a private chat?
+            }
+        },
+
+        newMessage: function(e) {
+            var text = this.get('message_text');
+            var last = this.groove.lastChatAuthor;
+            var me = this.groove.me;
+
+            if (text && text.trim()) {
+                this.data.chat_messages.push({
+                    from: me,
+                    text: text,
+                    isContinuation: last && last == me
+                });
+                this.groove.lastChatAuthor = me;
+                this.groove.sendChat(text);
+            }
+
+            this.pruneChat();
+            this.set('message_text', '');
+        },
+
+        becomeDJ: function() {
+            if (this.get('tracks').length === 0) {
+                this.app.setOverlay("no-tracks");
+                return;
+            }
+
+            if (!this.groove.me.dj) {
+                this.groove.becomeDJ();
+            } else {
+                this.groove.quitDJing();
+            }
+        },
+
+        skipSong: function() {
+            this.groove.skip();
+        },
+
+        deleteTrack: function(e) {
+            var track = this.get('tracks')[e.index];
+            console.log('delete track', track, e.index);
+            this.groove.deleteTrack(this.groove.activePlaylist, track);
+        },
+
+        bumpTrack: function(e) {
+            var i = e.index;
+            if (i == null || i < 0) return;
+            var track = this.data.tracks[i];
+            this.data.tracks.splice(i, 1);
+            this.data.tracks.unshift(track);
+
+            this.groove.savePlaylist(this.groove.activePlaylist);
+        },
+
+        vote: function(e, direction) {
+            if (this.groove.activeDJ == this.groove.me) {
+                return;
+            }
+
+            this.groove.vote(direction);
+        }
+    },
+
+    onMuted: function(muted) {
+        // set the volume for the local stream
+        this.groove.setVolume(muted ? 0 : 1);
+        // set the volume for the remote stream
+        this.player.muted = muted;
+    },
+
+    pruneChat: function() {
+        var count = this.data.chat_messages.length;
+        if (count > 76) {
+            this.data.chat_messages.splice(0, count - 75);
+        }
+    },
+
+    playSoundEffect: function(sound) {
+        var a = this.soundEffects[sound];
+        a.pause();
+        a.currentTime = 0;
+        a.play();
+    }
+});
+
+    /*
     $scope.sortableOptions = {
         stop: function(e, ui) {
             $scope.tracks.forEach(function(track, i) {
@@ -44,23 +227,15 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         },
         axis: "y"
     };
+    */
 
-    // Set up sound effects
-    var soundEffects = {
-        "ping": new Audio("/static/ping.wav")
-    };
+/*
+ng-init="msgPlaceholder = 'send a message'; iMsgPlaceholder = msgPlaceholder;"
+on-focus=""
+ui-event="{focus: 'msgPlaceholder = null', blur: 'msgPlaceholder = iMsgPlaceholder'}"
+*/
 
-    var player = $window.document.createElement("audio");
-    window.player = player;
-
-    $scope.bumpTrack = function(track) {
-        var i =  $scope.tracks.indexOf(track);
-        if(i == -1) return;
-        $scope.tracks.splice(i, 1);
-        $scope.tracks.unshift(track);
-
-        groove.savePlaylist(groove.activePlaylist);
-    }
+if (0) {
 
     $scope.dragEnter = function() {
         $scope.currentlyDragging = true;
@@ -70,85 +245,9 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         $scope.currentlyDragging = false;
     }
 
-    $scope.playSoundEffect = function(sound) {
-        var a = soundEffects[sound];
-        a.pause();
-        a.currentTime = 0;
-        a.play();
-    }
-
-    $scope.switchTab = function(tab) {
-        if(tab == "chat" && $scope.newMessages) {
-            $scope.newMessages = false;
-        }
-
-        localStorageService.set("user:tab", tab);
-        $scope.currentTab = tab;
-    }
-
-    $scope.clickUser = function(user) {
-        // TODO: Maybe have this open a private chat?
-        if(user == groove.me) {
-            $scope.setOverlay("settings");
-        } 
-    }
-
     $scope.isDJ = function(user) {
         return (user.dj == true);
     }
-
-    $scope.isAudience = function(user) {
-        return (user.dj != true);
-    }
-
-    $scope.becomeDJ = function() {
-        if($scope.tracks.length == 0) {
-            $scope.setOverlay("no-tracks");
-            return;
-        }
-
-        if(!groove.me.dj) {
-            groove.becomeDJ();
-        } else {
-            groove.quitDJing();
-        }
-    }
-
-    $scope.skipSong = function() {
-        groove.skip();
-    }
-
-    $scope.vote = function(direction) {
-        if(groove.activeDJ == groove.me) {
-            return;
-        }
-
-        groove.vote(direction);
-    }
-
-    $scope.getJoinText = function() {
-        if(groove.me.dj) {
-            return "step down";
-        } else {
-            return "become a dj";
-        }
-    }
-    
-    $scope.deleteTrack = function(track) {
-        groove.deleteTrack(groove.activePlaylist, track);
-    };
-
-    $scope.$on("$destroy", function() {
-        groove.leaveRoom();
-    });
-
-    $scope.$on("toggleMute", function() {
-        // set the volume for the local stream
-        groove.setVolume($scope.muted ? 0 : 1);
-        // set the volume for the remote stream
-        player.muted = $scope.muted;
-        // these are seperate because of reasons.
-    });
 
     var digest = $scope.$digest.bind($scope);
     function watchUser(user) {
@@ -157,59 +256,8 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         user.on("gravatar", digest);
     }
 
-    function pruneChat() {
-        var count = $scope.chat_messages.length;
-        if(count > 76) {
-            $scope.chat_messages.splice(0, count - 75);
-        }
-    }
-
-    $scope.newMessage = function(e) {
-        e.preventDefault();
-        var text = $scope.message_text;
-        var last = groove.lastChatAuthor;
-
-        if(text && text.trim()) {
-            $scope.chat_messages.push({
-                from: groove.me,
-                text: text,
-                isContinuation: last && last == groove.me
-            });
-            groove.lastChatAuthor = groove.me;
-            groove.sendChat(text);
-        }
-
-        pruneChat();
-        $scope.message_text = "";
-    };
-
     $scope.$watch("files", function() {
         groove.addFilesToQueue($scope.files);
-    });
-
-    $scope.$on("$destroy", function() {
-        groove.leaveRoom();
-    });
-
-    /*
-     * Listeners from the buoy server
-     */
-    groove.on("chat", function(message) {
-        $scope.$apply(function($scope) { 
-            if($scope.currentTab != "chat") {
-                $scope.newMessages = true;
-            }
-
-            if(message.text.indexOf(groove.me.name) != -1) {
-                $scope.playSoundEffect("ping");
-            }
-
-            var last = groove.lastChatAuthor;
-            message.isContinuation = (last && last == message.from);
-            groove.lastChatAuthor = message.from;
-            $scope.chat_messages.push(message);
-            pruneChat();
-        });
     });
 
     groove.on("setVote", function(user) {
@@ -308,7 +356,3 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
         });
     });
 }
-
-RoomCtrl.$inject = ["$scope", "$routeParams", "$window", "$location", "groove", "localStorageService", "$interval"];
-
-module.exports = RoomCtrl;

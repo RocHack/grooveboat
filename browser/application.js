@@ -8,7 +8,6 @@ require('angular-ui-utils/modules/keypress/keypress');
 */
 
 var Ractive = require('ractive/build/ractive.runtime');
-//var emoji = require('emoji-images');
 var Router = Ractive.extend(require('./router'));
 
 var MainCtrl = require('./controllers/MainCtrl');
@@ -22,7 +21,6 @@ var Groove = require('./groove');
 var groove = new Groove();
 window.groove = groove;
 
-/*
 groove.connectToBuoy("ws://" + location.hostname + ":8844");
 
 var name = localStorage["user:name"];
@@ -34,16 +32,13 @@ if (!name) {
 if(gravatar) {
     groove.me.setGravatar(gravatar);
 }
-
 groove.me.setName(name);
-*/
 
 // Set up UI
 
 var main = new MainCtrl({
     groove: groove
 });
-window.ractive = main;
 
 document.addEventListener('DOMContentLoaded', function() {
     main.insert(document.body);
@@ -52,21 +47,23 @@ document.addEventListener('DOMContentLoaded', function() {
 // Set up routing
 
 var router = new Router({
-    el: main.nodes.content,
-    handler: function(path) {
-        if (path == '/') {
-            return new RoomListCtrl({
-                groove: groove,
-                router: router
-            });
-        } else if (path.indexOf('/room/') === 0) {
-            var room = path.substr(6);
-            return new RoomCtrl({
-                groove: groove,
-                router: router,
-                room: room
-            });
-        }
+    el: main.nodes.content
+});
+router.setHandler(function(path) {
+    if (path == '/') {
+        return new RoomListCtrl({
+            app: main,
+            groove: groove,
+            router: router
+        });
+    } else if (path.indexOf('/room/') === 0) {
+        var room = path.substr(6);
+        return new RoomCtrl({
+            app: main,
+            groove: groove,
+            router: router,
+            room: room
+        });
     }
 });
 
@@ -178,14 +175,6 @@ new routes()
             el[0].addEventListener("dragover", dragOver, false);
             el[0].addEventListener("drop", drop, false);
             el[0].addEventListener("click", click, false);
-        };
-    }).filter('emoji', function() {
-        return function(text) {
-            return emoji(text, '/static/img/emoji');
-        };
-    }).filter("mention", function() {
-        return function(text, name) {
-            return text.replace(name, "<span class=\"mention\">"+ name +"</span>");
         };
     });
 */

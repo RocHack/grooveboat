@@ -1,72 +1,90 @@
 <div class="sidebar">
 
     <div class="tabs">
-        <div class="tab" ng-class="{active:currentTab == 'music'}" ng-click="switchTab('music')">music</div>
-        <div class="tab" ng-class="{active:currentTab == 'chat','new-messages':newMessages}" ng-click="switchTab('chat')">chat</div>
+        <div class="tab {{currentTab == 'music' ? 'active' : ''}}" on-click="switchTab:music">music</div>
+        <div class="tab {{currentTab == 'chat' ? 'active' : ''}} {{newMessages ? 'new-messages' : ''}}" on-click="switchTab:chat">chat</div>
     </div>
 
     <div class="sidebar-content">
 
-        <div class="chat panel" ng-show="currentTab == 'chat'">
+        {{# currentTab == 'chat'}}
+        <div class="chat panel">
             <div class="messages" id="messages" auto-scroll="chat_messages">
-                <div class="no_messages" ng-hide="chat_messages.length">
+                {{^chat_messages}}
+                <div class="no_messages">
                     Say something about stuff
                 </div>
-                <div class="message" ng-repeat="message in chat_messages">
-                    <div class="author" ng-class="{local: message.from.isLocal}" ng-hide="message.isContinuation">
-                        <img ng-click="clickUser(message.from)" ng-src="{{message.from.iconURL}}" />
-                        {{message.from.name}}
+                {{/chat_messages}}
+                {{#chat_messages}}
+                <div class="message">
+                    {{^isContinuation}}
+                    {{#from}}
+                    <div class="author {{isLocal ? 'local' : ''}}">
+                        <img on-click="clickUser" src="{{iconURL}}" />
+                        {{name}}
                     </div>
+                    {{/from}}
+                    {{/isContinuation}}
 
-                    <div class="text" ng-bind-html="message.text | linky | emoji | mention:currentUser.name"></div>
+                    <div class="text">{{{messageToHTML(text)}}}</div>
                 </div>
+                {{/chat_messages}}
             </div>
             <textarea class="new-message" 
-                ng-init="msgPlaceholder = 'send a message'; iMsgPlaceholder = msgPlaceholder;"
-                ui:keydown="{13: 'newMessage($event)'}" 
-                ui-event="{focus: 'msgPlaceholder = null', blur: 'msgPlaceholder = iMsgPlaceholder'}"
-                placeholder="{{msgPlaceholder}}" 
-                ng-model="message_text">
-                type="text" 
+                on-enter="newMessage"
+                placeholder="{{msgPlaceholder}}"
+                value="{{message_text}}">
             </textarea>
         </div>
+        {{/chat}}
 
-        <div class="music panel" ng-show="currentTab == 'music'">
-            <form class="dropzone track-upload" ng-class="{active: currentlyDragging}" id="upload-zone" action="#" drop-files="files" drag-enter="currentlyDragging = true" drag-leave="currentlyDragging = false">
+        {{# currentTab == 'music'}}
+        <div class="music panel">
+            <form class="dropzone track-upload {{currentlyDragging ? 'active' : ''}}" id="upload-zone" action="" drop-files="files" drag-enter="currentlyDragging = true" drag-leave="currentlyDragging = false">
                 drop music
             </form>
             
-            <div ng-class="{'sidebar-btn': true, half: currentUser == activeDJ}" ng-click="becomeDJ()">{{getJoinText()}}</div><div class="sidebar-btn half" ng-show="currentUser == activeDJ" ng-click="skipSong()">skip song</div>
+            <div class="sidebar-btn {{me == activeDJ ? 'half : ''}}" on-click="becomeDJ">{{joinText}}</div>
+            {{# me == activeDJ}}
+            <div class="sidebar-btn half" on-click="skipSong">skip song</div>
+            {{/ activeDJ}}
 
             <div class="songs-container">
-                <ul class="songs" ng-hide="!currentTrack || currentUser != activeDJ">
+                {{# currentTrack && me == activeDJ }}
+                <ul class="songs">
                     <li class="active">
                         <div class="track">{{currentTrack.title}}</div>
                         <div class="artist">{{currentTrack.artist}}</div>
                     </li>
                 </ul>
+                {{/ currentTrack}}
 
-                <ul class="songs" ui:sortable="sortableOptions" ng:model="tracks">
-                    <li ng-repeat="track in tracks" ng-hide="track.id == currentTrack.id">
-                        <div class="track">{{track.title}}</div>
-                        <div class="artist">{{track.artist}}</div>
+                <ul class="songs">
+                {{#tracks}}
+                <!--{{^track.id == currentTrack.id}-->
+                    <li decorator="sortable">
+                        <div class="track">{{title}}</div>
+                        <div class="artist">{{artist}}</div>
                         <div class="right">
-                            <div ng-click="deleteTrack(track)">&times;</div>
-                            <div ng-click="bumpTrack(track)"><i class="icon-up-arrow"></i></div>
+                            <div on-click="deleteTrack">&times;</div>
+                            <div on-click="bumpTrack"><i class="icon-up-arrow"></i></div>
                         </div>
                     </li>
+                {{/tracks}}
                 </ul>
             </div>
         </div>
+        {{/music}}
     </div>
 </div>
 
 
-<div class="now-playing" ng-show="currentTrack">
+{{#currentTrack}}
+<div class="now-playing">
     <div class="center-piece">
-        <a class="vote good good-{{currentUser.vote == 1}}" href="" ng-click="vote(1)"><i class="icon-thumbs-up"></i></a>
+        <a class="vote good good-{{me.vote > 0}}" href="" on-click="vote:1"><i class="icon-thumbs-up"></i></a>
         <span class="now-playing-artist">{{currentTrack.artist}}</span>
-        <a class="vote bad bad-{{currentUser.vote == -1}}" href="" ng-click="vote(-1)"><i class="icon-thumbs-down"></i></a>
+        <a class="vote bad bad-{{me.vote < 0}}" href="" on-click="vote:-1"><i class="icon-thumbs-down"></i></a>
     </div>
     <div class="now-playing-track">{{currentTrack.title}}</div>
 
@@ -74,26 +92,35 @@
         <div class="opinion yes" style="width: {{10 + (votes.yes * 2)}}px">&nbsp;</div><div class="opinion no" style="width: {{10 + (votes.no * 2)}}px">&nbsp;</div>
     </div>
 </div>
+{{/currentTrack}}
 
-<div class="awaiting-dj" ng-hide="currentTrack">
+{{^currentTrack}}
+<div class="awaiting-dj">
     <div class="title">awaiting dj</div>
     <div class="subtitle">
         {{ noDjMessages[0] }}
     </div>
 </div>
+{{/currentTrack}}
 
 <div class="stage">
-    <div ng-class="{dj: true, active: dj == activeDJ, local: dj.isLocal}" ng-repeat="dj in djs">
-        <img ng-class="{'vote-true': dj.vote == 1}" ng-src="{{dj.iconURL}}" /> {{dj.name}}
+    {{#djs}}
+    <div class="dj {{this == activeDJ ? 'active' : ''}} {{isLocal ? 'local' : ''}}">
+        <img class="vote-{{vote > 0}}" src="{{iconURL}}" /> {{name}}
     </div>
-    <div class="no-djs" ng-hide="currentTrack">
+    {{/djs}}
+    {{^currentTrack}}
+    <div class="no-djs">
         <img class="spinning slowly" src="/static/img/favicon.png" />
     </div>
+    {{/currentTrack}}
 </div>
 
 <div class="audience">
-    <div class="listener" ng-class="{local: listener.isLocal}" ng-repeat="listener in users | filter:isAudience">
-        <img ng-click="clickUser(listener)" class="vote-{{listener.vote == 1}}" ng-src="{{listener.iconURL}}" />
-        <div class="name">{{listener.name}}</div>
+    {{#audience}}
+    <div class="listener {{isLocal ? 'local' : ''}}">
+        <img on-click="clickUser" class="vote-{{vote > 0}}" src="{{iconURL}}" />
+        <div class="name">{{name}}</div>
     </div>
+    {{/audience}}
 </div>
