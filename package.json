@@ -31,7 +31,10 @@
     "uglify-js": "^2.4.13",
     "clean-css": "^2.1.8",
     "napa": "^0.4.1",
-    "nodemon": "^1.1.1"
+    "nodemon": "^1.1.1",
+    "mocha": "^1.20.0",
+    "should": "^4.0.0",
+    "sinon": "^1.10.1"
   },
   "napa": {
     "angular": "angular/bower-angular",
@@ -50,7 +53,8 @@
     "build-css": "catw -c 'lessc -' 'style/*.less' | cleancss > static/bundle.css",
     "build-js": "browserify browser/*.js | uglifyjs -c > static/bundle.js",
     "build": "npm run build-css && npm run build-js",
-    "start": "node server/groovebuoy.js"
+    "start": "node server/groovebuoy.js",
+    "test": "mocha -R spec --recursive spec/"
   },
   "browserify": {
     "transform": [
