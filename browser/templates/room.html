@@ -86,9 +86,9 @@
 {{#currentTrack}}
 <div class="now-playing">
     <div class="center-piece">
-        <a class="vote good good-{{me.vote > 0}}" href="" on-click="vote:1"><i class="icon-thumbs-up"></i></a>
+        <a class="vote good good-{{me.vote > 0}}" on-click="vote:1"><i class="icon-thumbs-up"></i></a>
         <span class="now-playing-artist">{{currentTrack.artist}}</span>
-        <a class="vote bad bad-{{me.vote < 0}}" href="" on-click="vote:-1"><i class="icon-thumbs-down"></i></a>
+        <a class="vote bad bad-{{me.vote < 0}}" on-click="vote:-1"><i class="icon-thumbs-down"></i></a>
     </div>
     <div class="now-playing-track">{{currentTrack.title}}</div>
 

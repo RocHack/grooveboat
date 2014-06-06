@@ -294,6 +294,7 @@ Groove.prototype.sendChat = function(text) {
 
 Groove.prototype.joinRoom = function(roomName) {
     this.roomName = roomName;
+    this.me.vote = 0;
     this.buoy.send("joinRoom", { 
         roomName: roomName
     });

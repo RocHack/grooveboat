@@ -236,7 +236,7 @@ module.exports = Ractive.extend({
                 return;
             }
 
-            this.groove.vote(direction);
+            this.groove.vote(+direction);
         },
 
         newMessageFocus: function() {
@@ -339,6 +339,10 @@ module.exports = Ractive.extend({
             var i = this.data.users.indexOf(user);
             if (i == -1) return;
             this.data.users.splice(i, 1);
+            // groove might not yet realize the user has disconnected, so reset
+            // their vote here for recalculation purposes
+            user.vote = 0;
+            this.updateVotes();
         },
 
         reconnected: function() {
@@ -357,7 +361,8 @@ module.exports = Ractive.extend({
         },
 
         setVote: function() {
-            this.set('votes', this.groove.getVotes());
+            this.updateVotes();
+            this.update('users');
         },
 
         playlistUpdated: function(playlistName) {
@@ -403,6 +408,10 @@ module.exports = Ractive.extend({
 
     pickNoDjMessage: function() {
         this.set('noDjMessage', pick(noDjMessages));
+    },
+
+    updateVotes: function() {
+        this.set('votes', this.groove.getVotes());
     },
 
     watchUser: function(user) {
