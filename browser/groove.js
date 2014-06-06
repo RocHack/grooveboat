@@ -150,12 +150,12 @@ Groove.prototype.onBuoyRoomData = function(data) {
 
         this.users[user.id] = user;
         this.emit('peerConnected', user);
-        console.log("Found user", user.name, user.id);
     }
 
     this.users[this.me.id] = this.me;
 
     // get DJs
+    var djs = [];
     for (i = 0; i < data.djs.length; i++) {
         var dj = this.users[data.djs[i]];
         if (!dj) {
@@ -163,8 +163,9 @@ Groove.prototype.onBuoyRoomData = function(data) {
             continue;
         }
         dj.dj = true;
-        this.djs.push(dj);
+        djs.push(dj);
     }
+    this.djs = djs;
 
     // get active track and DJ
     var trackStartTime = data.currentTime ?
@@ -175,7 +176,7 @@ Groove.prototype.onBuoyRoomData = function(data) {
         // prepare to receive track stream
         this.activeDJ.preparePeerConnection();
     }
-    this.emit("djs", this.djs.slice());
+    this.emit("djs");
     this.emit("activeDJ");
     this.emit("activeTrack");
     if (this.activeTrack) {
@@ -313,6 +314,10 @@ Groove.prototype.createRoom = function(roomName, cb) {
 Groove.prototype.leaveRoom = function() {
     this.roomName = null;
     this.buoy.send("leaveRoom", {});
+    this.disconnectMediaSource();
+    if (this.activeDJ) {
+        this.activeDJ.closePeerConnection();
+    }
 };
 
 Groove.prototype._onSetGravatar = function() {

@@ -230,7 +230,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
 
     groove.on("djs", function(djs) {
         $scope.$apply(function($scope) {
-            $scope.djs = djs;
+            $scope.djs = groove.djs;
         });
     });
 
