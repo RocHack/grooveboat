@@ -3,12 +3,14 @@ require('../lib/ractive-events-keys');
 var emoji = require('emoji-images');
 var linkify = require('html-linkify');
 
-function isAudience(user) {
-    return !user.dj;
-}
-
 function pick(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function subtract(arr1, arr2) {
+    return arr1.filter(function(item) {
+        return arr2.indexOf(item) == -1;
+    });
 }
 
 var noDjMessages = [
@@ -46,7 +48,7 @@ module.exports = Ractive.extend({
 
     computed: {
         audience: function() {
-            return this.get('users').filter(isAudience);
+            return subtract(this.get('users'), this.get('djs'));
         },
 
         isActiveDJ: function() {
@@ -86,7 +88,9 @@ module.exports = Ractive.extend({
             tracks: this.groove.playlists[this.groove.activePlaylist],
         });
 
-        this.updateUsers = this.update.bind(this, 'users');
+        this.updateUsers = function() {
+            this.update('users');
+        }.bind(this);
 
         this.watchUser(this.groove.me);
 
@@ -369,8 +373,8 @@ module.exports = Ractive.extend({
             this.set('tracks', this.groove.playlists[playlistName]);
         },
 
-        djs: function(djs) {
-            this.set('djs', djs);
+        djs: function() {
+            this.set('djs', this.groove.djs);
         },
 
         activeDJ: function() {
