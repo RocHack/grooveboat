@@ -76,6 +76,7 @@ module.exports = Ractive.extend({
         this.router = options.router;
         this.app = options.app;
         this.room = options.room;
+        this.storage = options.storage;
         this.groove.joinRoom(this.room);
 
         this.set({
@@ -84,7 +85,7 @@ module.exports = Ractive.extend({
             users: [this.groove.me],
             me: this.groove.me,
             chat_messages: [],
-            currentTab: localStorage['user:tab'] || 'music',
+            currentTab: this.storage.get('user:tab') || 'music',
             tracks: this.groove.playlists[this.groove.activePlaylist],
         });
 
@@ -121,7 +122,7 @@ module.exports = Ractive.extend({
 
     observers: {
         currentTab: function(tab) {
-            localStorage["user:tab"] = tab;
+            this.storage.set("user:tab", tab);
         },
 
         files: function() {

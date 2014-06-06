@@ -21,9 +21,10 @@ module.exports = Ractive.extend({
     init: function(options) {
         this.groove = options.groove;
         this.router = options.router;
+        this.storage = options.storage;
 
         this.set({
-            persistPlaylists: !!localStorage["user:persist"],
+            persistPlaylists: !!this.storage.get("user:persist"),
             tempGravatarEmail: this.groove.me.gravatar,
             tempUsername: this.groove.me.name
         });
@@ -39,7 +40,7 @@ module.exports = Ractive.extend({
 
     observers: {
         persistPlaylists: function(persist) {
-            localStorage['user:persist'] = persist || '';
+            this.storage.set('user:persist', persist || '');
             this.groove.setPersist(persist);
         }
     },
@@ -63,14 +64,14 @@ module.exports = Ractive.extend({
             var email = this.get('tempGravatarEmail');
             if (email) {
                 this.groove.me.setGravatar(email);
-                localStorage["user:gravatar"] = this.groove.me.gravatar;
+                this.storage.set("user:gravatar", this.groove.me.gravatar);
             }
 
             // Name
             var username = this.get('trimmedTempUsername');
             if (username) {
                 this.groove.me.setName(username);
-                localStorage["user:name"] = username;
+                this.storage.set("user:name", username);
             }
             this.set('tempUsername', this.groove.me.name);
             this.setOverlay(null);
