@@ -147,14 +147,9 @@ Room.prototype.removeDJ = function(peer) {
  */
 Room.prototype.setActiveDJ = function(peer) {
     var i = this.djs.indexOf(peer);
-    if(i == -1) {
-        this.sendAll("setActiveDJ", { peer: null });
-        return;
-    }
-
     this.activeDJ = i;
     this.sendAll("setActiveDJ", {
-        peer: peer.id,
+        peer: i == -1 ? null : peer.id,
     });
 };
 
@@ -163,8 +158,20 @@ Room.prototype.setActiveDJ = function(peer) {
  */
 Room.prototype.skip = function() {
     var nextDJ = this.djs[this.activeDJ + 1] || this.djs[0];
-    this.setActiveDJ(nextDJ);
+    if (this._skipTimer) return;
     this.setActiveTrack(null);
+
+    // insert a delay between DJ repeating a play,
+    // to avoid race condition in RTC signalling
+    if (nextDJ && nextDJ == this.getActiveDJ()) {
+        this.setActiveDJ(null);
+        this._skipTimer = setTimeout(function() {
+            this._skipTimer = null;
+            this.skip();
+        }.bind(this), 250);
+    } else {
+        this.setActiveDJ(nextDJ);
+    }
 };
 
 /*

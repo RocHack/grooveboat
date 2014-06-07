@@ -228,8 +228,18 @@ function User_onRemoveStream() {
 
 // (re-)negotiate the peer connection
 function User_onNegotiationNeeded() {
-    this.offerConnection();
+    if (this.pc.pc.signalingState == 'stable') {
+        this.offerConnection();
+    } else {
+        console.log('signaling state', this.pc.pc.signalingState);
+    }
 }
+
+User.prototype.closePeerConnection = function() {
+    if (this.pc) {
+        this.pc.close();
+    }
+};
 
 // set default icon URL
 User.prototype.updateIconURL();

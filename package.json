@@ -21,7 +21,7 @@
     "angular-local-storage": "grevory/angular-local-storage#0.0.5",
     "jquery": "^2.1.1",
     "jquery-ui": "^1.10.5",
-    "rtcpeerconnection": "^2.3.3",
+    "rtcpeerconnection": "clehner/rtcpeerconnection",
     "websocket": "1.0.x",
     "node-uuid": "1.4.x"
   },

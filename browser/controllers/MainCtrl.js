@@ -35,7 +35,7 @@ function MainCtrl($scope, groove, localStorageService) {
 
     $scope.togglePersistTracks = function() {
         $scope.persistPlaylists = !$scope.persistPlaylists;
-        localStorageService.set("user:persist", $scope.perstistPlaylists)
+        localStorageService.set("user:persist", $scope.persistPlaylists ? "1" : "");
 
         groove.setPersist($scope.persistPlaylists);
     }
@@ -51,7 +51,21 @@ function MainCtrl($scope, groove, localStorageService) {
             $scope.setOverlay(false);
         });
     });
-};
+
+    groove.db.on("blocked", function() {
+        $scope.$apply(function($scope) {
+            $scope.currentOverlay = "blocked";
+        });
+    });
+
+    groove.db.on("open", function() {
+        if ($scope.currentOverlay == "blocked") {
+            $scope.$apply(function($scope) {
+                $scope.currentOverlay = null;
+            });
+        }
+    });
+}
 
 MainCtrl.$inject = ["$scope", "groove", "localStorageService"];
 

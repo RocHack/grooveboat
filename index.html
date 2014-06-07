@@ -43,6 +43,12 @@
                 <img class="spinning" src="/static/img/favicon.png" />
                 <p>Looks like we've lost track of the buoy. Attempting to reconnect...</p>
             </div>
+
+            <div class="disconnected" ng-show="currentOverlay == 'blocked'">
+                <h1>Stuck</h1>
+                <img src="/static/img/emoji/wrench.png" />
+                <p>We're stuck trying to upgrade the database. Try closing other tabs with Grooveboat open.</p>
+            </div>
         </div>
 
         <div class="container top">

@@ -47,7 +47,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
 
     // Set up sound effects
     var soundEffects = {
-        "ping": new Audio("static/ping.wav")
+        "ping": new Audio("/static/ping.wav")
     };
 
     var player = $window.document.createElement("audio");
@@ -115,9 +115,6 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
     }
 
     $scope.skipSong = function() {
-        // TODO: Seeing a weird error of two songs being played at once
-        // when I try to use .skip(). Disabling this for the time being.
-        return;
         groove.skip();
     }
 
@@ -233,7 +230,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
 
     groove.on("djs", function(djs) {
         $scope.$apply(function($scope) {
-            $scope.djs = djs;
+            $scope.djs = groove.djs;
         });
     });
 

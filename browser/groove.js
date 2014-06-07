@@ -150,12 +150,12 @@ Groove.prototype.onBuoyRoomData = function(data) {
 
         this.users[user.id] = user;
         this.emit('peerConnected', user);
-        console.log("Found user", user.name, user.id);
     }
 
     this.users[this.me.id] = this.me;
 
     // get DJs
+    var djs = [];
     for (i = 0; i < data.djs.length; i++) {
         var dj = this.users[data.djs[i]];
         if (!dj) {
@@ -163,8 +163,9 @@ Groove.prototype.onBuoyRoomData = function(data) {
             continue;
         }
         dj.dj = true;
-        this.djs.push(dj);
+        djs.push(dj);
     }
+    this.djs = djs;
 
     // get active track and DJ
     var trackStartTime = data.currentTime ?
@@ -175,7 +176,7 @@ Groove.prototype.onBuoyRoomData = function(data) {
         // prepare to receive track stream
         this.activeDJ.preparePeerConnection();
     }
-    this.emit("djs", this.djs.slice());
+    this.emit("djs");
     this.emit("activeDJ");
     this.emit("activeTrack");
     if (this.activeTrack) {
@@ -313,6 +314,10 @@ Groove.prototype.createRoom = function(roomName, cb) {
 Groove.prototype.leaveRoom = function() {
     this.roomName = null;
     this.buoy.send("leaveRoom", {});
+    this.disconnectMediaSource();
+    if (this.activeDJ) {
+        this.activeDJ.closePeerConnection();
+    }
 };
 
 Groove.prototype._onSetGravatar = function() {
@@ -400,8 +405,18 @@ Groove.prototype._onDJQuit = function(user) {
 };
 
 Groove.prototype.skip = function() {
+    // yield to the next DJ
     this.buoy.send('skip', {});
     this.cleanupDJing();
+
+    // Swap out songs
+    var playlist = this.playlists[this.activePlaylist];
+    if(playlist.length == 1) return;
+
+    playlist.push(playlist.shift());
+    setTimeout(function() {
+        this.emit("playlistUpdated", this.activePlaylist);
+    }.bind(this), 10);
 };
 
 // remove peer connection and stream to user
@@ -419,10 +434,14 @@ Groove.prototype.cleanupDJing = function() {
     if (this.stream) {
         this.getPeers().forEach(Groove_removePeerStream.bind(this));
     }
-    if (this.mediaSource) {
-        this.mediaSource.disconnect();
-        this.mediaSource.stop(0);
-    }
+    this.disconnectMediaSource();
+};
+
+Groove.prototype.disconnectMediaSource = function() {
+    if (!this.mediaSource) return;
+    this.mediaSource.disconnect();
+    this.mediaSource.stop(0);
+    this.mediaSource = null;
 };
 
 function parseAudioMetadata(file, cb) {
@@ -488,9 +507,16 @@ Groove.prototype.setPersist = function(val) {
         // TODO Make this support playlists
         var playlist = this.playlists[this.activePlaylist];
         playlist.forEach(this.db.storeTrack.bind(this.db));
-
-        this.getPersistTracks();
     } else {
+        // Before clearing db, make sure we have the track file objects,
+        // in case the user still wants to play their tracks this pageload
+        this.playlists[this.activePlaylist].forEach(function(track) {
+            if (!track.file) {
+                this.db.getTrackFile(track, function(file) {
+                    track.file = file;
+                });
+            }
+        }.bind(this));
         this.db.clearDb();
     }
 
@@ -555,8 +581,17 @@ Groove.prototype.getMyTrack = function() {
 // play my track locally, as the active DJ
 Groove.prototype._playMyTrack = function() {
     var track = this.getMyTrack();
+    if (track.file) {
+        this._playFile(track.file);
+    } else {
+        this.db.getTrackFile(track, this._playFile.bind(this));
+    }
+};
+
+// play a file object as audio, and stream it
+Groove.prototype._playFile = function(file) {
     var reader = new FileReader();
-    reader.readAsArrayBuffer(track.file);
+    reader.readAsArrayBuffer(file);
     reader.onload = function(e) {
         this.audioContext.decodeAudioData(e.target.result,
             Groove_gotAudioData.bind(this));
@@ -565,16 +600,7 @@ Groove.prototype._playMyTrack = function() {
 
 // local audio track finished playing
 function Groove_onPlaybackEnded() {
-    // yield to the next DJ
-    this.buoy.send('skip', {});
-
-    // Swap out songs
-    var playlist = this.playlists[this.activePlaylist];
-    if(playlist.length == 1) return;
-    
-    var tmp = playlist.shift();
-    playlist.push(tmp);
-    this.emit("playlistUpdated", this.activePlaylist);
+    this.skip();
 }
 
 // handle audio data decoded from file.
@@ -589,6 +615,7 @@ function Groove_gotAudioData(buffer) {
     // http://servicelab.org/2013/07/24/streaming-audio-between-browsers-with-webrtc-and-webaudio/
 
     // create an audio source and connect it to the file buffer
+    this.disconnectMediaSource();
     this.mediaSource = this.audioContext.createBufferSource();
     this.mediaSource.buffer = buffer;
     this.mediaSource.start(0);
