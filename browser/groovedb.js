@@ -1,3 +1,5 @@
+var Emitter = require('wildemitter');
+
 var DB_VERSION = 3;
 
 // turn a track into something we can put in the db
@@ -33,6 +35,8 @@ function dataURItoBlob(dataURI) {
 }
 
 function GrooveDB() {
+    Emitter.call(this);
+
     this._persistQueue = [];
     this._getCallbackQueue = [];
     this.dbReq = window.indexedDB.open("grooveboat", DB_VERSION);
@@ -41,7 +45,12 @@ function GrooveDB() {
     this.dbReq.onerror = this._onRequestError.bind(this);
     this.dbReq.onsuccess = this._onRequestSuccess.bind(this);
     this.dbReq.onupgradeneeded = this._onUpgradeNeeded.bind(this);
+    this.dbReq.onblocked = this._onRequestBlocked.bind(this);
 }
+
+GrooveDB.prototype = Object.create(Emitter.prototype, {
+    constructor: {value: GrooveDB}
+});
 
 /*
 * Called whenever the database request fails
@@ -49,6 +58,14 @@ function GrooveDB() {
 GrooveDB.prototype._onRequestError = function(e) {
     console.log("[db] Could not open indexedb", e);
     this.db = null;
+};
+
+/*
+* Called when the request is blocked, due to other tabs having the db open
+*/
+GrooveDB.prototype._onRequestBlocked = function() {
+    console.log("[db] Request blocked");
+    this.emit("blocked");
 };
 
 /*
@@ -67,6 +84,7 @@ GrooveDB.prototype._onRequestSuccess = function(e) {
     }
 
     console.log("[db] Connected to local persistent store");
+    this.emit("open");
 };
 
 /*
