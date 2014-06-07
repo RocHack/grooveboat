@@ -143,7 +143,7 @@ angular.module('grooveboat',
         };
     }).filter('emoji', function() {
         return function(text) {
-            return emoji(text, 'static/img/emoji');
+            return emoji(text, '/static/img/emoji');
         };
     }).filter("mention", function() {
         return function(text, name) {
