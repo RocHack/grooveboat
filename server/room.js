@@ -163,15 +163,15 @@ Room.prototype.skip = function() {
 
     // insert a delay between DJ repeating a play,
     // to avoid race condition in RTC signalling
-    if (nextDJ == this.getActiveDJ()) {
+    if (nextDJ && nextDJ == this.getActiveDJ()) {
         this.setActiveDJ(null);
         this._skipTimer = setTimeout(function() {
             this._skipTimer = null;
             this.skip();
         }.bind(this), 250);
-        return;
+    } else {
+        this.setActiveDJ(nextDJ);
     }
-    this.setActiveDJ(nextDJ);
 };
 
 /*
