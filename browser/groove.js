@@ -507,9 +507,16 @@ Groove.prototype.setPersist = function(val) {
         // TODO Make this support playlists
         var playlist = this.playlists[this.activePlaylist];
         playlist.forEach(this.db.storeTrack.bind(this.db));
-
-        this.getPersistTracks();
     } else {
+        // Before clearing db, make sure we have the track file objects,
+        // in case the user still wants to play their tracks this pageload
+        this.playlists[this.activePlaylist].forEach(function(track) {
+            if (!track.file) {
+                this.db.getTrackFile(track, function(file) {
+                    track.file = file;
+                });
+            }
+        }.bind(this));
         this.db.clearDb();
     }
 
