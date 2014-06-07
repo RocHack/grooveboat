@@ -35,7 +35,7 @@ function MainCtrl($scope, groove, localStorageService) {
 
     $scope.togglePersistTracks = function() {
         $scope.persistPlaylists = !$scope.persistPlaylists;
-        localStorageService.set("user:persist", $scope.perstistPlaylists)
+        localStorageService.set("user:persist", $scope.persistPlaylists ? "1" : "");
 
         groove.setPersist($scope.persistPlaylists);
     }
