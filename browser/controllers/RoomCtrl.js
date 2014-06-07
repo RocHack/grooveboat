@@ -47,7 +47,7 @@ function RoomCtrl($scope, $routeParams, $window, $location, groove, localStorage
 
     // Set up sound effects
     var soundEffects = {
-        "ping": new Audio("static/ping.wav")
+        "ping": new Audio("/static/ping.wav")
     };
 
     var player = $window.document.createElement("audio");
