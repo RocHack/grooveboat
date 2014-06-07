@@ -574,8 +574,17 @@ Groove.prototype.getMyTrack = function() {
 // play my track locally, as the active DJ
 Groove.prototype._playMyTrack = function() {
     var track = this.getMyTrack();
+    if (track.file) {
+        this._playFile(track.file);
+    } else {
+        this.db.getTrackFile(track, this._playFile.bind(this));
+    }
+};
+
+// play a file object as audio, and stream it
+Groove.prototype._playFile = function(file) {
     var reader = new FileReader();
-    reader.readAsArrayBuffer(track.file);
+    reader.readAsArrayBuffer(file);
     reader.onload = function(e) {
         this.audioContext.decodeAudioData(e.target.result,
             Groove_gotAudioData.bind(this));

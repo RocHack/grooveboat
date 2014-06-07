@@ -1,19 +1,24 @@
-var DB_VERSION = 2;
+var DB_VERSION = 3;
 
 // turn a track into something we can put in the db
-function exportTrack(t, cb) {
+// excluding the file
+function exportTrack(t) {
+    return {
+        id: t.id,
+        title: t.title,
+        artist: t.artist,
+        album: t.album,
+        playlistPosition: t.playlistPosition
+    };
+}
+
+// turn a file into something we can put in the db
+function fileToDataURI(file, cb) {
     var fr = new FileReader();
     fr.onloadend = function() {
-        cb({
-            id: t.id,
-            title: t.title,
-            artist: t.artist,
-            album: t.album,
-            file: fr.result,
-            playlistPosition: t.playlistPosition
-        });
+        cb(fr.result);
     };
-    fr.readAsDataURL(t.file);
+    fr.readAsDataURL(file);
 }
 
 function dataURItoBlob(dataURI) {
@@ -69,11 +74,33 @@ GrooveDB.prototype._onRequestSuccess = function(e) {
 * or existing w/old version)
 */
 GrooveDB.prototype._onUpgradeNeeded = function(e) {
-    var db = e.target.result;
     // don't expose the db until the upgrade transaction is finished
+    var db = e.target.result;
+    var tx = e.target.transaction;
+    var musicStore, fileStore;
 
-    var musicStore = db.createObjectStore("music", { keyPath: "id" });
-    console.log("[db] Initiated music database");
+    if (e.oldVersion < 2) {
+        // the first version of the database
+        musicStore = db.createObjectStore("music", { keyPath: "id" });
+        console.log("[db] Initialized music database");
+    }
+    if (e.oldVersion < 3) {
+        // Move track file data into seperate object store
+        fileStore = db.createObjectStore("files");
+        musicStore = tx.objectStore("music");
+
+        musicStore.openCursor().onsuccess = function(e) {
+            var c = e.target.result;
+
+            if(c) {
+                console.log('[db] Migrating track', c.value.title);
+                fileStore.put(c.value.file, c.value.id);
+                delete c.value.file;
+                musicStore.put(c.value);
+                c.continue();
+            }
+        };
+    }
 };
 
 /*
@@ -90,37 +117,49 @@ GrooveDB.prototype._persistTrack = function(track) {
     var t = this.db.transaction(["music"], "readwrite");
     var music = t.objectStore("music");
 
+    var trackObject = exportTrack(track);
     var self = this;
     music.get(track.id).onsuccess = function(e) {
         var resultTrack = e.target.result;
 
-        // We need to convert the track to a dataURL because chrome doesn't
-        // support blobs in IndexedDB yet. See the this chrome bug:
-        // https://code.google.com/p/chromium/issues/detail?id=108012
-        exportTrack(track, function(trackObj) {
-            // Continue the transaction lifecycle
-            var t = self.db.transaction(["music"], "readwrite");
-            var music = t.objectStore("music");
+        if (resultTrack) {
+            // The track is already in the DB, so we don't need to add the file.
+            // Update the track.
+            music.put(trackObject);
+            return;
+        }
 
-            if(resultTrack) {
-                music.put(trackObj);
-            } else {
-                music.add(trackObj);
-            }
+        // Add the track's file when first adding the track
+
+        // We need to convert the file to a dataURL because chrome doesn't
+        // support blobs in IndexedDB yet. See this chrome bug:
+        // https://code.google.com/p/chromium/issues/detail?id=108012
+        fileToDataURI(track.file, function(file) {
+
+            // Build new transaction to put the track/file
+            var t = self.db.transaction(["music", "files"], "readwrite");
+            var music = t.objectStore("music");
+            var files = t.objectStore("files");
+
+            // Add the track and file
+            music.add(trackObject);
+            files.add(file, track.id);
         });
-    }
+    };
 };
 
 /*
 * Deletes a track from the store
 */
 GrooveDB.prototype.deleteTrack = function(track) {
-    var t = this.db.transaction(["music"], "readwrite");
+    var t = this.db.transaction(["music", "files"], "readwrite");
     var music = t.objectStore("music");
+    var files = t.objectStore("files");
 
     music.delete(track.id);
+    files.delete(track.id);
     console.log("[db] Deleted track "+ track.title);
-}
+};
 
 /*
 * Adds a song to the persist queue if we're not connected or persists
@@ -144,14 +183,16 @@ GrooveDB.prototype.clearDb = function() {
         return;
     }
 
-    var music = this.db.transaction("music", "readwrite").objectStore("music");
-    var self = this;
+    var tx = this.db.transaction(["music", "files"], "readwrite");
+    var music = tx.objectStore("music");
+    var files = tx.objectStore("files");
     music.openCursor().onsuccess = function(e) {
         var c = e.target.result;
 
         if(c) {
             console.log("[db] Deleting track "+ c.value.title +" from persistent store");
             music.delete(c.key);
+            files.delete(c.key);
             c.continue();
         }
     };
@@ -172,13 +213,24 @@ GrooveDB.prototype.getTracks = function(callback) {
         var c = e.target.result;
 
         if(c) {
-            c.value.file = dataURItoBlob(c.value.file);
-
             tracks.push(c.value);
             c.continue();
         } else {
             callback(tracks);
         }
+    };
+};
+
+/*
+ * Retrieves the stored blob for the given track
+ */
+GrooveDB.prototype.getTrackFile = function(track, callback) {
+    if (!track || !track.id) {
+        return callback(null);
+    }
+    var files = this.db.transaction(["files"], "readonly").objectStore("files");
+    files.get(track.id).onsuccess = function(e) {
+        callback(dataURItoBlob(e.target.result));
     };
 };
 
