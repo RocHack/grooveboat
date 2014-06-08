@@ -240,6 +240,7 @@ Groove.prototype.onBuoySetActiveDJ = function(data) {
         // prepare to receive track stream
         this.activeDJ.preparePeerConnection();
     }
+    // todo: cleanup old DJ peer connection or stream?
 
     this.emit("activeDJ");
 };
@@ -548,6 +549,14 @@ Groove.prototype.savePlaylist = function(name) {
     this.playlists[name].forEach(function(track) {
         self.db.storeTrack(track);
     });
+};
+
+Groove.prototype.setPlaylist = function(name, tracks) {
+    tracks.forEach(function(track, i) {
+        track.playlistPosition = i;
+    });
+    this.playlists[name] = tracks;
+    this.savePlaylist(name);
 };
 
 Groove.prototype.deleteTrack = function(playlistName, track) {

@@ -150,7 +150,12 @@ module.exports = Ractive.extend({
         },
 
         tracks: function() {
-            this.updatePlaylistPositions();
+            var tracks = this.get('tracks');
+            //console.log('tracks!', tracks.map(title), tracks._dragging);
+            if (tracks._dragging) {
+                tracks._dragging = false;
+                this.groove.setPlaylist(this.groove.activePlaylist, tracks);
+            }
         }
     },
 
@@ -225,7 +230,6 @@ module.exports = Ractive.extend({
         deleteTrack: function(e) {
             var i = e.index.i;
             var track = this.get('tracks')[i];
-            console.log('delete track', track, i);
             this.groove.deleteTrack(this.groove.activePlaylist, track);
         },
 
@@ -324,7 +328,6 @@ module.exports = Ractive.extend({
 
     decorators: {
         sortable: function(listEl, keypath) {
-            var groove = this.groove;
             var el;
             var startY;
             var startIndex, currentIndex;
@@ -390,14 +393,25 @@ module.exports = Ractive.extend({
                 }
 
                 // update model
-                var array = ractive.get(keypath).slice();
+                var arrayOrig = ractive.get(keypath);
+                var array = arrayOrig.slice();
                 var item = array[startIndex];
+                item.playlistPosition = currentIndex;
                 // remove item from old position
                 array.splice(startIndex, 1);
                 // add item to array at new position
                 array.splice(currentIndex, 0, item);
 
-                ractive.merge(keypath, array);
+                array._dragging = true;
+                //ractive.merge(keypath, array);
+                /*
+                arrayOrig.sort(function(a, b) {
+                    return array.indexOf(a) - array.indexOf(b);
+                });
+                */
+                ractive.set(keypath, array);
+
+                array._dragging = false;
             }
 
             function onMouseDown(e) {
@@ -421,7 +435,6 @@ module.exports = Ractive.extend({
                 listEl.style.overflow = 'visible';
                 origNextNode = el.nextElementSibling;
                 startY = e.clientY;
-
                 var elKeypath = el._ractive.keypath;
                 var lastDot = elKeypath.lastIndexOf('.') + 1;
                 currentIndex = startIndex = +elKeypath.substr(lastDot);
