@@ -146,7 +146,6 @@ Room.prototype.removeDJ = function(peer) {
  * Sets the given peer to the active DJ of the room
  */
 Room.prototype.setActiveDJ = function(peer) {
-    console.log("setting active DJ", peer && peer.name);
     var i = this.djs.indexOf(peer);
     this.activeDJ = i;
     this.sendAll("setActiveDJ", {
@@ -165,10 +164,8 @@ Room.prototype.skip = function() {
     // insert a delay between DJ repeating a play,
     // to avoid race condition in RTC signalling
     if (nextDJ && nextDJ == this.getActiveDJ()) {
-        console.log('skip delay', nextDJ && nextDJ.name);
         this.setActiveDJ(null);
         this._skipTimer = setTimeout(function() {
-            console.log('skip delay resolve', nextDJ && nextDJ.name);
             this._skipTimer = null;
             this.skip();
         }.bind(this), 250);
