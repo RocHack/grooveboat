@@ -1,12 +1,3 @@
-/*
-require('jquery-ui/sortable');
-require('angular-sanitize/angular-sanitize');
-require('angular-local-storage/angular-local-storage');
-require('angular-ui-sortable/src/sortable');
-require('angular-ui-utils/modules/event/event');
-require('angular-ui-utils/modules/keypress/keypress');
-*/
-
 var Ractive = require('ractive/build/ractive.runtime');
 var Router = Ractive.extend(require('./router'));
 
