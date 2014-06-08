@@ -24,7 +24,7 @@
     "browserify": "^4.1.6",
     "watchify": "^0.10.2",
     "partialify": "^3.1.1",
-    "ractify": "git://github.com/jrajav/ractify",
+    "ractivate": "^0.1.0",
     "catw": "^0.2.0",
     "uglify-js": "^2.4.13",
     "less": "^1.5.1",
@@ -52,7 +52,7 @@
   },
   "browserify": {
     "transform": [
-      "ractify"
+      "ractivate"
     ]
   }
 }
