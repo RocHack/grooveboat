@@ -37,6 +37,7 @@ function peerToId(peer) {
  * Adds a peer to the room
  */
 Room.prototype.join = function(peer) {
+    if (!peer) return;
     this.peers.push(peer);
 
     this.sendAllBut(peer, "peerJoined", peerData(peer));
@@ -104,7 +105,7 @@ Room.prototype.sendAllBut = function(but, event, data) {
  * Adds a peer to the DJ list
  */
 Room.prototype.addDJ = function(peer) {
-    if (this.djs.indexOf(peer) != -1) return;
+    if (!peer || this.djs.indexOf(peer) != -1) return;
 
     if(this.djs.length >= MAX_DJS) {
         return false;
