@@ -19,7 +19,7 @@ module.exports = function sortable(listEl, keypath) {
         var height = el.clientHeight;
 
         // swap item down the list
-        while (e.clientY - startY > height && el.nextElementSibling) {
+        while (e.clientY - startY > height/2 && el.nextElementSibling) {
             startY += height;
             currentIndex++;
             var nextEl = el.nextElementSibling;
@@ -31,7 +31,7 @@ module.exports = function sortable(listEl, keypath) {
         }
 
         // swap item up the list
-        while (e.clientY - startY < -height &&
+        while (e.clientY - startY < -height/2 &&
                 el.previousElementSibling) {
             currentIndex--;
             startY -= height;
