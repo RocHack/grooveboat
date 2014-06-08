@@ -183,7 +183,9 @@ module.exports = Ractive.extend({
             }
         },
 
-        newMessage: function() {
+        newMessage: function(e) {
+            e.original.preventDefault();
+
             var text = this.get('message_text');
             var last = this.groove.lastChatAuthor;
             var me = this.groove.me;

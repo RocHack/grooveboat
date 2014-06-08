@@ -59,7 +59,9 @@ module.exports = Ractive.extend({
             this.clearOverlay();
         },
 
-        saveSettings: function() {
+        saveSettings: function(e) {
+            e.original.preventDefault();
+
             // Gravatar
             var email = this.get('tempGravatarEmail');
             if (email) {

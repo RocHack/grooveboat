@@ -3,7 +3,7 @@
 
 <div class="prompt overlay">
 	{{# currentOverlay == 'settings'}}
-	<div class="settings">
+	<form class="settings" on-submit="saveSettings">
 		<h1>Settings</h1>
 
 		<h2>Nickname</h2>
@@ -20,8 +20,8 @@
 			<div class="checkbox {{persistPlaylists ? 'checked' : ''}}" on-click="togglePersistTracks"></div> 
 			Save playlists
 		</div>
-		<button class="action" on-click="saveSettings">save it</button>
-	</div>
+		<button class="action" type="submit">save it</button>
+	</form>
 	{{/ settings}}
 
 	{{# currentOverlay == 'no-tracks'}}
