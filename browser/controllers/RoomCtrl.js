@@ -1,5 +1,4 @@
 var Ractive = require('ractive/build/ractive.runtime');
-require('../lib/ractive-events-keys');
 var emoji = require('emoji-images');
 var linkify = require('html-linkify');
 
@@ -268,6 +267,23 @@ module.exports = Ractive.extend({
     },
 
     events: {
+        enter: function(node, fire) {
+            function onKeydown(e) {
+                if (e.keyCode == 13 && !e.shiftKey) {
+                    fire({
+                        node: node,
+                        original: e
+                    });
+                }
+            }
+            node.addEventListener('keydown', onKeydown, false);
+            return {
+                teardown: function() {
+                    node.removeEventListener('keydown', onKeydown, false);
+                }
+            };
+        },
+
         dragend: function(node, fire) {
             function shoot(e) {
                 fire({
