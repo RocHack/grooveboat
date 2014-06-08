@@ -229,8 +229,12 @@ module.exports = Ractive.extend({
 
         deleteTrack: function(e) {
             var i = e.index.i;
-            var track = this.get('tracks')[i];
+            var tracks = this.get('tracks');
+            var track = tracks[i];
+            // get around keypath error
+            this.set('tracks', null);
             this.groove.deleteTrack(this.groove.activePlaylist, track);
+            this.set('tracks', tracks);
         },
 
         bumpTrack: function(e) {
