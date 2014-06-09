@@ -7,8 +7,7 @@
 
     <div class="sidebar-content">
 
-        {{# currentTab == 'chat'}}
-        <div class="chat panel">
+        <div class="chat panel {{currentTab == 'chat' ? '' : 'hide'}}">
             <div class="messages" id="messages" auto-scroll="chat_messages">
                 {{^chat_messages}}
                 <div class="no_messages">
@@ -39,10 +38,8 @@
                 required>
             </textarea>
         </div>
-        {{/chat}}
 
-        {{# currentTab == 'music'}}
-        <div class="music panel">
+        <div class="music panel {{currentTab == 'music' ? '' : 'hide'}}">
             <form class="dropzone track-upload {{currentlyDragging ? 'active' : ''}}" id="upload-zone" action="" on-dropfiles="queueFiles" on-dragenter="setCurrentlyDragging:yes" on-dragend="setCurrentlyDragging:no">
                 drop music
             </form>
@@ -78,7 +75,6 @@
                 </ul>
             </div>
         </div>
-        {{/music}}
     </div>
 </div>
 
