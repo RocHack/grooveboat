@@ -3,3 +3,5 @@
 style.css
 node_modules
 npm-debug.log
+
+static/bundle.*
