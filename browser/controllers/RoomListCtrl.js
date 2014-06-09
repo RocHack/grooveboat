@@ -1,37 +1,54 @@
-function RoomListCtrl($scope, $location, groove, localStorageService) {
-    /*
-     * Room selection
-     */
-    $scope.room_selected = -1;
-    $scope.creating_room = false;
-    $scope.new_room_name = "";
-    $scope.rooms = groove.rooms;
+/*
+* Room selection
+*/
+var Ractive = require('ractive/build/ractive.runtime');
+module.exports = Ractive.extend({
+    template: require("../templates/room_list.html"),
 
-    $scope.clickRoom = function(i) {
-        $scope.room_selected = i;
-    }
+    data: {
+        room_selected: -1,
+        new_room_name: '',
+        creating_room: false,
+        username: 'Guest',
+        rooms: []
+    },
 
-    $scope.clickJoinRoom = function() {
-        var room;
-        if($scope.room_selected == $scope.rooms.length) {
-            room = $scope.new_room_name;
-        } else {
-            room = $scope.rooms[$scope.room_selected];
+    init: function(options) {
+        this.groove = options.groove;
+        this.router = options.router;
+
+        this.on(this.eventHandlers);
+        this.updateRooms = this.update.bind(this, 'rooms');
+        this.groove.on('roomsChanged', this.updateRooms);
+
+        this.set('username', this.groove.me.name);
+        this.set('rooms', this.groove.rooms);
+    },
+
+    eventHandlers: {
+        teardown: function() {
+            this.groove.me.setName(this.data.username);
+            this.groove.off('roomsChanged', this.updateRooms);
+        },
+
+        joinRoom: function() {
+            var room;
+            if (this.data.room_selected == 'new') {
+                room = this.data.new_room_name;
+            } else {
+                room = this.data.rooms[this.data.room_selected];
+            }
+            var roomId = room.replace(/\s/g, "-");
+            this.router.navigate("/room/" + roomId);
+        },
+
+        selectRoom: function(e, i) {
+            this.set('room_selected', i);
         }
-        room = room.replace(/\s/g, "-");
-        groove.me.updateIconURL(room);
-        localStorageService.set("user:name", groove.me.name);
-        $location.path("/room/" + room);
     }
+});
 
-    /*
-     * Listeners
-     */
-    // Listen for any new rooms being created or removed
-    var digest = $scope.$digest.bind($scope);
-    groove.on("roomsChanged", digest);
-}
-
-RoomListCtrl.$inject = ["$scope", "$location", "groove", "localStorageService"];
-
-module.exports = RoomListCtrl;
+/*
+* Listeners
+*/
+// Listen for any new rooms being created or removed

@@ -1,72 +1,100 @@
-function MainCtrl($scope, groove, localStorageService) {
-    $scope.currentUser = groove.me;
-    $scope.currentOverlay = false;
-    $scope.tempGravatarEmail = groove.me.gravatar;
-    $scope.tempUsername = groove.me.name;
-    $scope.muted = false;
+var Ractive = require("ractive/build/ractive.runtime");
 
-    $scope.persistPlaylists = localStorageService.get("user:persist") || false;
-    groove.setPersist($scope.persistPlaylists);
+module.exports = Ractive.extend({
+    template: require("../templates/main.html"),
 
-    $scope.setOverlay = function(overlay) {
-        $scope.currentOverlay = overlay;
-    };
+    data: {
+        currentOverlay: false,
+        persistPlaylists: false,
+        tempGravatarEmail: null,
+        tempUsername: null,
+        muted: false
+    },
 
-    $scope.saveSettings = function() {
-        // Gravatar
-        if($scope.tempGravatarEmail != undefined) {
-            groove.me.setGravatar($scope.tempGravatarEmail);
-            localStorageService.set("user:gravatar", groove.me.gravatar);
+    computed: {
+        trimmedTempUsername: function() {
+            var tempUsername = this.get('tempUsername');
+            return tempUsername && tempUsername.trim();
         }
+    },
 
-        // Name
-        if($scope.tempUsername && $scope.tempUsername.trim()) {
-            $scope.currentUser.setName($scope.tempUsername);
-            localStorageService.set("user:name", $scope.tempUsername);
+    init: function(options) {
+        this.groove = options.groove;
+        this.router = options.router;
+        this.storage = options.storage;
+
+        this.set({
+            persistPlaylists: !!this.storage.get("user:persist"),
+            tempGravatarEmail: this.groove.me.gravatar,
+            tempUsername: this.groove.me.name
+        });
+
+        this.on(this.eventHandlers);
+        this.observe(this.observers);
+
+        this.groove.buoy.on('disconnected', this, this.setOverlay.bind(this, 'disconnected'));
+        this.groove.buoy.on('reconnected', this, this.clearOverlay.bind(this, 'disconnected'));
+        this.groove.db.on('blocked', this, this.setOverlay.bind(this, 'blocked'));
+        this.groove.db.on('open', this, this.clearOverlay.bind(this, 'blocked'));
+    },
+
+    observers: {
+        persistPlaylists: function(persist) {
+            this.storage.set('user:persist', persist || '');
+            this.groove.setPersist(persist);
         }
-        $scope.tempUsername = groove.me.name;
-        $scope.setOverlay(false);
+    },
+
+    eventHandlers: {
+        teardown: function() {
+            this.groove.buoy.releaseGroup(this);
+            this.groove.db.releaseGroup(this);
+        },
+
+        setOverlay: function(e, overlay) {
+            this.setOverlay(overlay);
+        },
+
+        clearOverlay: function() {
+            this.clearOverlay();
+        },
+
+        saveSettings: function(e) {
+            e.original.preventDefault();
+
+            // Gravatar
+            var email = this.get('tempGravatarEmail');
+            if (email) {
+                this.groove.me.setGravatar(email);
+                this.storage.set("user:gravatar", this.groove.me.gravatar);
+            }
+
+            // Name
+            var username = this.get('trimmedTempUsername');
+            if (username) {
+                this.groove.me.setName(username);
+                this.storage.set("user:name", username);
+            }
+            this.set('tempUsername', this.groove.me.name);
+            this.setOverlay(null);
+        },
+
+        toggleMute: function() {
+            this.toggle('muted');
+        },
+
+        togglePersistTracks: function() {
+            this.toggle('persistPlaylists');
+        }
+    },
+
+    setOverlay: function(overlay) {
+        this.set('currentOverlay', overlay);
+    },
+
+    clearOverlay: function(overlay) {
+        if (!overlay || this.get('currentOverlay') == overlay) {
+            this.set('currentOverlay', false);
+        }
     }
-
-    $scope.toggleMute = function() {
-        $scope.muted = !$scope.muted;
-        $scope.$broadcast("toggleMute");
-    };
-
-    $scope.togglePersistTracks = function() {
-        $scope.persistPlaylists = !$scope.persistPlaylists;
-        localStorageService.set("user:persist", $scope.persistPlaylists ? "1" : "");
-
-        groove.setPersist($scope.persistPlaylists);
-    }
-
-    groove.buoy.on("disconnected", function() {
-        $scope.$apply(function($scope) {
-            $scope.setOverlay("disconnected");
-        });
-    });
-
-    groove.buoy.on("reconnected", function() {
-        $scope.$apply(function($scope) {
-            $scope.setOverlay(false);
-        });
-    });
-
-    groove.db.on("blocked", function() {
-        $scope.$apply(function($scope) {
-            $scope.currentOverlay = "blocked";
-        });
-    });
-
-    groove.db.on("open", function() {
-        if ($scope.currentOverlay == "blocked") {
-            $scope.$apply(function($scope) {
-                $scope.currentOverlay = null;
-            });
-        }
-    });
-}
-
-MainCtrl.$inject = ["$scope", "groove", "localStorageService"];
-
-module.exports = MainCtrl;
+});

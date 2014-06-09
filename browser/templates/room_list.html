@@ -1,12 +1,16 @@
 <div class="prompt">
     <h1>select a room</h1>
     <div class="rooms">
-        <div class="room" ng-class="{selected: room_selected == $index}" ng-repeat="room in rooms" ng-click="$parent.room_selected = $index">
-            {{room}}
+        {{#rooms:i}}
+        <div class="room {{room_selected == i ? 'selected' : ''}}" on-click="selectRoom:{{i}}">
+            {{.}}
         </div>
-        <div class="room" ng-class="{selected: room_selected == rooms.length}" ng-click="room_selected = rooms.length">create room</div>
+        {{/rooms}}
+        <div class="room {{room_selected == 'new' ? 'selected' : ''}}" on-click="selectRoom:new">create room</div>
     </div>
-    <input type="text" maxlength="32" placeholder="new room name" class="full no_border" ng-model="new_room_name" ng-show="room_selected == (rooms.length) && room_selected != -1">
-    <input type="text" name="user" maxlength="32" placeholder="nickname" class="full no_border" ng-model="currentUser.name">
-    <input type="button" class="action" value="join room" ng-disabled="room_selected == -1 || (room_selected == rooms.length && new_room_name.length < 3)" ng-click="clickJoinRoom()" />
+    {{# room_selected == 'new' }}
+    <input type="text" maxlength="32" placeholder="new room name" class="full no_border" value="{{new_room_name}}">
+    {{/ room_selected}}
+    <input type="text" name="user" maxlength="32" placeholder="nickname" class="full no_border" value="{{username}}">
+    <button class="action" disabled="{{room_selected == -1 || (room_selected == 'new' && new_room_name.length < 3)}}" on-click="joinRoom">join room</button>
 </div>

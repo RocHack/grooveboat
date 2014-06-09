@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html ng-app="grooveboat">
+<html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>grooveboat</title>
@@ -8,57 +8,6 @@
         <link rel="stylesheet" type="text/css" href="/static/bundle.css">
         <script src="/static/bundle.js"></script>
     </head>
-    <body ng-controller="MainCtrl">
-        <div class="screen" ng-show="currentOverlay" ng-click="setOverlay(false)">&nbsp;</div>
-        <div class="prompt overlay" ng-show="currentOverlay">
-
-            <div class="settings" ng-show="currentOverlay == 'settings'">
-                <h1>Settings</h1>
-
-                <h2>Nickname</h2>
-                <input type="text" class="full" name="gravatar" ng-model="tempUsername" />
-
-                <h2>Avatar</h2>
-                <p>Grooveboat uses <a target="_blank" href="//gravatar.com">Gravatar</a> to provide users with avatars. If you have a Gravatar account, enter your email address here:</p>
-                <input type="text" class="full" name="gravatar" placeholder="Gravatar email address" ng-model="tempGravatarEmail" />
-
-                <h2>Playlist persistence</h2>
-                <p>Due to browser restrictions, we aren't able to save your playlists using files stored on your local filesystem.</p> 
-                <p>To get around this, we can copy your music files into a special storage system in your browser, however this will require you to have two copies of the file. In return, you'll be able to save your playlists and have them persist between sessions.</p>
-                <div class="persist-bar">
-                    <div class="checkbox" ng-class="{checked: persistPlaylists}" ng-click="togglePersistTracks()"></div> 
-                    Save playlists
-                </div>
-                <input type="button" value="save it" class="action" ng-click="saveSettings();" />
-            </div>
-
-            <div class="no-tracks" ng-show="currentOverlay == 'no-tracks'">
-                <h1>Empty queue</h1>
-                <p>Add some tracks to your DJ queue before taking to the stage!</p>
-                <input type="button" value="righto" class="action" ng-click="setOverlay(false)" />
-            </div>
-
-            <div class="disconnected" ng-show="currentOverlay == 'disconnected'">
-                <h1>Disconnected</h1>
-                <img class="spinning" src="/static/img/favicon.png" />
-                <p>Looks like we've lost track of the buoy. Attempting to reconnect...</p>
-            </div>
-
-            <div class="disconnected" ng-show="currentOverlay == 'blocked'">
-                <h1>Stuck</h1>
-                <img src="/static/img/emoji/wrench.png" />
-                <p>We're stuck trying to upgrade the database. Try closing other tabs with Grooveboat open.</p>
-            </div>
-        </div>
-
-        <div class="container top">
-            <a href="/" class="title">grooveboat</a>
-            <a class="right-btn settings" ng-click="setOverlay('settings')"><i class="icon-gear"></i></a>
-            <a class="right-btn volume" ng-click="toggleMute()">
-                <i ng-show="!muted" class="icon-volume"></i>
-                <i ng-show="muted" class="icon-volume-off"></i>
-            </a>
-        </div>
-        <div class="content" ng-view></div>
+    <body>
     </body>
 </html>

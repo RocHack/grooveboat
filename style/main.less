@@ -324,6 +324,7 @@ a {
         padding: 10px 15px 10px 15px;
         margin: 5px 10px;
         border-radius: 50%;
+        cursor: pointer;
 
         transition: .15s;
 
@@ -496,7 +497,7 @@ a {
         cursor: pointer;
 
         &.half {
-            display: inline-block;
+            float: left;
             width: 50%;
         }
 
@@ -631,7 +632,7 @@ a {
 
         text-align: center;
 
-        &:focus {
+        &:focus, &:valid {
             padding-top: 5px;
             text-align: left;
         }

@@ -1,152 +1,74 @@
-/* global angular */
-window.jQuery = require('jquery');
-require('jquery-ui/sortable');
-require('angular/angular');
-require('angular-route/angular-route');
-require('angular-sanitize/angular-sanitize');
-require('angular-local-storage/angular-local-storage');
-require('angular-ui-sortable/src/sortable');
-require('angular-ui-utils/modules/event/event');
-require('angular-ui-utils/modules/keypress/keypress');
-var emoji = require('emoji-images');
+var Ractive = require('ractive/build/ractive.runtime');
+var Router = Ractive.extend(require('./router'));
 
 var MainCtrl = require('./controllers/MainCtrl');
 var RoomListCtrl = require('./controllers/RoomListCtrl');
 var RoomCtrl = require('./controllers/RoomCtrl');
 
+// Set up storage
+
+var storage = {
+    prefix: 'ls.',
+    set: function(key, value) {
+        localStorage[this.prefix + key] = value;
+    },
+    get: function(key) {
+        return localStorage[this.prefix + key];
+    }
+};
+
+// Set up Groove
+
 var Groove = require('./groove');
 
-angular.module('grooveboat',
-    ['ngRoute', 'LocalStorageModule', 'ngSanitize', 'ui.sortable',
-        'ui.keypress', 'ui.event'])
-    .controller('MainCtrl', MainCtrl) 
-    .config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
-        $routeProvider
-            .when("/", { 
-                controller: RoomListCtrl, 
-                template: require("./templates/room_list.html")
-            })
-            .when("/room/:room", { 
-                controller: RoomCtrl, 
-                template: require("./templates/room.html")
-            })
-            .otherwise({redirect_to: "/"});
+var groove = new Groove();
+window.groove = groove;
 
-        $locationProvider.html5Mode(true);
-    }])
-    .run(function($rootScope, $location) {
-        $rootScope.location = $location;
-    })
-    .factory("groove", ["localStorageService", function(localStorageService) {
-        var groove = new Groove();
-        window.groove = groove;
+groove.connectToBuoy("ws://" + location.hostname + ":8844");
 
-        groove.connectToBuoy("ws://"+ window.location.hostname +":8844");
+var name = storage.get("user:name");
+var gravatar = storage.get("user:gravatar");
+if (!name) {
+    name = "Guest " + Math.floor(Math.random()*101);
+    storage.set("user:name", name);
+}
+if(gravatar) {
+    groove.me.setGravatar(gravatar);
+}
+groove.me.setName(name);
 
-        var name = localStorageService.get("user:name");
-        var gravatar = localStorageService.get("user:gravatar");
-        if (!name) {
-            name = "Guest " + Math.floor(Math.random()*101);
-            localStorageService.set("user:name", name);
-        }
-        if(gravatar) {
-            groove.me.setGravatar(gravatar);
-        }
+// Set up UI
 
-        groove.me.setName(name);
-        return groove;
-    }])
-    .directive('autoScroll', function() {
-        return function(scope, elements, attrs) {
-            var el = elements[0];
-            function scrollToBottom() {
-                el.scrollTop = el.scrollHeight;
-            }
-            scope.$watch("(" + attrs.autoScroll + ").length", function() {
-                var lastElHeight = el.lastElementChild.offsetHeight;
-                var isScrolledToBottom = (el.scrollHeight - el.scrollTop -
-                    el.clientHeight - lastElHeight) < lastElHeight;
-                if (isScrolledToBottom) {
-                    scrollToBottom();
-                    setTimeout(scrollToBottom, 10);
-                }
-            });
-        };
-    }).directive('filesBind', function() {
-        return function(scope, el, attrs) {
-            el.bind('change', function(e) {
-                scope.$apply(function() {
-                    scope[attrs.filesBind] = e.target.files;
-                });
-            });
-        };
-    }).directive('dropFiles', function() {
-        return function(scope, el, attr) {
-            function dragEnter(e) {
-                e.stopPropagation();
-                e.preventDefault();
+var main = new MainCtrl({
+    groove: groove,
+    storage: storage
+});
 
-                if(!attr.dragEnter) return;
+document.addEventListener('DOMContentLoaded', function() {
+    main.insert(document.body);
+}, false);
 
-                scope.$apply(function() {
-                    scope.$eval(attr.dragEnter);
-                });
-            }
+// Set up routing
 
-            function dragLeave(e) {
-                e.stopPropagation();
-                e.preventDefault();
-
-                if(!attr.dragLeave) return;
-
-                scope.$apply(function() {
-                    scope.$eval(attr.dragLeave);
-                });
-            }
-
-            function dragOver(e) {
-                e.stopPropagation();
-                e.preventDefault();
-            }
-
-            function drop(e) {
-                e.stopPropagation();
-                e.preventDefault();
-
-                scope.$apply(function() {
-                    scope.$eval(attr.dragLeave);
-                });
-
-                scope.$apply(function() {
-                    scope.files = e.dataTransfer.files;
-                });
-            }
-
-            function click() {
-                var input = document.createElement("input");
-                input.type = "file";
-                function onChange() {
-                    scope.$apply(function() {
-                        scope.files = input.files;
-                    });
-                    input.removeEventListener("change", onChange);
-                }
-                input.addEventListener("change", onChange, false);
-                input.click();
-            }
-
-            el[0].addEventListener("dragenter", dragEnter, false);
-            el[0].addEventListener("dragleave", dragLeave, false);
-            el[0].addEventListener("dragover", dragOver, false);
-            el[0].addEventListener("drop", drop, false);
-            el[0].addEventListener("click", click, false);
-        };
-    }).filter('emoji', function() {
-        return function(text) {
-            return emoji(text, '/static/img/emoji');
-        };
-    }).filter("mention", function() {
-        return function(text, name) {
-            return text.replace(name, "<span class=\"mention\">"+ name +"</span>");
-        };
-    });
+var router = new Router({
+    el: main.nodes.content
+});
+router.setHandler(function(path) {
+    if (path == '/') {
+        return new RoomListCtrl({
+            app: main,
+            groove: groove,
+            router: router,
+            storage: storage
+        });
+    } else if (path.indexOf('/room/') === 0) {
+        var room = path.substr(6);
+        return new RoomCtrl({
+            app: main,
+            groove: groove,
+            router: router,
+            room: room,
+            storage: storage
+        });
+    }
+});

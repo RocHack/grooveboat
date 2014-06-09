@@ -2,6 +2,20 @@ var Emitter = require('wildemitter');
 
 var DB_VERSION = 3;
 
+// Helper functions for queue
+function ensureDb(origFn) {
+    return function fn() {
+        if (this.db) {
+            origFn.apply(this, fn.arguments);
+        } else {
+            this._queue.push([origFn, fn.arguments]);
+        }
+    };
+}
+function exec(handler) {
+    handler[0].apply(this, handler[1]);
+}
+
 // turn a track into something we can put in the db
 // excluding the file
 function exportTrack(t) {
@@ -37,8 +51,7 @@ function dataURItoBlob(dataURI) {
 function GrooveDB() {
     Emitter.call(this);
 
-    this._persistQueue = [];
-    this._getCallbackQueue = [];
+    this._queue = [];
     this.dbReq = window.indexedDB.open("grooveboat", DB_VERSION);
     this.db = null;
 
@@ -76,12 +89,7 @@ GrooveDB.prototype._onRequestSuccess = function(e) {
     this.db.onerror = this._onDbError.bind(this);
 
     // Empty the waiting queue
-    if(this._persistQueue.length != 0) {
-        this._persistQueue.map(this._persistTrack.bind(this));
-    }
-    if(this._getCallbackQueue.length != 0) {
-        this._getCallbackQueue.map(this.getTracks.bind(this));
-    }
+    this._queue.forEach(exec.bind(this));
 
     console.log("[db] Connected to local persistent store");
     this.emit("open");
@@ -169,7 +177,7 @@ GrooveDB.prototype._persistTrack = function(track) {
 /*
 * Deletes a track from the store
 */
-GrooveDB.prototype.deleteTrack = function(track) {
+GrooveDB.prototype.deleteTrack = ensureDb(function(track) {
     var t = this.db.transaction(["music", "files"], "readwrite");
     var music = t.objectStore("music");
     var files = t.objectStore("files");
@@ -177,55 +185,34 @@ GrooveDB.prototype.deleteTrack = function(track) {
     music.delete(track.id);
     files.delete(track.id);
     console.log("[db] Deleted track "+ track.title);
-};
+});
 
 /*
 * Adds a song to the persist queue if we're not connected or persists
 * it immediately if we are
 */
-GrooveDB.prototype.storeTrack = function(track) {
-    if(!this.db) {
-        this._persistQueue.push(track);
-        return;
-    }
-
+GrooveDB.prototype.storeTrack = ensureDb(function(track) {
     this._persistTrack(track);
-};
+});
 
 /*
 * Clears all songs from the store
 */
-GrooveDB.prototype.clearDb = function() {
-    if(!this.db) {
-        // TODO: Something more meaniningful here
-        return;
-    }
-
+GrooveDB.prototype.clearDb = ensureDb(function() {
     var tx = this.db.transaction(["music", "files"], "readwrite");
-    var music = tx.objectStore("music");
-    var files = tx.objectStore("files");
-    music.openCursor().onsuccess = function(e) {
-        var c = e.target.result;
-
-        if(c) {
-            console.log("[db] Deleting track "+ c.value.title +" from persistent store");
-            music.delete(c.key);
-            files.delete(c.key);
-            c.continue();
-        }
+    tx.objectStore("music").clear();
+    tx.objectStore("files").clear();
+    tx.oncomplete = function() {
+        console.log("[db] Deleted tracks from persistent store");
     };
-};
+});
 
 /*
 * Retreives the stored tracks and sends them as a list to the callback
 */
-GrooveDB.prototype.getTracks = function(callback) {
-    if(!this.db) {
-        this._getCallbackQueue.push(callback);
-        return;
-    }
-
-    var music = this.db.transaction(["music"], "readwrite").objectStore("music");
+GrooveDB.prototype.getTracks = ensureDb(function(callback) {
+    var tx = this.db.transaction(["music"], "readwrite");
+    var music = tx.objectStore("music");
     var tracks = [];
     music.openCursor().onsuccess = function(e) {
         var c = e.target.result;
@@ -237,12 +224,12 @@ GrooveDB.prototype.getTracks = function(callback) {
             callback(tracks);
         }
     };
-};
+});
 
 /*
  * Retrieves the stored blob for the given track
  */
-GrooveDB.prototype.getTrackFile = function(track, callback) {
+GrooveDB.prototype.getTrackFile = ensureDb(function(track, callback) {
     if (!track || !track.id) {
         return callback(null);
     }
@@ -250,6 +237,6 @@ GrooveDB.prototype.getTrackFile = function(track, callback) {
     files.get(track.id).onsuccess = function(e) {
         callback(dataURItoBlob(e.target.result));
     };
-};
+});
 
 module.exports = GrooveDB;
