@@ -59,7 +59,7 @@
                 </ul>
                 {{/ currentTrack}}
 
-                <ul class="songs" decorator="sortable:tracks">
+                <ul class="songs" decorator="sortable:'tracks','i'">
                 {{#tracks:i}}
                 {{# id != currentTrack.id}}
                     <li>

@@ -1,6 +1,6 @@
 // Sortable decorator
 // Allows a list to be reordered with drag-and-drop.
-module.exports = function sortable(listEl, keypath) {
+module.exports = function sortable(listEl, keypath, index) {
     var el;
     var startY;
     var startIndex, currentIndex;
@@ -70,6 +70,10 @@ module.exports = function sortable(listEl, keypath) {
         var arrayOrig = ractive.get(keypath);
         var array = arrayOrig.slice();
         var item = array[startIndex];
+        if (!item) {
+            console.error('Unable to find item', array, startIndex);
+            return;
+        }
         item.playlistPosition = currentIndex;
         // remove item from old position
         array.splice(startIndex, 1);
@@ -98,7 +102,7 @@ module.exports = function sortable(listEl, keypath) {
         }
 
         el = findEl(e.target);
-        if (!el || !el._ractive) {
+        if (!el || !el._ractive || !el._ractive.index) {
             console.error('Unable to find list item');
             return;
         }
@@ -109,7 +113,7 @@ module.exports = function sortable(listEl, keypath) {
         listEl.style.overflow = 'visible';
         origNextNode = el.nextElementSibling;
         startY = e.clientY;
-        currentIndex = startIndex = el._ractive.index.i;
+        currentIndex = startIndex = el._ractive.index[index];
 
         document.addEventListener('mousemove', onDrag, false);
         document.addEventListener('mouseup', onDragEnd, false);
