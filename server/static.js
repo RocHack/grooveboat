@@ -17,9 +17,6 @@ function serveFile(filename, resp) {
     var contentType = mimes[path.extname(filename)] || "text/plain";
     resp.setHeader("Content-Type", contentType);
     fs.createReadStream(filename)
-        .once("data", function() {
-            resp.writeHead(200);
-        })
         .on("error", function(err) {
             if (err.code == "ENOENT") {
                 resp.writeHead(404);
@@ -39,8 +36,6 @@ function serveFile(filename, resp) {
 
 module.exports = function(request, response) {
     var uri = decodeURIComponent(url.parse(request.url).pathname.substr(1));
-    console.log("uri", uri);
-
     if (uri.indexOf("static/") === 0) {
         serveFile(uri, response);
     } else {
