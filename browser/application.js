@@ -24,7 +24,7 @@ var Groove = require('./groove');
 var groove = new Groove();
 window.groove = groove;
 
-groove.connectToBuoy("ws://" + location.hostname + ":8844");
+groove.connectToBuoy("ws://" + location.hostname + ":8844/buoy");
 
 var name = storage.get("user:name");
 var gravatar = storage.get("user:gravatar");
