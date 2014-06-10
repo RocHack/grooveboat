@@ -17,8 +17,9 @@ function normalizeUrl(url) {
 }
 
 // Route object for matching URLs and dispatching a callback
-function Route(route, handler) {
-	this.handler = handler;
+function Route(route, controller, router) {
+	this.controller = controller;
+	this.router = router;
 	var names = this.names = ['path'];
 	route = route.replace(escapeRegExp, '\\$&')
 		.replace(optionalParam, '(?:$1)?')
@@ -33,14 +34,14 @@ function Route(route, handler) {
 	this.regexp = new RegExp('^' + route + '$');
 }
 
-Route.prototype.handle = function(path, router) {
+Route.prototype.handle = function(path) {
 	var matches = this.regexp.exec(path);
 	if (!matches) return;
-	var params = {};
+	var options = Object.create(this.router.routeOptions);
 	for (var i = 0; i < matches.length; i++) {
-		params[this.names[i]] = matches[i];
+		options[this.names[i]] = matches[i];
 	}
-	return this.handler.call(router, params);
+	return new this.controller(options);
 };
 
 module.exports = {
@@ -50,6 +51,8 @@ module.exports = {
 		this.observe(this.observers);
 
 		this.root = options.root ? normalizeUrl(options.root) : '/';
+		this.routeOptions = options.options || {};
+		this.routeOptions._router = this;
 		this.routes = {};
 		if (options.routes) for (var route in options.routes) {
 			this.route(route, options.routes[route]);
@@ -69,7 +72,6 @@ module.exports = {
 	observers: {
 		page: function(newPage, oldPage) {
 			if (oldPage) oldPage.teardown();
-			if (newPage) newPage.insert(this.el);
 		},
 		relativePath: function(path) {
 			var page;
@@ -127,7 +129,7 @@ module.exports = {
 
 	// register a route
 	route: function(route, callback) {
-		this.routes[route] = new Route(route, callback);
+		this.routes[route] = new Route(route, callback, this);
 	},
 
 	// handle current route

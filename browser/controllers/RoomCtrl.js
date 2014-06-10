@@ -72,7 +72,7 @@ module.exports = Ractive.extend({
      */
     init: function(options) {
         this.groove = options.groove;
-        this.router = options.router;
+        this.router = options._router;
         this.app = options.app;
         this.room = options.room;
         this.storage = options.storage;

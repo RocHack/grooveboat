@@ -15,7 +15,7 @@ module.exports = Ractive.extend({
 
     init: function(options) {
         this.groove = options.groove;
-        this.router = options.router;
+        this.router = options._router;
 
         this.on(this.eventHandlers);
         this.updateRooms = this.update.bind(this, 'rooms');

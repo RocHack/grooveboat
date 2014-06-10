@@ -51,24 +51,14 @@ document.addEventListener('DOMContentLoaded', function() {
 // Set up routing
 
 new Router({
-    el: main.nodes.content,
+    options: {
+        el: main.nodes.content,
+        app: main,
+        groove: groove,
+        storage: storage
+    },
     routes: {
-        '/': function() {
-            return new RoomListCtrl({
-                app: main,
-                groove: groove,
-                router: this,
-                storage: storage
-            });
-        },
-        '/room/:room': function(params) {
-            return new RoomCtrl({
-                app: main,
-                groove: groove,
-                router: this,
-                room: params.room,
-                storage: storage
-            });
-        }
+        '/': RoomListCtrl,
+        '/room/:room': RoomCtrl
     }
 }).go();
