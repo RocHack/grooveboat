@@ -7,7 +7,7 @@ function pick(arr) {
 }
 
 function subtract(arr1, arr2) {
-    return arr1.filter(function(item) {
+    return !arr1 ? [] : !arr2 ? arr1 : arr1.filter(function(item) {
         return arr2.indexOf(item) == -1;
     });
 }
@@ -316,7 +316,8 @@ module.exports = Ractive.extend({
         },
 
         queueUpdate: function() {
-            this.update('tracks');
+            var tracks = this.groove.playlists[this.groove.activePlaylist];
+            this.set('tracks', tracks.slice());
         },
 
         setVote: function() {
