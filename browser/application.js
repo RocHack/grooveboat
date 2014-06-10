@@ -50,25 +50,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Set up routing
 
-var router = new Router({
-    el: main.nodes.content
-});
-router.setHandler(function(path) {
-    if (path == '/') {
-        return new RoomListCtrl({
-            app: main,
-            groove: groove,
-            router: router,
-            storage: storage
-        });
-    } else if (path.indexOf('/room/') === 0) {
-        var room = path.substr(6);
-        return new RoomCtrl({
-            app: main,
-            groove: groove,
-            router: router,
-            room: room,
-            storage: storage
-        });
+new Router({
+    el: main.nodes.content,
+    routes: {
+        '/': function() {
+            return new RoomListCtrl({
+                app: main,
+                groove: groove,
+                router: this,
+                storage: storage
+            });
+        },
+        '/room/:room': function(params) {
+            return new RoomCtrl({
+                app: main,
+                groove: groove,
+                router: this,
+                room: params.room,
+                storage: storage
+            });
+        }
     }
-});
+}).go();
