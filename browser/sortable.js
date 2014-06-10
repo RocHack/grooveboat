@@ -98,7 +98,7 @@ module.exports = function sortable(listEl, keypath) {
         }
 
         el = findEl(e.target);
-        if (!el) {
+        if (!el || !el._ractive) {
             console.error('Unable to find list item');
             return;
         }
@@ -109,9 +109,7 @@ module.exports = function sortable(listEl, keypath) {
         listEl.style.overflow = 'visible';
         origNextNode = el.nextElementSibling;
         startY = e.clientY;
-        var elKeypath = el._ractive.keypath;
-        var lastDot = elKeypath.lastIndexOf('.') + 1;
-        currentIndex = startIndex = +elKeypath.substr(lastDot);
+        currentIndex = startIndex = el._ractive.index.i;
 
         document.addEventListener('mousemove', onDrag, false);
         document.addEventListener('mouseup', onDragEnd, false);

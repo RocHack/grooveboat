@@ -325,11 +325,11 @@ module.exports = Ractive.extend({
         },
 
         playlistUpdated: function(playlistName) {
-            this.set('tracks', this.groove.playlists[playlistName]);
+            this.set('tracks', this.groove.playlists[playlistName].slice());
         },
 
         djs: function() {
-            this.set('djs', this.groove.djs);
+            this.set('djs', this.groove.djs.slice());
         },
 
         activeDJ: function() {
