@@ -1,38 +1,38 @@
 <div class="private-chat {{collapsed ? 'collapsed' : ''}}">
-	<div class="handle">
-		chat with <em>{{peer.name}}</em>
-		<div class="right">
-			<a href="" on-click="collapseChat" class="icon-collapse"></a>
-			<a href="" on-click="closeChat">×</a>
-		</div>
-	</div>
-	<div class="chat-contents">
-		<div class="messages">
-			{{^messages}}
-			<div class="no_messages">
-				Say something about stuff
-			</div>
-			{{/messages}}
-			{{#messages}}
-			<div class="message">
-				{{#from}}
-				<div class="author {{isLocal ? 'local' : ''}}">
-					<img src="{{iconURL}}" />
-					{{name}}
-				</div>
-				{{/from}}
-				<div class="text">{{text}}</div>
-			</div>
-			{{/messages}}
-		</div>
-		<textarea class="new-message" 
-			id="newMessage"
-			on-enter="newMessage"
-			on-focus="newMessageFocus"
-			on-blur="newMessageBlur"
-			placeholder="{{msgPlaceholder}}"
-			value="{{message_text}}"
-			required>
-		</textarea>
-	</div>
+    <div class="handle">
+        chat with <em>{{peer.name}}</em>
+        <div class="right">
+            <a href="" on-click="collapseChat" class="icon-collapse"></a>
+            <a href="" on-click="closeChat">×</a>
+        </div>
+    </div>
+    <div class="chat-contents">
+        <div class="messages">
+            {{^messages}}
+            <div class="no_messages">
+                Say something about stuff
+            </div>
+            {{/messages}}
+            {{#messages}}
+            <div class="message">
+                {{#from}}
+                <div class="author {{isLocal ? 'local' : ''}}">
+                    <img src="{{iconURL}}" />
+                    {{name}}
+                </div>
+                {{/from}}
+                <div class="text">{{text}}</div>
+            </div>
+            {{/messages}}
+        </div>
+        <textarea class="new-message" 
+            id="newMessage"
+            on-enter="newMessage"
+            on-focus="newMessageFocus"
+            on-blur="newMessageBlur"
+            placeholder="{{msgPlaceholder}}"
+            value="{{message_text}}"
+            required>
+        </textarea>
+    </div>
 </div>

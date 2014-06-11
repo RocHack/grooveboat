@@ -656,8 +656,8 @@ a {
  */
 
 .no_messages {
-	text-align: center;
-	padding: 15px;
+    text-align: center;
+    padding: 15px;
 }
 
 .messages {
@@ -736,27 +736,27 @@ a {
 
     .private-chat {
         position: relative;
-		float: left;
+        float: left;
         width: 240px;
         box-sizing: border-box;
         border: 1px solid @gray;
         margin-left: 12px;
-		z-index: 1;
-		background-color: white;
+        z-index: 1;
+        background-color: white;
     }
 
-	.chat-contents {
+    .chat-contents {
         height: 250px;
         transition: height .15s;
-	}
+    }
 
-	.collapsed {
-		.chat-contents {
-			height: 0;
-			position: relative;
-			overflow: hidden;
-		}
-	}
+    .collapsed {
+        .chat-contents {
+            height: 0;
+            position: relative;
+            overflow: hidden;
+        }
+    }
 
     .messages {
         top: 30px;
@@ -768,30 +768,30 @@ a {
         border-bottom: 1px solid @gray;
     }
 
-	.right {
-		position: absolute;
-		top: 3px;
-		right: 5px;
-		font-size: 24px;
-		line-height: 1em;
+    .right {
+        position: absolute;
+        top: 3px;
+        right: 5px;
+        font-size: 24px;
+        line-height: 1em;
 
-		a {
-			color: darken(@white, 15%);
-			font-weight: bold;
-		}
+        a {
+            color: darken(@white, 15%);
+            font-weight: bold;
+        }
 
-		.icon-collapse {
-			display: inline-block;
-			width: 1ex;
-			height: 1ex;
-			border-bottom: 2px solid darken(@white, 15%);
-			vertical-align: 2px;
-		}
+        .icon-collapse {
+            display: inline-block;
+            width: 1ex;
+            height: 1ex;
+            border-bottom: 2px solid darken(@white, 15%);
+            vertical-align: 2px;
+        }
 
-		:hover {
-			color: @red;
-		}
-	}
+        :hover {
+            color: @red;
+        }
+    }
 }
 
 /*

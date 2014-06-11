@@ -2,76 +2,76 @@ var emoji = require('emoji-images');
 var linkify = require('html-linkify');
 
 function messageToHTML(text) {
-	// sanitize html
-	text = linkify(text);
-	// render emoji
-	text = emoji(text, '/static/img/emoji');
-	// highlight mentions
-	var myName = this.groove.me.name;
-	return text.replace(myName,
-		'<span class="mention">' + myName + '</span>');
+    // sanitize html
+    text = linkify(text);
+    // render emoji
+    text = emoji(text, '/static/img/emoji');
+    // highlight mentions
+    var myName = this.groove.me.name;
+    return text.replace(myName,
+        '<span class="mention">' + myName + '</span>');
 }
 
 module.exports = {
-	template: require('../templates/private_chat.html'),
+    template: require('../templates/private_chat.html'),
     events: require('../events'),
 
-	data: {
-		collapsed: false,
-		messageToHTML: messageToHTML
-	},
+    data: {
+        collapsed: false,
+        messageToHTML: messageToHTML
+    },
 
     computed: {
         msgPlaceholder: function() {
             return this.get('newMessageFocused') ? '' : 'send a message';
-		}
-	},
+        }
+    },
 
-	init: function(options) {
-		this.peer = options.user;
-		this.me = options.me;
-		this.channel = options.channel;
+    init: function(options) {
+        this.peer = options.user;
+        this.me = options.me;
+        this.channel = options.channel;
 
-		this.set({
-			peer: this.peer,
-			messages: [],
-			messageToHTML: messageToHTML
-		});
+        this.set({
+            peer: this.peer,
+            messages: [],
+            messageToHTML: messageToHTML
+        });
 
-		this.on(this.eventHandlers);
+        this.on(this.eventHandlers);
 
-		for (var eventType in this.channelEventHandlers) {
-			var handler = this.channelEventHandlers[eventType].bind(this);
-			this.channel.addEventListener(eventType, handler, false);
-		}
+        for (var eventType in this.channelEventHandlers) {
+            var handler = this.channelEventHandlers[eventType].bind(this);
+            this.channel.addEventListener(eventType, handler, false);
+        }
 
-		this.focus();
-	},
+        this.focus();
+    },
 
-	eventHandlers: {
-		teardown: function() {
-			console.log('teardown');
-		},
+    eventHandlers: {
+        teardown: function() {
+            console.log('teardown');
+        },
 
-		collapseChat: function(e) {
-			e.original.preventDefault();
-			this.toggle('collapsed');
-		},
+        collapseChat: function(e) {
+            e.original.preventDefault();
+            this.toggle('collapsed');
+        },
 
-		closeChat: function(e) {
-			console.log('close');
-			e.original.preventDefault();
-			this.channel.close();
-		},
+        closeChat: function(e) {
+            console.log('close');
+            e.original.preventDefault();
+            this.channel.close();
+        },
 
         newMessage: function(e) {
             e.original.preventDefault();
             var text = this.get('message_text');
-			if (text && text.trim()) {
-				this.send(text);
-			}
+            if (text && text.trim()) {
+                this.send(text);
+            }
             this.set('message_text', '');
-		},
+        },
 
         newMessageFocus: function() {
             this.set('newMessageFocused', true);
@@ -82,51 +82,57 @@ module.exports = {
         }
     },
 
-	channelEventHandlers: {
-		message: function(e) {
-			// use empty message to mean closing channel
-			if (e.data === "") {
-				this.teardown();
-			}
-			this.get('messages').push({
-				from: this.last == this.peer ? null : this.peer,
-				text: e.data
-			});
-			this.last = this.peer;
-		},
+    channelEventHandlers: {
+        message: function(e) {
+            // use empty message to mean closing channel
+            if (e.data === "") {
+                this.teardown();
+            }
+            this.get('messages').push({
+                from: this.last == this.peer ? null : this.peer,
+                text: e.data
+            });
+            this.last = this.peer;
+        },
 
-		close: function() {
-			this.teardown();
-		},
+        open: function() {
+            this.get('messages').push({
+                text: 'open'
+            });
+        },
 
-		error: function(e) {
-			this.showError(e);
-		}
-	},
+        close: function() {
+            this.teardown();
+        },
 
-	send: function(text) {
-		this.get('messages').push({
-			from: this.last == this.me ? null : this.me,
-			text: text
-		});
-		this.last = this.me;
-		try {
-			this.channel.send(text);
-		} catch(e) {
-			this.showError(e);
-		}
-	},
+        error: function(e) {
+            this.showError(e);
+        }
+    },
 
-	focus: function () {
-		this.nodes.newMessage.focus();
-		this.set('collapsed', false);
-	},
+    send: function(text) {
+        this.get('messages').push({
+            from: this.last == this.me ? null : this.me,
+            text: text
+        });
+        this.last = this.me;
+        try {
+            this.channel.send(text);
+        } catch(e) {
+            this.showError(e);
+        }
+    },
 
-	showError: function(err) {
-		this.get('messages').push({
-			text: err.toString()
-		});
-	},
+    focus: function () {
+        this.nodes.newMessage.focus();
+        this.set('collapsed', false);
+    },
 
-	messageToHTML: messageToHTML
+    showError: function(err) {
+        this.get('messages').push({
+            text: err.toString()
+        });
+    },
+
+    messageToHTML: messageToHTML
 };
