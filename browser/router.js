@@ -87,6 +87,7 @@ module.exports = {
 	computed: {
 		relativePath: function() {
 			var path = this.get('path');
+			if (!path) return;
 			// strip root
 			if (path.indexOf(this.root) === 0) {
 				path = path.substr(this.root.length);
