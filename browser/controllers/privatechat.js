@@ -27,10 +27,17 @@ module.exports = {
         }
     },
 
+    bind: function(handlers) {
+        var bound = {};
+        for (var name in handlers) {
+            bound[name] = handlers[name].bind(this);
+        }
+        return bound;
+    },
+
     init: function(options) {
-        this.peer = options.user;
+        this.peer = options.peer;
         this.me = options.me;
-        this.channel = options.channel;
 
         this.set({
             peer: this.peer,
@@ -39,38 +46,61 @@ module.exports = {
         });
 
         this.on(this.eventHandlers);
-
-        for (var eventType in this.channelEventHandlers) {
-            var handler = this.channelEventHandlers[eventType].bind(this);
-            this.channel.addEventListener(eventType, handler, false);
+        this.observe(this.observers);
+        this.channelEventHandlers = this.bind(this.channelEventHandlers);
+        this.peerEventHandlers = this.bind(this.peerEventHandlers);
+        for (var name in this.peerEventHandlers) {
+            this.peer.on(name, this, this.peerEventHandlers[name]);
         }
 
         this.focus();
     },
 
-    eventHandlers: {
-        teardown: function() {
-            console.log('teardown');
+    observers: {
+        channel: function(chan, prevChan) {
+            this.channel = chan;
+            this.set('status', {
+                open: 'connected',
+                closed: 'disconnected'
+            }[chan.readyState]);
+            for (var name in this.channelEventHandlers) {
+                var fn = this.channelEventHandlers[name];
+                if (chan) chan.addEventListener(name, fn, false);
+                if (prevChan) prevChan.removeEventListener(name, fn, false);
+            }
         },
 
-        collapseChat: function(e) {
+        collapsed: function() {
+            this.set('newMessages', false);
+        }
+    },
+
+    eventHandlers: {
+        teardown: function() {
+            this.peer.releaseGroup(this);
+            this.channel.close();
+            this.set('channel', null);
+        },
+
+        toggleCollapse: function(e) {
             e.original.preventDefault();
             this.toggle('collapsed');
         },
 
         closeChat: function(e) {
-            console.log('close');
             e.original.preventDefault();
-            this.channel.close();
+            this.teardown();
         },
 
         newMessage: function(e) {
             e.original.preventDefault();
-            var text = this.get('message_text');
-            if (text && text.trim()) {
-                this.send(text);
-            }
-            this.set('message_text', '');
+            this.send(this.get('message_text'), function(err) {
+                if (err) {
+                    this.addMessage('unable to send message', null, 'status');
+                } else {
+                    this.set('message_text', '');
+                }
+            });
         },
 
         newMessageFocus: function() {
@@ -84,54 +114,75 @@ module.exports = {
 
     channelEventHandlers: {
         message: function(e) {
-            // use empty message to mean closing channel
-            if (e.data === "") {
-                this.teardown();
-            }
-            this.get('messages').push({
-                from: this.last == this.peer ? null : this.peer,
-                text: e.data
-            });
-            this.last = this.peer;
+            this.addMessage(e.data, this.peer);
+            this.set('newMessages', true);
         },
 
         open: function() {
-            this.get('messages').push({
-                text: 'open'
-            });
+            this.set('status', 'connected');
         },
 
         close: function() {
-            this.teardown();
+            this.set('status', 'disconnected');
         },
 
         error: function(e) {
-            this.showError(e);
+            console.error(e);
+            this.addMessage(e.toString(), null, 'error');
         }
     },
 
-    send: function(text) {
+    peerEventHandlers: {
+        disconnected: function() {
+            this.addMessage(this.peer.name + " left", null, 'status');
+            this.set('status', 'disconnected');
+        },
+
+        name: function() {
+            this.update();
+        }
+    },
+
+    addMessage: function(text, from, type) {
         this.get('messages').push({
-            from: this.last == this.me ? null : this.me,
+            from: this.last == from ? null : from,
+            type: type,
             text: text
         });
-        this.last = this.me;
+        this.last = from;
+    },
+
+    send: function(text, cb, immediate) {
+        if (!text) return;
         try {
             this.channel.send(text);
         } catch(e) {
-            this.showError(e);
+            if (immediate) {
+                return cb.call(this, e);
+            }
+            // remote closed connection
+            this.set('status', 'disconnected');
+            // try to reconnect
+            this.peer.startChat();
+            // resend message
+            var onStatus = this.observe('status', function(status) {
+                if (status == 'connected') {
+                    this.send(text, cb, true);
+                    onStatus.cancel();
+                } else if (status == 'disconnected') {
+                    cb.call(this, e);
+                    onStatus.cancel();
+                }
+            });
+            return;
         }
+        this.addMessage(text, this.me);
+        cb.call(this);
     },
 
     focus: function () {
         this.nodes.newMessage.focus();
         this.set('collapsed', false);
-    },
-
-    showError: function(err) {
-        this.get('messages').push({
-            text: err.toString()
-        });
     },
 
     messageToHTML: messageToHTML

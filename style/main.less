@@ -698,6 +698,11 @@ a {
         font-size: 14px;
     }
 
+    &.status .text {
+        color: darken(@gray, 25%);
+        text-align: center;
+    }
+
     .mention {
         color: @red;
     }
@@ -758,14 +763,42 @@ a {
         }
     }
 
+    .disconnected {
+
+        .messages {
+            bottom: 0;
+        }
+
+        .new-message {
+            display: none;
+        }
+
+        .handle {
+            color: darken(@gray, 25%);
+        }
+    }
+
     .messages {
         top: 30px;
     }
 
     .handle {
-        color: @red;
         padding: 5px;
         border-bottom: 1px solid @gray;
+    }
+
+    .connected .handle {
+        color: @red;
+    }
+
+    .handle.active {
+        color: @white;
+        background-color: @red;
+
+        a:hover {
+            color: white;
+            border-color: white;
+        }
     }
 
     .right {
@@ -790,6 +823,7 @@ a {
 
         :hover {
             color: @red;
+            border-color: @red;
         }
     }
 }

@@ -187,15 +187,17 @@ Groove.prototype.onBuoyRoomData = function(data) {
 Groove.prototype.onBuoyRecvMessage = function(data) {
     var user = this.users[data.from];
     if (!user) {
-        console.error("Received message from unknown user " + user.id);
+        console.error("Received message from unknown user " + data.from);
     }
     user.handleMessage(data.msg);
 };
 
 Groove.prototype.onBuoyPeerLeft = function(data) {
-    this.emit("peerDisconnected", this.users[data.id]);
+    var user = this.users[data.id];
+    user.emit("disconnected");
+    this.emit("peerDisconnected", user);
 
-    console.log("User "+ this.users[data.id].name +" disconnected");
+    console.log("User "+ user.name +" disconnected");
 
     delete this.users[data.id];
 };

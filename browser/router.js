@@ -102,6 +102,10 @@ module.exports = {
 
 	// handle click events on the page
 	onClick: function(e) {
+		if (e.defaultPrevented) {
+			// the app is already doing something with this event
+			return;
+		}
 		if (e.target.nodeName == 'A' && !e.ctrlKey && e.target.href &&
 			e.target.href.indexOf(location.origin) === 0) {
 			// intercept the click

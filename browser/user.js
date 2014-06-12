@@ -215,11 +215,20 @@ function User_onAddStream(e) {
     this.groove.gotRemoteStream(e.stream);
 }
 
+
+
 // got a data channel over peer connection
 function User_onAddChannel(channel) {
     if (channel.label == 'private_chat') {
         this.chatChannel = channel;
-        this.emit('chatChannel', channel);
+
+        // defer the event until receiving first message
+        var self = this;
+        channel.addEventListener("message", function onMessage(e) {
+            channel.removeEventListener("message", onMessage, false);
+            self.emit('chatChannel', channel);
+            setTimeout(channel.dispatchEvent.bind(channel, e), 10);
+        }, false);
     }
 }
 

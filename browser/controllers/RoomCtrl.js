@@ -300,6 +300,7 @@ module.exports = Ractive.extend({
             var i = this.data.users.indexOf(user);
             if (i == -1) return;
             this.data.users.splice(i, 1);
+            delete this.privateChats[user.id];
             // groove might not yet realize the user has disconnected, so reset
             // their vote here for recalculation purposes
             user.vote = 0;
@@ -410,12 +411,19 @@ module.exports = Ractive.extend({
     },
 
     gotUserChatChannel: function(user, chan) {
-        this.privateChats[user.id] = new PrivateChat({
-            el: this.nodes.private_chats,
-            append: true,
-            user: user,
-            me: this.groove.me,
-            channel: chan
-        });
+        var pc = this.privateChats[user.id];
+        if (!pc) {
+            pc = this.privateChats[user.id] = new PrivateChat({
+                el: this.nodes.private_chats,
+                append: true,
+                peer: user,
+                me: this.groove.me
+            });
+            var onTeardown = pc.on('teardown', function() {
+                delete this.privateChats[user.id];
+                onTeardown.cancel();
+            }.bind(this));
+        }
+        pc.set('channel', chan);
     }
 });

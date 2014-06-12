@@ -1,8 +1,8 @@
-<div class="private-chat {{collapsed ? 'collapsed' : ''}}">
-    <div class="handle">
+<div class="private-chat {{collapsed ? 'collapsed' : ''}} {{status}}">
+    <div class="handle {{collapsed && newMessages ? 'active' : ''}}">
         chat with <em>{{peer.name}}</em>
         <div class="right">
-            <a href="" on-click="collapseChat" class="icon-collapse"></a>
+            <a href="" on-click="toggleCollapse" class="icon-collapse"></a>
             <a href="" on-click="closeChat">×</a>
         </div>
     </div>
@@ -14,7 +14,7 @@
             </div>
             {{/messages}}
             {{#messages}}
-            <div class="message">
+            <div class="message {{type}}">
                 {{#from}}
                 <div class="author {{isLocal ? 'local' : ''}}">
                     <img src="{{iconURL}}" />
