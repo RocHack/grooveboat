@@ -570,6 +570,7 @@ Groove.prototype.deleteTrack = function(playlistName, track) {
     playlist.splice(i, 1);
 
     if(this.persist) this.db.deleteTrack(track);
+    this.emit("playlistUpdated", playlistName);
 };
 
 Groove.prototype.vote = function(direction) {
