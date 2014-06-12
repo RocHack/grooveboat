@@ -102,6 +102,7 @@ Groove.prototype.connectToBuoy = function(url) {
     this.buoy.on("setName", this.onBuoySetName.bind(this));
     this.buoy.on("setGravatar", this.onBuoySetGravatar.bind(this));
     this.buoy.on("setVote", this.onBuoySetVote.bind(this));
+    this.buoy.on("reconnected", this.emit.bind(this, "reconnected"));
 };
 
 Groove.prototype.onBuoyWelcome = function(data) {
