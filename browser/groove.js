@@ -486,7 +486,7 @@ function grooveFileParsed(file, next, tags) {
         this.db.storeTrack(track);
     }
 
-    this.emit('queueUpdate');
+    this.emit('playlistUpdated', this.activePlaylist);
     next();
 }
 

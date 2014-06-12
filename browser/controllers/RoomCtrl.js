@@ -303,11 +303,6 @@ module.exports = Ractive.extend({
             this.groove.joinRoom(this.room);
         },
 
-        queueUpdate: function() {
-            var tracks = this.groove.playlists[this.groove.activePlaylist];
-            this.set('tracks', tracks.slice());
-        },
-
         setVote: function() {
             this.updateVotes();
             this.update('users');
