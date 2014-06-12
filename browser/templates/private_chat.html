@@ -1,8 +1,9 @@
 <div class="private-chat {{collapsed ? 'collapsed' : ''}} {{status}}">
     <div class="handle {{collapsed && newMessages ? 'active' : ''}}">
-        chat with <em>{{peer.name}}</em>
+        <div class="title" on-click="toggleCollapse">
+            chat with <em>{{peer.name}}</em>
+        </div>
         <div class="right">
-            <a href="" on-click="toggleCollapse" class="icon-collapse"></a>
             <a href="" on-click="closeChat">×</a>
         </div>
     </div>

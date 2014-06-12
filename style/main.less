@@ -783,7 +783,6 @@ a {
     }
 
     .handle {
-        padding: 5px;
         border-bottom: 1px solid @gray;
     }
 
@@ -797,8 +796,12 @@ a {
 
         a:hover {
             color: white;
-            border-color: white;
         }
+    }
+
+    .title {
+        padding: 5px;
+        cursor: pointer;
     }
 
     .right {
@@ -813,17 +816,8 @@ a {
             font-weight: bold;
         }
 
-        .icon-collapse {
-            display: inline-block;
-            width: 1ex;
-            height: 1ex;
-            border-bottom: 2px solid darken(@white, 15%);
-            vertical-align: 2px;
-        }
-
         :hover {
             color: @red;
-            border-color: @red;
         }
     }
 }
