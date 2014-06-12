@@ -132,19 +132,6 @@ module.exports = Ractive.extend({
             this.player.muted = muted;
         },
 
-        'chat_messages.length': function() {
-            var el = this.nodes.messages;
-            function scrollToBottom() {
-                el.scrollTop = el.scrollHeight;
-            }
-            var lastElHeight = el.lastElementChild.offsetHeight;
-            var isScrolledToBottom = (el.scrollHeight - el.scrollTop -
-                el.clientHeight - lastElHeight) < lastElHeight;
-            if (isScrolledToBottom) {
-                scrollToBottom();
-            }
-        },
-
         tracks: function() {
             var tracks = this.get('tracks');
             //console.log('tracks!', tracks.map(title), tracks._dragging);
@@ -271,7 +258,8 @@ module.exports = Ractive.extend({
     events: require('../events'),
 
     decorators: {
-        sortable: require('../sortable')
+        sortable: require('../sortable'),
+        autoscroll: require('../autoscroll')
     },
 
     grooveEventHandlers: {

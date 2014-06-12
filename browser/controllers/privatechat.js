@@ -16,6 +16,10 @@ module.exports = {
     template: require('../templates/private_chat.html'),
     events: require('../events'),
 
+    decorators: {
+        autoscroll: require('../autoscroll')
+    },
+
     data: {
         collapsed: false,
         messageToHTML: messageToHTML
