@@ -93,6 +93,11 @@ module.exports = function sortable(listEl, keypath, index) {
     }
 
     function onMouseDown(e) {
+        if (e.button == 2) {
+            // leave right click alone
+            return;
+        }
+
         e.preventDefault();
 
         if (el) {
