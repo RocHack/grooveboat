@@ -63,6 +63,7 @@
                 {{#tracks:i}}
                 {{# id != currentTrack.id}}
                     <li>
+                        <div class="preview {{.previewing ? 'previewing' : ''}}" title="preview" on-click="previewTrack"></div>
                         <div class="track">{{title}}</div>
                         <div class="artist">{{artist}}</div>
                         <div class="right">

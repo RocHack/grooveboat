@@ -235,6 +235,22 @@ module.exports = Ractive.extend({
             this.updatePlaylistPositions();
         },
 
+        previewTrack: function(e) {
+            var i = e.index.i;
+            var track = this.data.tracks[i];
+            if (!track) return;
+            var keypath = e.keypath + '.previewing';
+            var previewing = this.get(keypath);
+            this.toggle(keypath);
+            if (previewing) {
+                this.previewTrack(null);
+            } else {
+                this.previewTrack(track, function done() {
+                    this.set(keypath, false);
+                });
+            }
+        },
+
         vote: function(e, direction) {
             if (this.groove.activeDJ == this.groove.me) {
                 return;
@@ -405,5 +421,12 @@ module.exports = Ractive.extend({
             }.bind(this));
         }
         pc.set('channel', chan);
+    },
+
+    previewTrack: function(track, onDone) {
+        // TODO: replace this with something that plays the track
+        if (onDone) {
+            setTimeout(onDone.bind(this), 1000);
+        }
     }
 });
