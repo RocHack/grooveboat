@@ -91,9 +91,6 @@ module.exports = Ractive.extend({
 
         this.watchUser(this.groove.me);
 
-        this.player = document.createElement('audio');
-        window.player = this.player;  // for debugging
-
         this.on(this.eventHandlers);
         this.observe(this.observers);
 
@@ -126,10 +123,7 @@ module.exports = Ractive.extend({
         },
 
         muted: function(muted) {
-            // set the volume for the local stream
-            this.groove.setVolume(muted ? 0 : 1);
-            // set the volume for the remote stream
-            this.player.muted = muted;
+            this.groove.player.setMuted(muted);
         },
 
         tracks: function() {
@@ -338,18 +332,6 @@ module.exports = Ractive.extend({
 
         activeTrack: function() {
             this.set('currentTrack', this.groove.activeTrack);
-        },
-
-        activeTrackURL: function() {
-            var track = this.groove.activeTrack;
-            var url = track && track.url;
-            if (url) {
-                console.log('got track url', url.length, url.substr(0, 256));
-                this.player.src = url;
-                this.player.play();
-            } else {
-                this.player.pause();
-            }
         },
 
         activeTrackDuration: function() {

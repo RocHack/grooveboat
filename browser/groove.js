@@ -5,6 +5,7 @@ var ID3v2 = require('./lib/id3v2');
 var User = require('./user');
 var Buoy = require('./buoy');
 var GrooveDB = require('./groovedb');
+var Player = require('./player');
 
 // turn track into object suitable for transmission
 function exportTrack(t) {
@@ -16,21 +17,6 @@ function exportTrack(t) {
         duration: t.duration
     };
 }
-
-// create an object URL for a stream or file
-function createObjectUrl(stream) {
-    var URL = window.URL || window.webkitURL;
-    var url =
-        window.createObjectURL ? window.createObjectURL(stream) :
-        window.createBlobURL ? window.createBlobURL(stream) :
-        URL && URL.createObjectURL ? URL.createObjectURL(stream) : null;
-    if (!url) {
-        throw new Error('Unable to make object URL for', stream);
-    }
-    return url;
-}
-
-var AudioContext = window.AudioContext || window.webkitAudioContext;
 
 function Groove() {
     Emitter.call(this);
@@ -53,12 +39,7 @@ function Groove() {
     this.persist = false;
     this.db = new GrooveDB();
     this.getPersistTracks();
-
-    this.audioContext = new AudioContext();
-    // gainNode control volume for local stream.
-    // volume for incoming stream is set on the player object in RoomCtrl
-    this.gainNode = this.audioContext.createGain();
-    this.gainNode.connect(this.audioContext.destination);
+    this.player = new Player();
 
     // get stats about incoming peer connection from DJ
     this.statsTimestamp = 0;
@@ -320,10 +301,15 @@ Groove.prototype.createRoom = function(roomName, cb) {
 Groove.prototype.leaveRoom = function() {
     this.roomName = null;
     this.buoy.send("leaveRoom", {});
-    this.disconnectMediaSource();
     if (this.activeDJ) {
         this.activeDJ.closePeerConnection();
+        if (this.activeDJ == this.me) {
+            this.activeDJ.dj = false;
+            this.cleanupDJing();
+        }
     }
+    this._setActiveTrack(null, null);
+    this.emit('activeTrack');
 };
 
 Groove.prototype._onSetGravatar = function() {
@@ -434,20 +420,13 @@ function Groove_removePeerStream(user) {
 Groove.prototype.cleanupDJing = function() {
     this.activeDJ = null;
     this._setActiveTrack(null, null);
+    this.player.stop();
     this.emit('activeDJ');
     this.emit('activeTrack');
     this.emit('activeTrackURL');
     if (this.stream) {
         this.getPeers().forEach(Groove_removePeerStream.bind(this));
     }
-    this.disconnectMediaSource();
-};
-
-Groove.prototype.disconnectMediaSource = function() {
-    if (!this.mediaSource) return;
-    this.mediaSource.disconnect();
-    this.mediaSource.stop(0);
-    this.mediaSource = null;
 };
 
 function parseAudioMetadata(file, cb) {
@@ -583,11 +562,6 @@ Groove.prototype.vote = function(direction) {
     });
 };
 
-// set volume of local (DJ's) stream
-Groove.prototype.setVolume = function(volume) {
-    this.gainNode.gain.value = volume;
-};
-
 // get our upcoming track (or active track, if we are the active DJ)
 Groove.prototype.getMyTrack = function() {
     return this.playlists[this.activePlaylist][0];
@@ -608,7 +582,7 @@ Groove.prototype._playFile = function(file) {
     var reader = new FileReader();
     reader.readAsArrayBuffer(file);
     reader.onload = function(e) {
-        this.audioContext.decodeAudioData(e.target.result,
+        this.player.audioContext.decodeAudioData(e.target.result,
             Groove_gotAudioData.bind(this));
     }.bind(this);
 };
@@ -630,22 +604,23 @@ function Groove_gotAudioData(buffer) {
     // http://servicelab.org/2013/07/24/streaming-audio-between-browsers-with-webrtc-and-webaudio/
 
     // create an audio source and connect it to the file buffer
-    this.disconnectMediaSource();
-    this.mediaSource = this.audioContext.createBufferSource();
-    this.mediaSource.buffer = buffer;
-    this.mediaSource.start(0);
+    var mediaSource = this.player.audioContext.createBufferSource();
+    mediaSource.buffer = buffer;
+    mediaSource.start(0);
 
     // handle end of playback
-    this.mediaSource.onended = Groove_onPlaybackEnded.bind(this);
+    mediaSource.onended = Groove_onPlaybackEnded.bind(this);
 
     // connect the audio stream to the audio hardware
-    this.mediaSource.connect(this.gainNode);
+    this.activeTrack.mediaSource = mediaSource;
+    this.player.playTrack(this.activeTrack);
+    this.emit('activeTrack');
 
     // create a destination for the remote browser
-    var remote = this.audioContext.createMediaStreamDestination();
+    var remote = this.player.audioContext.createMediaStreamDestination();
 
     // connect the remote destination to the source
-    this.mediaSource.connect(remote);
+    mediaSource.connect(remote);
 
     // send stream to peers
     this.stream = remote.stream;
@@ -737,9 +712,9 @@ function Groove_gotStats(err, stats) {
 
 // got a stream through WebRTC from the active DJ
 Groove.prototype.gotRemoteStream = function(stream) {
-    // make the object url for the track stream
-    this.activeTrack.url = createObjectUrl(stream);
-    this.emit('activeTrackURL');
+    this.activeTrack.stream = stream;
+    this.emit('activeTrack');
+    this.player.playTrack(this.activeTrack);
 };
 
 // Get the current time (ms) in playback of the active track
