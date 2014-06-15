@@ -8,9 +8,18 @@ module.exports = function sortable(listEl, keypath, index) {
     var ractive = this;
     var scrollY;
     var clientY;
+    var listeners = [];
 
-    // in case they change, we know what elements we put listeners on
-    var parents = [];
+    function addListener(el, name, fn, bubble) {
+        listeners.push({el: el, args: [name, fn, !!bubble]});
+        el.addEventListener(name, fn, !!bubble);
+    }
+
+    function removeListeners() {
+        listeners.forEach(function(listener) {
+            listener.el.removeEventListener.apply(listener.el, listener.args);
+        });
+    }
 
     function updateScroll() {
         scrollY = 0;
@@ -24,8 +33,7 @@ module.exports = function sortable(listEl, keypath, index) {
 
     // keep track of scroll position of list and its ancestors
     for (var parent = listEl; parent; parent = parent.parentElement) {
-        parents.push(parent);
-        parent.addEventListener('scroll', updateScroll, false);
+        addListener(parent, 'scroll', updateScroll);
     }
 
     updateScroll();
@@ -153,14 +161,9 @@ module.exports = function sortable(listEl, keypath, index) {
         document.addEventListener('mouseup', onDragEnd, false);
     }
 
-    listEl.addEventListener('mousedown', onMouseDown, false);
+    addListener(listEl, 'mousedown', onMouseDown);
 
     return {
-        teardown: function() {
-            listEl.removeEventListener('mousedown', onMouseDown, false);
-            parents.forEach(function(parent) {
-                parent.removeEventListener('scroll', updateScroll, false);
-            });
-        }
+        teardown: removeListeners
     };
 };
