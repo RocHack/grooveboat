@@ -63,12 +63,12 @@
                 {{#tracks:i}}
                 {{# id != currentTrack.id}}
                     <li>
-                        <div class="preview {{.previewing ? 'previewing' : ''}}" title="preview" on-click="previewTrack"></div>
+                        <div class="preview {{.previewing ? 'previewing' : ''}}" title="Preview track" on-click="previewTrack"></div>
                         <div class="track">{{title}}</div>
                         <div class="artist">{{artist}}</div>
                         <div class="right">
-                            <div on-click="deleteTrack">&times;</div>
-                            <div on-click="bumpTrack"><i class="icon-up-arrow"></i></div>
+                            <div title="Delete track" on-click="deleteTrack">&times;</div>
+                            <div title="Move to top" on-click="bumpTrack"><i class="icon-up-arrow"></i></div>
                         </div>
                     </li>
                 {{/ currentTrack}}
