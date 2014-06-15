@@ -16,13 +16,14 @@ module.exports = function sortable(listEl, keypath, index) {
     }
 
     function onDrag(e) {
-        var height = el.clientHeight;
+        var prevEl, nextEl;
+        var y = e.clientY;
 
         // swap item down the list
-        while (e.clientY - startY > height/2 && el.nextElementSibling) {
-            startY += height;
+        while ((nextEl = el.nextElementSibling) &&
+                (y - startY > nextEl.clientHeight/2)) {
             currentIndex++;
-            var nextEl = el.nextElementSibling;
+            startY += nextEl.clientHeight;
             if (nextEl.nextElementSibling) {
                 listEl.insertBefore(el, nextEl.nextElementSibling);
             } else {
@@ -31,14 +32,14 @@ module.exports = function sortable(listEl, keypath, index) {
         }
 
         // swap item up the list
-        while (e.clientY - startY < -height/2 &&
-                el.previousElementSibling) {
+        while ((prevEl = el.previousElementSibling) &&
+                (y - startY < -prevEl.clientHeight/2)) {
             currentIndex--;
-            startY -= height;
-            listEl.insertBefore(el, el.previousElementSibling);
+            startY -= prevEl.clientHeight;
+            listEl.insertBefore(el, prevEl);
         }
 
-        el.style.top = (e.clientY - startY) + 'px';
+        el.style.top = (y - startY) + 'px';
     }
 
     function onDragEnd(e) {
