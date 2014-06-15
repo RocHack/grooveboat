@@ -24,7 +24,7 @@ var Groove = require('./groove');
 var groove = new Groove();
 window.groove = groove;
 
-groove.connectToBuoy("ws://" + location.hostname + ":8844");
+groove.connectToBuoy("ws://" + location.hostname + ":8844/buoy");
 
 var name = storage.get("user:name");
 var gravatar = storage.get("user:gravatar");
@@ -50,25 +50,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Set up routing
 
-var router = new Router({
-    el: main.nodes.content
-});
-router.setHandler(function(path) {
-    if (path == '/') {
-        return new RoomListCtrl({
-            app: main,
-            groove: groove,
-            router: router,
-            storage: storage
-        });
-    } else if (path.indexOf('/room/') === 0) {
-        var room = path.substr(6);
-        return new RoomCtrl({
-            app: main,
-            groove: groove,
-            router: router,
-            room: room,
-            storage: storage
-        });
+new Router({
+    options: {
+        el: main.nodes.content,
+        app: main,
+        groove: groove,
+        storage: storage
+    },
+    routes: {
+        '/': RoomListCtrl,
+        '/room/:room': RoomCtrl
     }
-});
+}).go();

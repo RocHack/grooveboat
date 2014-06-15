@@ -114,6 +114,7 @@ User.prototype.preparePeerConnection = function() {
     this.pc.on('addStream', User_onAddStream.bind(this));
     this.pc.on('removeStream', User_onRemoveStream.bind(this));
     this.pc.on('negotiationNeeded', User_onNegotiationNeeded.bind(this));
+    this.pc.on('addChannel', User_onAddChannel.bind(this));
 };
 
 User.prototype.offerConnection = function() {
@@ -122,10 +123,8 @@ User.prototype.offerConnection = function() {
 
 // handle an offer from a prospective peer
 User.prototype.handleOffer = function(offer) {
-    if (!this.pc) {
-        console.error("Received offer without peer connection");
-        return;
-    }
+    if (!this.pc) this.preparePeerConnection();
+    // answer offer unconditionally
     this.pc.handleOffer(offer, User_offerHandled.bind(this));
 };
 
@@ -196,6 +195,17 @@ User.prototype.addStream = function(stream) {
     this.pc.addStream(stream);
 };
 
+// add a stream to the peer connection
+User.prototype.createDataChannel = function(name) {
+    if (!this.pc) this.preparePeerConnection();
+    return this.pc.createDataChannel(name, {});
+};
+
+User.prototype.startChat = function() {
+    this.chatChannel = this.createDataChannel('private_chat');
+    this.emit('chatChannel', this.chatChannel);
+};
+
 // got a remote audio stream over peer connection
 function User_onAddStream(e) {
     if (this != this.groove.activeDJ) {
@@ -203,6 +213,23 @@ function User_onAddStream(e) {
         return;
     }
     this.groove.gotRemoteStream(e.stream);
+}
+
+
+
+// got a data channel over peer connection
+function User_onAddChannel(channel) {
+    if (channel.label == 'private_chat') {
+        this.chatChannel = channel;
+
+        // defer the event until receiving first message
+        var self = this;
+        channel.addEventListener("message", function onMessage(e) {
+            channel.removeEventListener("message", onMessage, false);
+            self.emit('chatChannel', channel);
+            setTimeout(channel.dispatchEvent.bind(channel, e), 10);
+        }, false);
+    }
 }
 
 // remove a stream from the peer connection

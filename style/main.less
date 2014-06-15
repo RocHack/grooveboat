@@ -60,6 +60,10 @@ body {
 //
 // Generic UI stuff
 //
+.hide {
+    display: none;
+}
+
 button,
 input[type=button] {
     display: inline-block;
@@ -564,80 +568,6 @@ a {
         }
     }
 
-    .no_messages {
-        text-align: center;
-        padding: 15px;
-    }
-
-    .messages {
-        position: absolute;
-        top: 0px;
-        bottom: 70px;
-        width: 100%;
-        overflow-y: auto;
-        overflow-x: hidden;
-        word-break: break-word;
-    }
-
-    .message {
-        padding: 5px 10px 2px 10px;
-
-        .author {
-            font-weight: 400;
-            margin: 5px 0px 7px 0px;
-
-            img {
-                display: inline-block;
-                margin-right: 5px;
-                width: 25px;
-                height: 25px;
-                border-radius: 5px;
-                vertical-align: middle;
-            }
-
-            &.local {
-                color: @blue;
-                font-weight: 500;
-            }
-        }
-
-        .text {
-            display: block;
-            line-height: 1.2;
-            font-size: 14px;
-        }
-
-        .mention {
-            color: @red;
-        }
-    }
-
-    .emoji {
-        height: 20px;
-        vertical-align: middle;
-    }
-
-    .new-message {
-        border-bottom: 0px;
-        border-left: 0px;
-        border-right: 0px;
-        box-sizing: border-box;
-        width: 100%;
-        position: absolute;
-        bottom: 0px;
-        outline: 0px;
-        height: 60px;
-        padding-top: 20px;
-        background: darken(@white, 2%);
-
-        text-align: center;
-
-        &:focus, &:valid {
-            padding-top: 5px;
-            text-align: left;
-        }
-    }
-
     .upload {
         text-align: center;
         padding: 15px 0px 15px 0px;
@@ -717,6 +647,177 @@ a {
             margin-top: 3px;
             display: block;
             color: lighten(@dark, 25%);
+        }
+    }
+}
+
+/*
+ * Chat
+ */
+
+.no_messages {
+    text-align: center;
+    padding: 15px;
+}
+
+.messages {
+    position: absolute;
+    top: 0px;
+    bottom: 70px;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    word-break: break-word;
+}
+
+.message {
+    padding: 5px 10px 2px 10px;
+
+    .author {
+        font-weight: 400;
+        margin: 5px 0px 7px 0px;
+
+        img {
+            display: inline-block;
+            margin-right: 5px;
+            width: 25px;
+            height: 25px;
+            border-radius: 5px;
+            vertical-align: middle;
+        }
+
+        &.local {
+            color: @blue;
+            font-weight: 500;
+        }
+    }
+
+    .text {
+        display: block;
+        line-height: 1.2;
+        font-size: 14px;
+    }
+
+    &.status .text {
+        color: darken(@gray, 25%);
+        text-align: center;
+    }
+
+    .mention {
+        color: @red;
+    }
+}
+
+.emoji {
+    height: 20px;
+    vertical-align: middle;
+}
+
+.new-message {
+    border-bottom: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    box-sizing: border-box;
+    width: 100%;
+    position: absolute;
+    bottom: 0px;
+    outline: 0px;
+    height: 60px;
+    padding-top: 20px;
+    background: darken(@white, 2%);
+
+    text-align: center;
+
+    &:focus, &:valid {
+        padding-top: 5px;
+        text-align: left;
+    }
+}
+
+.private-chats {
+    position: absolute;
+    float: left;
+    bottom: 0;
+
+    .private-chat {
+        position: relative;
+        float: left;
+        width: 240px;
+        box-sizing: border-box;
+        border: 1px solid @gray;
+        margin-left: 12px;
+        z-index: 1;
+        background-color: white;
+    }
+
+    .chat-contents {
+        height: 250px;
+        transition: height .15s;
+    }
+
+    .collapsed {
+        .chat-contents {
+            height: 0;
+            position: relative;
+            overflow: hidden;
+        }
+    }
+
+    .disconnected {
+
+        .messages {
+            bottom: 0;
+        }
+
+        .new-message {
+            display: none;
+        }
+
+        .handle {
+            color: darken(@gray, 25%);
+        }
+    }
+
+    .messages {
+        top: 30px;
+    }
+
+    .handle {
+        border-bottom: 1px solid @gray;
+    }
+
+    .connected .handle {
+        color: @red;
+    }
+
+    .handle.active {
+        color: @white;
+        background-color: @red;
+
+        a:hover {
+            color: white;
+        }
+    }
+
+    .title {
+        padding: 5px;
+        cursor: pointer;
+    }
+
+    .right {
+        position: absolute;
+        top: 3px;
+        right: 5px;
+        font-size: 24px;
+        line-height: 1em;
+
+        a {
+            color: darken(@white, 15%);
+            font-weight: bold;
+        }
+
+        :hover {
+            color: @red;
         }
     }
 }

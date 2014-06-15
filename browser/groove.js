@@ -102,6 +102,7 @@ Groove.prototype.connectToBuoy = function(url) {
     this.buoy.on("setName", this.onBuoySetName.bind(this));
     this.buoy.on("setGravatar", this.onBuoySetGravatar.bind(this));
     this.buoy.on("setVote", this.onBuoySetVote.bind(this));
+    this.buoy.on("reconnected", this.emit.bind(this, "reconnected"));
 };
 
 Groove.prototype.onBuoyWelcome = function(data) {
@@ -187,15 +188,17 @@ Groove.prototype.onBuoyRoomData = function(data) {
 Groove.prototype.onBuoyRecvMessage = function(data) {
     var user = this.users[data.from];
     if (!user) {
-        console.error("Received message from unknown user " + user.id);
+        console.error("Received message from unknown user " + data.from);
     }
     user.handleMessage(data.msg);
 };
 
 Groove.prototype.onBuoyPeerLeft = function(data) {
-    this.emit("peerDisconnected", this.users[data.id]);
+    var user = this.users[data.id];
+    user.emit("disconnected");
+    this.emit("peerDisconnected", user);
 
-    console.log("User "+ this.users[data.id].name +" disconnected");
+    console.log("User "+ user.name +" disconnected");
 
     delete this.users[data.id];
 };
@@ -483,7 +486,7 @@ function grooveFileParsed(file, next, tags) {
         this.db.storeTrack(track);
     }
 
-    this.emit('queueUpdate');
+    this.emit('playlistUpdated', this.activePlaylist);
     next();
 }
 
@@ -567,6 +570,7 @@ Groove.prototype.deleteTrack = function(playlistName, track) {
     playlist.splice(i, 1);
 
     if(this.persist) this.db.deleteTrack(track);
+    this.emit("playlistUpdated", playlistName);
 };
 
 Groove.prototype.vote = function(direction) {
