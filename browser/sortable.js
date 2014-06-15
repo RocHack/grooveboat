@@ -135,8 +135,6 @@ module.exports = function sortable(listEl, keypath, index) {
             return;
         }
 
-        e.preventDefault();
-
         if (el) {
             // finish previous drag
             onDragEnd(e);
@@ -151,6 +149,8 @@ module.exports = function sortable(listEl, keypath, index) {
 
         // ignore?
         if(el.className.indexOf("disable-sort") != -1) return;
+
+        e.preventDefault();
 
         el.classList.add('ui-sortable-helper');
         el.style.position = 'relative';
