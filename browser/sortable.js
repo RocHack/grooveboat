@@ -149,6 +149,9 @@ module.exports = function sortable(listEl, keypath, index) {
             return;
         }
 
+        // ignore?
+        if(el.className.indexOf("disable-sort") != -1) return;
+
         el.classList.add('ui-sortable-helper');
         el.style.position = 'relative';
         el.style.zIndex = 10000;

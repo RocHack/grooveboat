@@ -36,6 +36,8 @@ module.exports = Ractive.extend({
         activeDJ: null,
         votes: {yes: 0, no: 0},
         newMessages: false,
+        currentlyEditingTrack: null,
+        trackEditClickTimer: null,
 
         messageToHTML: PrivateChat.prototype.messageToHTML
     },
@@ -249,11 +251,18 @@ module.exports = Ractive.extend({
             this.groove.setPlaylist(this.groove.activePlaylist, tracks);
         },
 
-        previewTrack: function(e) {
-            var i = e.index.i;
-            var track = this.data.tracks[i];
-            if (!track) return;
-            var keypath = 'tracks.' + e.index.i + '.previewing';
+        previewTrack: function(e, track) {
+            var i;
+            if(!track) {
+                i = e.index.i;
+                track = this.data.tracks[i];
+                if (!track) return;
+            } else {
+                track = this.get("currentlyEditingTrack");
+                i = this.data.tracks.indexOf(track);
+            }
+
+            var keypath = 'tracks.' + i + '.previewing';
             var previewing = this.get(keypath);
             this.toggle(keypath);
             if (previewing) {
@@ -263,6 +272,34 @@ module.exports = Ractive.extend({
                     this.set(keypath, false);
                 });
             }
+        },
+
+        clickTrack: function(e) {
+            if(this.get("currentlyEditingTrack")) {
+                e.original.preventDefault();
+                return;
+            }
+            
+            // Detect a double click
+            if(!this.get("trackEditClickTimer")) {
+                var self = this;
+                this.set("trackEditClickTimer", setTimeout(function() {
+                    self.set("trackEditClickTimer", null);
+                }, 300));
+
+                return;
+            }
+
+            this.set({
+                trackEditClickTimer: null,
+                currentlyEditingTrack: this.data.tracks[e.index.i]
+            });
+        },
+
+        saveTrack: function(e) {
+            this.set("currentlyEditingTrack", null);
+
+            this.groove.savePlaylist(this.groove.activePlaylist);
         },
 
         vote: function(e, direction) {

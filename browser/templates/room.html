@@ -61,15 +61,29 @@
 
                 <ul class="songs" decorator="sortable:'tracks','i'">
                 {{#tracks:i}}
-                {{# id != currentTrack.id}}
-                    <li>
+                {{# id != currentTrack.id }}
+                    <li on-click="clickTrack" class="{{id == currentlyEditingTrack.id ? 'disable-sort' : ''}}">
                         <div class="preview {{.previewing ? 'previewing' : ''}}" title="Preview track" on-click="previewTrack"></div>
-                        <div class="track">{{title}}</div>
-                        <div class="artist">{{artist}}</div>
-                        <div class="right">
-                            <div title="Delete track" on-click="deleteTrack">&times;</div>
-                            <div title="Move to top" on-click="bumpTrack"><i class="icon-up-arrow"></i></div>
-                        </div>
+
+                        {{# id != currentlyEditingTrack.id }}
+                            <div title="Double click to edit" class="track">{{title}}</div>
+                            <div title="Double click to edit" class="artist">{{artist}}</div>
+
+                            <div class="right">
+                                <div title="Delete track" on-click="deleteTrack">&times;</div>
+                                <div title="Move to top" on-click="bumpTrack"><i class="icon-up-arrow"></i></div>
+                            </div>
+                        {{/ currentlyEndingTrack }}
+
+                        {{# id == currentlyEditingTrack.id }}
+                            <input type="text" class="edit-track" placeholder="Track name" value="{{title}}" />
+                            <input type="text" class="edit-track" placeholder="Artist name" value="{{artist}}" />
+
+                            <div class="right">
+                                <div title="Save track" on-click="saveTrack"><i class="icon-save"></i></div>
+                            </div>
+                        {{/ currentlyEditingTrack }}
+
                     </li>
                 {{/ currentTrack}}
                 {{/tracks}}
