@@ -188,7 +188,8 @@ Groove.prototype.onBuoyRoomData = function(data) {
 Groove.prototype.onBuoyRecvMessage = function(data) {
     var user = this.users[data.from];
     if (!user) {
-        console.error("Received message from unknown user " + data.from);
+        console.error("Received message from unknown user " + data.from, data);
+        return;
     }
     user.handleMessage(data.msg);
 };
