@@ -81,7 +81,7 @@ module.exports = Ractive.extend({
             me: this.groove.me,
             chat_messages: [],
             currentTab: this.storage.get('user:tab') || 'music',
-            tracks: this.groove.playlists[this.groove.activePlaylist],
+            tracks: this.groove.playlists[this.groove.activePlaylist].slice(),
         });
 
         this.privateChats = {};
@@ -133,7 +133,6 @@ module.exports = Ractive.extend({
 
         tracks: function() {
             var tracks = this.get('tracks');
-            //console.log('tracks!', tracks.map(title), tracks._dragging);
             if (tracks._dragging) {
                 tracks._dragging = false;
                 this.groove.setPlaylist(this.groove.activePlaylist, tracks);
@@ -225,20 +224,29 @@ module.exports = Ractive.extend({
 
         bumpTrack: function(e) {
             var i = e.index.i;
-            var track = this.data.tracks[i];
+            var tracks = this.get('tracks').slice();
+            var track = tracks[i];
+            var newIndex = 0;
             if (!track) {
                 console.error('Unknown track');
                 return;
             }
-            track.playlistPosition = -1;
 
             // don't bump in front of current track
-            var firstTrack = this.data.tracks[0];
-            if (trackIsEqual(firstTrack, this.groove.activeTrack)) {
-                firstTrack.playlistPosition = -2;
+            if (trackIsEqual(tracks[0], this.groove.activeTrack)) {
+                newIndex = 1;
             }
 
-            this.updatePlaylistPositions();
+            if (newIndex >= i) {
+                // no move to make
+                return;
+            }
+
+            tracks.splice(i, 1);
+            tracks.splice(newIndex, 0, track);
+
+            this.set('tracks', tracks);
+            this.groove.setPlaylist(this.groove.activePlaylist, tracks);
         },
 
         previewTrack: function(e) {
@@ -389,14 +397,6 @@ module.exports = Ractive.extend({
         a.pause();
         a.currentTime = 0;
         a.play();
-    },
-
-    updatePlaylistPositions: function() {
-        var tracks = this.data.tracks;
-        tracks.sort(function(a, b) {
-            return a.playlistPosition|0 - b.playlistPosition|0;
-        });
-        this.groove.setPlaylist(this.groove.activePlaylist, tracks);
     },
 
     gotUserChatChannel: function(user, chan) {
