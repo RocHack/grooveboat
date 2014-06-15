@@ -351,14 +351,18 @@ a {
         color: @white;
     }
 
+    @opinion-bar-height: 15px;
     .opinion-bar {
         margin-top: 10px;
         display: inline-block;
-        width: 250px;
+        width: 100px;
+        background-color: @gray;
+        font-size: 0px;
+        height: @opinion-bar-height;
 
         .opinion {
             display: inline-block;
-            height: 10px;
+            height: @opinion-bar-height;
         }
 
         .yes {

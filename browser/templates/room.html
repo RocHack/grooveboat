@@ -90,7 +90,8 @@
     <div class="now-playing-track">{{currentTrack.title}}</div>
 
     <div class="opinion-bar">
-        <div class="opinion yes" style="width: {{10 + (votes.yes * 2)}}px">&nbsp;</div><div class="opinion no" style="width: {{10 + (votes.no * 2)}}px">&nbsp;</div>
+        <div class="opinion yes" style="width: {{ votes.yes / (votes.yes + votes.no) * 100 }}%">&nbsp;</div>
+        <div class="opinion no" style="width: {{ votes.no / (votes.yes + votes.no) * 100 }}%">&nbsp;</div>
     </div>
 </div>
 {{/currentTrack}}
