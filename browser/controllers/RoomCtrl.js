@@ -233,11 +233,11 @@ module.exports = Ractive.extend({
             var i = e.index.i;
             var track = this.data.tracks[i];
             if (!track) return;
-            var keypath = e.keypath + '.previewing';
+            var keypath = 'tracks.' + e.index.i + '.previewing';
             var previewing = this.get(keypath);
             this.toggle(keypath);
             if (previewing) {
-                this.previewTrack(null);
+                this.stopPreviewing();
             } else {
                 this.previewTrack(track, function done() {
                     this.set(keypath, false);
@@ -406,9 +406,12 @@ module.exports = Ractive.extend({
     },
 
     previewTrack: function(track, onDone) {
-        // TODO: replace this with something that plays the track
-        if (onDone) {
-            setTimeout(onDone.bind(this), 1000);
-        }
+        this.groove.ensureTrackFile(track, function() {
+            this.groove.player.previewTrack(track, onDone.bind(this));
+        }.bind(this));
+    },
+
+    stopPreviewing: function() {
+        this.groove.player.previewTrack(null);
     }
 });

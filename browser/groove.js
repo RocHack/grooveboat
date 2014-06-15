@@ -418,9 +418,12 @@ function Groove_removePeerStream(user) {
 
 // clean up after no longer the active DJ
 Groove.prototype.cleanupDJing = function() {
+    if (this.activeTrack && this.activeTrack.mediaSource) {
+        this.activeTrack.mediaSource.disconnect();
+    }
     this.activeDJ = null;
     this._setActiveTrack(null, null);
-    this.player.stop();
+    this.player.playTrack(null);
     this.emit('activeDJ');
     this.emit('activeTrack');
     this.emit('activeTrackURL');
@@ -570,10 +573,21 @@ Groove.prototype.getMyTrack = function() {
 // play my track locally, as the active DJ
 Groove.prototype._playMyTrack = function() {
     var track = this.getMyTrack();
-    if (track.file) {
+    this.ensureTrackFile(track, function() {
         this._playFile(track.file);
+    }.bind(this));
+};
+
+Groove.prototype.ensureTrackFile = function(track, cb) {
+    if (!track) {
+        cb();
+    } else if (track.file) {
+        cb();
     } else {
-        this.db.getTrackFile(track, this._playFile.bind(this));
+        this.db.getTrackFile(track, function(file) {
+            track.file = file;
+            cb();
+        });
     }
 };
 
