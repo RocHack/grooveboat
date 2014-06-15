@@ -11,6 +11,11 @@ function subtract(arr1, arr2) {
     });
 }
 
+function trackIsEqual(track1, track2) {
+    return track1 == track2 ||
+        (track1 && track2 && track1.id == track2.id);
+}
+
 var noDjMessages = [
     "Why not Zoidberg?",
     "You could be next",
@@ -226,6 +231,13 @@ module.exports = Ractive.extend({
                 return;
             }
             track.playlistPosition = -1;
+
+            // don't bump in front of current track
+            var firstTrack = this.data.tracks[0];
+            if (trackIsEqual(firstTrack, this.groove.activeTrack)) {
+                firstTrack.playlistPosition = -2;
+            }
+
             this.updatePlaylistPositions();
         },
 
@@ -380,13 +392,11 @@ module.exports = Ractive.extend({
     },
 
     updatePlaylistPositions: function() {
-        this.data.tracks.sort(function(a, b) {
+        var tracks = this.data.tracks;
+        tracks.sort(function(a, b) {
             return a.playlistPosition|0 - b.playlistPosition|0;
         });
-        this.data.tracks.forEach(function(track, i) {
-            track.playlistPosition = i;
-        });
-        this.groove.savePlaylist(this.groove.activePlaylist);
+        this.groove.setPlaylist(this.groove.activePlaylist, tracks);
     },
 
     gotUserChatChannel: function(user, chan) {
