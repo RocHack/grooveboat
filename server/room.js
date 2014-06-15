@@ -25,7 +25,7 @@ function peerData(peer) {
         id: peer.id,
         name: peer.name,
         gravatar: peer.gravatar,
-        votes: peer.vote
+        vote: peer.vote
     };
 }
 

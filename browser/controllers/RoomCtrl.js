@@ -289,6 +289,7 @@ module.exports = Ractive.extend({
         peerConnected: function(user) {
             this.data.users.push(user);
             this.watchUser(user);
+            this.updateVotes();
         },
 
         peerDisconnected: function(user) {
