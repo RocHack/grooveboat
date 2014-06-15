@@ -6,6 +6,29 @@ module.exports = function sortable(listEl, keypath, index) {
     var startIndex, currentIndex;
     var origNextNode;
     var ractive = this;
+    var scrollY;
+    var clientY;
+
+    // in case they change, we know what elements we put listeners on
+    var parents = [];
+
+    function updateScroll() {
+        scrollY = 0;
+        for (var parent = listEl; parent; parent = parent.parentElement) {
+            scrollY += parent.scrollTop;
+        }
+        if (el) {
+            drag();
+        }
+    }
+
+    // keep track of scroll position of list and its ancestors
+    for (var parent = listEl; parent; parent = parent.parentElement) {
+        parents.push(parent);
+        parent.addEventListener('scroll', updateScroll, false);
+    }
+
+    updateScroll();
 
     // find the element ancestor corresponding to an item in our list
     function findEl(child) {
@@ -15,9 +38,9 @@ module.exports = function sortable(listEl, keypath, index) {
         return el;
     }
 
-    function onDrag(e) {
+    function drag() {
         var prevEl, nextEl;
-        var y = e.clientY;
+        var y = clientY + scrollY;
 
         // swap item down the list
         while ((nextEl = el.nextElementSibling) &&
@@ -40,6 +63,11 @@ module.exports = function sortable(listEl, keypath, index) {
         }
 
         el.style.top = (y - startY) + 'px';
+    }
+
+    function onDrag(e) {
+        clientY = e.clientY;
+        drag();
     }
 
     function onDragEnd(e) {
@@ -118,7 +146,7 @@ module.exports = function sortable(listEl, keypath, index) {
         el.style.zIndex = 10000;
         listEl.style.overflow = 'visible';
         origNextNode = el.nextElementSibling;
-        startY = e.clientY;
+        startY = e.clientY + scrollY;
         currentIndex = startIndex = el._ractive.index[index];
 
         document.addEventListener('mousemove', onDrag, false);
@@ -130,6 +158,9 @@ module.exports = function sortable(listEl, keypath, index) {
     return {
         teardown: function() {
             listEl.removeEventListener('mousedown', onMouseDown, false);
+            parents.forEach(function(parent) {
+                parent.removeEventListener('scroll', updateScroll, false);
+            });
         }
     };
 };
