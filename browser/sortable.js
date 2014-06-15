@@ -145,7 +145,7 @@ module.exports = function sortable(listEl, keypath, index) {
 
         el = findEl(e.target);
         if (!el || !el._ractive || !el._ractive.index) {
-            console.error('Unable to find list item');
+            // clicked in the list but outside a list item
             return;
         }
 
