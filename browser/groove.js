@@ -538,6 +538,7 @@ Groove.prototype.savePlaylist = function(name) {
 };
 
 Groove.prototype.setPlaylist = function(name, tracks) {
+    tracks = tracks.slice();
     tracks.forEach(function(track, i) {
         track.playlistPosition = i;
     });
