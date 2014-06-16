@@ -42,7 +42,9 @@ module.exports = function sortable(listEl, keypath, index) {
     function findEl(child) {
         for (var el = child;
             el && el.parentNode != listEl;
-            el = el.parentNode);
+            el = el.parentNode) {
+                if (el.classList.contains("disable-sort")) return;
+        }
         return el;
     }
 
@@ -144,12 +146,6 @@ module.exports = function sortable(listEl, keypath, index) {
         el = findEl(e.target);
         if (!el || !el._ractive || !el._ractive.index) {
             // clicked in the list but outside a list item
-            return;
-        }
-
-        // ignore?
-        if(el.className.indexOf("disable-sort") != -1) {
-            el = null;
             return;
         }
 

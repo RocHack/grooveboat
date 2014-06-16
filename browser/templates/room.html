@@ -62,7 +62,7 @@
                 <ul class="songs" decorator="sortable:'tracks','i'">
                 {{#tracks:i}}
                 {{# id != currentTrack.id }}
-                    <li on-dblclick="editTrack" class="{{.editing ? 'disable-sort' : ''}}">
+                    <li on-dblclick="editTrack">
                         <div class="preview {{.previewing ? 'previewing' : ''}}" title="Preview track" on-click="previewTrack"></div>
 
                         {{^editing}}
@@ -76,8 +76,8 @@
                         {{/editing}}
 
                         {{#editing}}
-                            <input type="text" class="edit-track" on-enter="saveTrack" placeholder="Track name" value="{{title}}" />
-                            <input type="text" class="edit-track" on-enter="saveTrack" placeholder="Artist name" value="{{artist}}" />
+                            <input type="text" class="edit-track disable-sort" on-enter="saveTrack" placeholder="Track name" value="{{title}}" />
+                            <input type="text" class="edit-track disable-sort" on-enter="saveTrack" placeholder="Artist name" value="{{artist}}" />
 
                             <div class="right">
                                 <div title="Save track" on-click="saveTrack"><i class="icon-save"></i></div>
