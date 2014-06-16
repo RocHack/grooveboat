@@ -76,8 +76,8 @@
                         {{/editing}}
 
                         {{#editing}}
-                            <input type="text" class="edit-track" placeholder="Track name" value="{{title}}" />
-                            <input type="text" class="edit-track" placeholder="Artist name" value="{{artist}}" />
+                            <input type="text" class="edit-track" on-enter="saveTrack" placeholder="Track name" value="{{title}}" />
+                            <input type="text" class="edit-track" on-enter="saveTrack" placeholder="Artist name" value="{{artist}}" />
 
                             <div class="right">
                                 <div title="Save track" on-click="saveTrack"><i class="icon-save"></i></div>
