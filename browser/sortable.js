@@ -148,7 +148,10 @@ module.exports = function sortable(listEl, keypath, index) {
         }
 
         // ignore?
-        if(el.className.indexOf("disable-sort") != -1) return;
+        if(el.className.indexOf("disable-sort") != -1) {
+            el = null;
+            return;
+        }
 
         e.preventDefault();
 
