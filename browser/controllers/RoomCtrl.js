@@ -36,7 +36,6 @@ module.exports = Ractive.extend({
         activeDJ: null,
         votes: {yes: 0, no: 0},
         newMessages: false,
-        currentlyEditingTrack: null,
 
         messageToHTML: PrivateChat.prototype.messageToHTML
     },
@@ -250,17 +249,10 @@ module.exports = Ractive.extend({
             this.groove.setPlaylist(this.groove.activePlaylist, tracks);
         },
 
-        previewTrack: function(e, track) {
-            var i;
-            if(!track) {
-                i = e.index.i;
-                track = this.data.tracks[i];
-                if (!track) return;
-            } else {
-                track = this.get("currentlyEditingTrack");
-                i = this.data.tracks.indexOf(track);
-            }
-
+        previewTrack: function(e) {
+            var i = e.index.i;
+            var track = this.data.tracks[i];
+            if (!track) return;
             var keypath = 'tracks.' + i + '.previewing';
             var previewing = this.get(keypath);
             this.toggle(keypath);
@@ -273,19 +265,12 @@ module.exports = Ractive.extend({
             }
         },
 
-        dblclickTrack: function(e) {
-            if(this.get("currentlyEditingTrack")) {
-                e.original.preventDefault();
-                return;
-            }
-            
-            this.set({
-                currentlyEditingTrack: this.data.tracks[e.index.i]
-            });
+        editTrack: function(e) {
+            this.set('tracks.' + e.index.i + '.editing', true);
         },
 
         saveTrack: function(e) {
-            this.set("currentlyEditingTrack", null);
+            this.set('tracks.' + e.index.i + '.editing', false);
 
             this.groove.savePlaylist(this.groove.activePlaylist);
         },
