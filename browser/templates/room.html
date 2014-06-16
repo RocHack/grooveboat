@@ -62,7 +62,7 @@
                 <ul class="songs" decorator="sortable:'tracks','i'">
                 {{#tracks:i}}
                 {{# id != currentTrack.id }}
-                    <li on-click="clickTrack" class="{{id == currentlyEditingTrack.id ? 'disable-sort' : ''}}">
+                    <li on-dblclick="dblclickTrack" class="{{id == currentlyEditingTrack.id ? 'disable-sort' : ''}}">
                         <div class="preview {{.previewing ? 'previewing' : ''}}" title="Preview track" on-click="previewTrack"></div>
 
                         {{# id != currentlyEditingTrack.id }}

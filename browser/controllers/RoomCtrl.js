@@ -37,7 +37,6 @@ module.exports = Ractive.extend({
         votes: {yes: 0, no: 0},
         newMessages: false,
         currentlyEditingTrack: null,
-        trackEditClickTimer: null,
 
         messageToHTML: PrivateChat.prototype.messageToHTML
     },
@@ -274,24 +273,13 @@ module.exports = Ractive.extend({
             }
         },
 
-        clickTrack: function(e) {
+        dblclickTrack: function(e) {
             if(this.get("currentlyEditingTrack")) {
                 e.original.preventDefault();
                 return;
             }
             
-            // Detect a double click
-            if(!this.get("trackEditClickTimer")) {
-                var self = this;
-                this.set("trackEditClickTimer", setTimeout(function() {
-                    self.set("trackEditClickTimer", null);
-                }, 300));
-
-                return;
-            }
-
             this.set({
-                trackEditClickTimer: null,
                 currentlyEditingTrack: this.data.tracks[e.index.i]
             });
         },
