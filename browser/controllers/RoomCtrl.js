@@ -31,6 +31,7 @@ module.exports = Ractive.extend({
     template: require("../templates/room.html"),
 
     data: {
+        djs: [],
         currentTab: null,
         currentTrack: null,
         activeDJ: null,
@@ -45,12 +46,16 @@ module.exports = Ractive.extend({
             return subtract(this.get('users'), this.get('djs'));
         },
 
+        isDJ: function() {
+            return this.get('djs').indexOf(this.get('me')) != -1;
+        },
+
         isActiveDJ: function() {
             return this.get('activeDJ') == this.get('me');
         },
 
         joinText: function() {
-            return this.get('isActiveDJ') ? 'step down' : 'become a dj';
+            return this.get('isDJ') ? 'step down' : 'become a dj';
         },
 
         msgPlaceholder: function() {
