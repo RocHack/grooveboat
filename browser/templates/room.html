@@ -53,7 +53,9 @@
                 <ul class="songs">
                     {{#searchResults}}
                     <li>
+                        {{# !hasTrack(.)}}
                         <div class="add-icon" title="Add track to your playlist" on-click="addTrack"></div>
+                        {{/ hasTrack}}
                         <div class="preview {{.previewing ? 'previewing' : ''}}" title="Preview track" on-click="previewTrack"></div>
                         <div class="track">{{title}}</div>
                         <div class="artist">{{artist}}</div>

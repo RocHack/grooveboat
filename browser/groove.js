@@ -7,17 +7,6 @@ var Buoy = require('./buoy');
 var GrooveDB = require('./groovedb');
 var Player = require('./player');
 
-// turn track into object suitable for transmission
-function exportTrack(t) {
-    return t && {
-        id: t.id,
-        title: t.title,
-        artist: t.artist,
-        album: t.album,
-        duration: t.duration
-    };
-}
-
 function Groove() {
     Emitter.call(this);
 
@@ -361,7 +350,7 @@ Groove.prototype.becomeActiveDJ = function() {
 
     console.log("set active track", track);
     this.buoy.send('setActiveTrack', {
-        track: exportTrack(track)
+        track: GrooveDB.exportTrack(track)
     });
 
     // play our active track, and stream it to peers.
@@ -430,7 +419,30 @@ Groove.prototype.cleanupDJing = function() {
     this.emit('activeTrackURL');
     if (this.stream) {
         this.getPeers().forEach(Groove_removePeerStream.bind(this));
+        this.stream = null;
     }
+};
+
+// check if a track is in a playlist
+Groove.prototype.hasTrack = function(track, playlistName) {
+    var playlist = this.playlists[playlistName];
+    return playlist.some(function(t) { return t.id == track.id; });
+};
+
+// add a track to the current playlist
+Groove.prototype.addTrack = function(track) {
+    if (this.hasTrack(track, this.activePlaylist)) return;
+
+    var playlist = this.playlists[this.activePlaylist];
+    playlist.push(track);
+
+    track.playlistPosition = playlist.indexOf(track);
+
+    if(this.persist) {
+        this.db.storeTrack(track);
+    }
+
+    this.emit('playlistUpdated', this.activePlaylist);
 };
 
 function parseAudioMetadata(file, cb) {
@@ -461,16 +473,7 @@ function grooveFileParsed(file, next, tags) {
         album: tags.Album || 'Unknown',
     };
 
-    var playlist = this.playlists[this.activePlaylist];
-    playlist.push(track);
-
-    track.playlistPosition = playlist.indexOf(track);
-
-    if(this.persist) {
-        this.db.storeTrack(track);
-    }
-
-    this.emit('playlistUpdated', this.activePlaylist);
+    this.addTrack(track);
     next();
 }
 
@@ -499,13 +502,8 @@ Groove.prototype.setPersist = function(val) {
     } else {
         // Before clearing db, make sure we have the track file objects,
         // in case the user still wants to play their tracks this pageload
-        this.playlists[this.activePlaylist].forEach(function(track) {
-            if (!track.file) {
-                this.db.getTrackFile(track, function(file) {
-                    track.file = file;
-                });
-            }
-        }.bind(this));
+        this.playlists[this.activePlaylist].forEach(
+            this.ensureTrackFile.bind(this));
         this.db.clearDb();
     }
 
@@ -575,6 +573,16 @@ Groove.prototype.getMyTrack = function() {
 // play my track locally, as the active DJ
 Groove.prototype._playMyTrack = function() {
     var track = this.getMyTrack();
+    if (track.duration) {
+        this.emit("activeTrackDuration");
+    }
+
+    if (track.audioUrl) {
+        this.player.playTrack(track);
+        //this.emit('activeTrack');
+        return;
+    }
+
     this.ensureTrackFile(track, function() {
         this._playFile(track.file);
     }.bind(this));
@@ -648,6 +656,7 @@ function Groove_gotAudioData(buffer) {
 }
 
 Groove.prototype.streamToPeer = function(user) {
+    if (!this.stream) return;
     user.preparePeerConnection();
     // add the stream to the peer connection
     user.addStream(this.stream);
@@ -669,6 +678,12 @@ Groove.prototype._setActiveTrack = function(track, startTime) {
     if (track) {
         this.trackStartTime = startTime;
         this.trackClock = setInterval(Groove_clock.bind(this), 1000);
+
+        // If the track has an audio url, play it.
+        if (track.audioUrl) {
+            var trackStartTime = this.getCurrentTrackTime();
+            this.player.playTrack(track, trackStartTime);
+        }
     } else {
         this.trackStartTime = -1;
         this.trackClock = null;
@@ -740,7 +755,7 @@ Groove.prototype.gotRemoteStream = function(stream) {
 // Get the current time (ms) in playback of the active track
 Groove.prototype.getCurrentTrackTime = function() {
     return this.trackStartTime ?
-        (new Date().getTime() - this.trackStartTime) : -1;
+        (new Date().getTime() - this.trackStartTime)/1000 : -1;
 };
 
 Groove.prototype.searchTracks = function(query, cb) {

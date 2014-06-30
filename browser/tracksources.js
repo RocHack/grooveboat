@@ -3,8 +3,8 @@ var soundCloudClientId = 'ef44c57ca5d4d98885bf7fb38da7492a';
 var SoundCloud = {};
 
 SoundCloud.search = function(query, cb) {
-    // SoundCloud
-    var xhr = new XMLHttpRequest();
+    if (this.xhr) this.xhr.abort();
+    var xhr = this.xhr = new XMLHttpRequest();
     var url = 'https://api.soundcloud.com/tracks?client_id=' +
         soundCloudClientId + '&filter=streamable&format=json&q=' +
         encodeURIComponent(query);
@@ -29,6 +29,7 @@ SoundCloud.search = function(query, cb) {
             return track.streamable;
         }).map(function(track) {
             return {
+                id: 'soundcloud_' + track.id,
                 title: track.title,
                 artist: track.user.username,
                 artistUrl: track.user.permalink_url,

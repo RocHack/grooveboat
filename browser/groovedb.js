@@ -19,13 +19,14 @@ function exec(handler) {
 // turn a track into something we can put in the db
 // excluding the file
 function exportTrack(t) {
-    return {
-        id: t.id,
-        title: t.title,
-        artist: t.artist,
-        album: t.album,
-        playlistPosition: t.playlistPosition
-    };
+    if (!t) return null;
+    var track = {};
+    for (var i in t) {
+        if (typeof t[i] != 'object') {
+            track[i] = t[i];
+        }
+    }
+    return track;
 }
 
 // turn a file into something we can put in the db
@@ -38,6 +39,7 @@ function fileToDataURI(file, cb) {
 }
 
 function dataURItoBlob(dataURI) {
+    if (!dataURI) return null;
     var split = dataURI.split(',');
     var binary = atob(split[1]);
     var array = [];
@@ -155,12 +157,18 @@ GrooveDB.prototype._persistTrack = function(track) {
             return;
         }
 
+        // If the track doesn't have a file,
+        // add the track object in this transaction.
+        if (!track.file) {
+            music.add(trackObject);
+        }
+
         // Add the track's file when first adding the track
 
         // We need to convert the file to a dataURL because chrome doesn't
         // support blobs in IndexedDB yet. See this chrome bug:
         // https://code.google.com/p/chromium/issues/detail?id=108012
-        fileToDataURI(track.file, function(file) {
+        if (track.file) fileToDataURI(track.file, function(file) {
 
             // Build new transaction to put the track/file
             var t = self.db.transaction(["music", "files"], "readwrite");

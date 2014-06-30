@@ -32,10 +32,15 @@ Player.prototype.setVolume = function(volume) {
 function Player_playURL(url, startTime) {
     this.audio.src = url;
     if (startTime) {
+        var loadStartTime = Date.now();
         once(this.audio, 'canplay', function() {
             if (startTime < 0) {
                 // offset the start time from the middle of the track
                 startTime = Math.max(0, (this.audio.duration + startTime) / 2);
+            } else {
+                // skip time spent loading
+                var loadTime = (Date.now() - loadStartTime)/1000;
+                startTime += loadTime;
             }
             this.audio.currentTime = startTime;
             this.audio.play();
@@ -88,8 +93,7 @@ function Player_stop() {
     }
 }
 
-Player.prototype.playTrack = function(track) {
-    this.playingTrack = track;
+Player.prototype.playTrack = function(track, startTime) {
     if (this.previewingTrack) {
         // stop currently previewing track
         Player_stopPreviewing.call(this);
@@ -98,7 +102,8 @@ Player.prototype.playTrack = function(track) {
         // stop previously playing track
         Player_stop.call(this);
     }
-    Player_play.call(this, 0);
+    this.playingTrack = track;
+    Player_play.call(this, startTime);
 };
 
 Player.prototype.previewTrack = function(track, cb) {

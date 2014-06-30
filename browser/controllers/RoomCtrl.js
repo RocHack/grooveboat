@@ -39,7 +39,10 @@ module.exports = Ractive.extend({
         newMessages: false,
         searchResults: [],
 
-        messageToHTML: PrivateChat.prototype.messageToHTML
+        messageToHTML: PrivateChat.prototype.messageToHTML,
+        hasTrack: function(track) {
+            return this.groove.hasTrack(track, this.groove.activePlaylist);
+        }
     },
 
     computed: {
@@ -306,6 +309,13 @@ module.exports = Ractive.extend({
                 clearTimeout(this.inputTimer);
             }
             this.inputTimer = setTimeout(this.search.bind(this), 500);
+        },
+
+        addTrack: function(e) {
+            var track = e.context;
+            if (!track) return;
+            this.groove.addTrack(track);
+            this.update('searchResults');
         }
     },
 
