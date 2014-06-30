@@ -37,6 +37,7 @@ module.exports = Ractive.extend({
         activeDJ: null,
         votes: {yes: 0, no: 0},
         newMessages: false,
+        searchResults: [],
 
         messageToHTML: PrivateChat.prototype.messageToHTML
     },
@@ -255,10 +256,9 @@ module.exports = Ractive.extend({
         },
 
         previewTrack: function(e) {
-            var i = e.index.i;
-            var track = this.data.tracks[i];
+            var keypath = e.keypath + '.previewing';
+            var track = e.context;
             if (!track) return;
-            var keypath = 'tracks.' + i + '.previewing';
             var previewing = this.get(keypath);
             this.toggle(keypath);
             if (previewing) {
@@ -294,6 +294,22 @@ module.exports = Ractive.extend({
 
         newMessageBlur: function() {
             this.set('newMessageFocused', false);
+        },
+
+        trackSearch: function() {
+            if (this.get('searchTerm')) {
+                this.search();
+            } else {
+                this.set('searching', false);
+            }
+        },
+
+        trackSearchType: function() {
+            // debounce
+            if (this.inputTimer) {
+                clearTimeout(this.inputTimer);
+            }
+            this.inputTimer = setTimeout(this.search.bind(this), 500);
         }
     },
 
@@ -443,5 +459,16 @@ module.exports = Ractive.extend({
 
     stopPreviewing: function() {
         this.groove.player.previewTrack(null);
+    },
+
+    search: function() {
+        clearTimeout(this.inputTimer);
+        var query = this.get('searchTerm');
+        this.groove.searchTracks(query, this._gotSearchResults.bind(this));
+    },
+
+    _gotSearchResults: function(tracks) {
+        this.set('searching', true);
+        this.set('searchResults', tracks);
     }
 });

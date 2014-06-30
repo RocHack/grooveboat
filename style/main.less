@@ -500,6 +500,57 @@ a {
     border-bottom: 1px solid @gray;
     z-index: 1;
 
+    .track-search {
+        position: relative;
+        height: 30px;
+        border-top: 1px solid @gray;
+
+        [type=search] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            margin: auto;
+            width: 80%;
+            height: 26px;
+            /*
+            border: 1px solid @gray;
+            */
+            border: none;
+            text-align: center;
+        }
+    }
+
+    .track-searching li {
+        z-index: 2;
+        background-color: white;
+
+        .add-icon {
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            height: 24px;
+            width: 24px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 100%;
+            line-height: 20px;
+            text-align: center;
+            vertical-align: bottom;
+            color: darken(white, 15%);
+            cursor: pointer;
+
+            &:after {
+                content: '+';
+            }
+
+            &:hover {
+                color: red;
+            }
+        }
+    }
+
     .sidebar-btn {
         text-align: center;
         padding: 10px 0px;
@@ -581,7 +632,7 @@ a {
 
     .songs-container {
         position: absolute;
-        top: 137px;
+        top: 167px;
         left: 0px;
         right: 0px;
         bottom: 0px;

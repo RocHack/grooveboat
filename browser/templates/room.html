@@ -43,7 +43,27 @@
             <form class="dropzone track-upload {{currentlyDragging ? 'active' : ''}}" id="upload-zone" action="" on-dropfiles="queueFiles" on-dragenter="setCurrentlyDragging:yes" on-dragend="setCurrentlyDragging:no">
                 drop music
             </form>
-            
+
+            <div class="track-search">
+                <input type="search" value="{{searchTerm}}" placeholder="Search tracks" on-search="trackSearch" on-input="trackSearchType">
+            </div>
+
+            {{#searching}}
+            <div class="track-searching">
+                <ul class="songs">
+                    {{#searchResults}}
+                    <li>
+                        <div class="add-icon" title="Add track to your playlist" on-click="addTrack"></div>
+                        <div class="preview {{.previewing ? 'previewing' : ''}}" title="Preview track" on-click="previewTrack"></div>
+                        <div class="track">{{title}}</div>
+                        <div class="artist">{{artist}}</div>
+                    </li>
+                    {{/searchResults}}
+                </ul>
+            </div>
+            {{/searching}}
+
+            {{^searching}}
             <div class="sidebar-btn {{isActiveDJ ? 'half' : ''}}" on-click="becomeDJ">{{joinText}}</div>
             {{#isActiveDJ}}
             <div class="sidebar-btn half" on-click="skipSong">skip song</div>
@@ -89,6 +109,7 @@
                 {{/tracks}}
                 </ul>
             </div>
+            {{/searching}}
         </div>
     </div>
 </div>

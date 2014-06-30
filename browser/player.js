@@ -61,7 +61,10 @@ function Player_play(startTime) {
     var track = this.previewingTrack || this.playingTrack;
     if (!track) return;
 
-    if (track.stream || track.file) {
+    if (track.audioUrl) {
+        Player_playURL.call(this, track.audioUrl, startTime);
+
+    } else if (track.stream || track.file) {
         var url = URL.createObjectURL(track.stream || track.file);
         Player_playURL.call(this, url, startTime);
 
@@ -75,6 +78,7 @@ function Player_play(startTime) {
 
 function Player_stop() {
     this.audio.pause();
+    this.audio.src = null;
     if (this.mediaSource) {
         // We can't disconnect the media source because it have might remote
         // media stream destinations. So disconnect the gainNode.

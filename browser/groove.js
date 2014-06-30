@@ -40,6 +40,7 @@ function Groove() {
     this.db = new GrooveDB();
     this.getPersistTracks();
     this.player = new Player();
+    this.trackSources = require('./tracksources');
 
     // get stats about incoming peer connection from DJ
     this.statsTimestamp = 0;
@@ -584,6 +585,10 @@ Groove.prototype.ensureTrackFile = function(track, cb) {
         cb();
     } else if (track.file) {
         cb();
+    } else if (track.audioUrl) {
+        // We'll share the audio url to the peers
+        // rather than download and stream it to them.
+        cb();
     } else {
         this.db.getTrackFile(track, function(file) {
             track.file = file;
@@ -736,6 +741,10 @@ Groove.prototype.gotRemoteStream = function(stream) {
 Groove.prototype.getCurrentTrackTime = function() {
     return this.trackStartTime ?
         (new Date().getTime() - this.trackStartTime) : -1;
+};
+
+Groove.prototype.searchTracks = function(query, cb) {
+    this.trackSources.search(query, cb);
 };
 
 module.exports = Groove;
