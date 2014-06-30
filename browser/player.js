@@ -32,7 +32,7 @@ Player.prototype.setVolume = function(volume) {
 function Player_playURL(url, startTime) {
     this.audio.src = url;
     if (startTime) {
-        once(this.audio, 'canplaythrough', function() {
+        once(this.audio, 'canplay', function() {
             if (startTime < 0) {
                 // offset the start time from the middle of the track
                 startTime = Math.max(0, (this.audio.duration + startTime) / 2);
@@ -78,7 +78,7 @@ function Player_play(startTime) {
 
 function Player_stop() {
     this.audio.pause();
-    this.audio.src = null;
+    this.audio.src = "";
     if (this.mediaSource) {
         // We can't disconnect the media source because it have might remote
         // media stream destinations. So disconnect the gainNode.
@@ -119,8 +119,13 @@ Player.prototype.previewTrack = function(track, cb) {
 
     // Play a clip from the given track
     this.previewingTrack = track;
-    Player_play.call(this, -this.previewDuration);
-    // Restore the regularly playing track
+
+    // If we have the track file, play the preview from the middle.
+    // If we have to download the track, play the preview from the beginning.
+    var startTime = track.duration ? 0 : -this.previewDuration;
+    Player_play.call(this, startTime);
+
+    // Restore the regularly playing track when the preview is finished.
     if (this._endPreviewTimer) {
         clearTimeout(this._endPreviewTimer);
     }

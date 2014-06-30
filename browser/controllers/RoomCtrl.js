@@ -297,11 +297,7 @@ module.exports = Ractive.extend({
         },
 
         trackSearch: function() {
-            if (this.get('searchTerm')) {
-                this.search();
-            } else {
-                this.set('searching', false);
-            }
+            this.search();
         },
 
         trackSearchType: function() {
@@ -464,6 +460,10 @@ module.exports = Ractive.extend({
     search: function() {
         clearTimeout(this.inputTimer);
         var query = this.get('searchTerm');
+        if (!query) {
+            this.set('searching', false);
+            return;
+        }
         this.groove.searchTracks(query, this._gotSearchResults.bind(this));
     },
 
