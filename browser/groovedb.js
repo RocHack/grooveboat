@@ -247,7 +247,6 @@ GrooveDB.prototype.getTrackFile = ensureDb(function(track, callback) {
         return callback(null);
     }
     var files = this.db.transaction(["files"], "readonly").objectStore("files");
-    console.error("get");
     files.get(track.id).onsuccess = function(e) {
         callback(dataURItoBlob(e.target.result));
     };
