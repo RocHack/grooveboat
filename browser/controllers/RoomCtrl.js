@@ -42,6 +42,14 @@ module.exports = Ractive.extend({
         messageToHTML: PrivateChat.prototype.messageToHTML,
         hasTrack: function(track) {
             return this.groove.hasTrack(track, this.groove.activePlaylist);
+        },
+
+        formatDuration: function(ms) {
+            if (!ms) return '';
+            var sec = Math.round(ms/1000);
+            var min = Math.floor(sec / 60);
+            sec %= 60;
+            return min + ':' + ('0' + sec).substr(-2);
         }
     },
 

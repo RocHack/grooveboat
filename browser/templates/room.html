@@ -57,7 +57,9 @@
                         <div class="add-icon" title="Add track to your playlist" on-click="addTrack"></div>
                         {{/ hasTrack}}
                         <div class="preview {{.previewing ? 'previewing' : ''}}" title="Preview track" on-click="previewTrack"></div>
-                        <div class="track">{{title}}</div>
+                        <div class="track">{{title}}
+                            <span class="duration">{{formatDuration(.duration)}}</span>
+                        </div>
                         <div class="artist">{{artist}}</div>
                     </li>
                     {{/searchResults}}
@@ -72,14 +74,18 @@
             {{/isActiveDJ}}
 
             <div class="songs-container">
-                {{# currentTrack && isActiveDJ }}
+                {{#isActiveDJ}}
+                {{#currentTrack}}
                 <ul class="songs">
                     <li class="active">
-                        <div class="track">{{currentTrack.title}}</div>
-                        <div class="artist">{{currentTrack.artist}}</div>
+                        <div class="track">{{title}}
+                            <span class="duration">{{formatDuration(.duration)}}</span>
+                        </div>
+                        <div class="artist">{{artist}}</div>
                     </li>
                 </ul>
-                {{/ currentTrack}}
+                {{/currentTrack}}
+                {{/isActiveDJ}}
 
                 <ul class="songs" decorator="sortable:'tracks','i'">
                 {{#tracks:i}}
@@ -88,7 +94,9 @@
                         <div class="preview {{.previewing ? 'previewing' : ''}}" title="Preview track" on-click="previewTrack"></div>
 
                         {{^editing}}
-                            <div title="Double click to edit" class="track">{{title}}</div>
+                            <div title="Double click to edit" class="track">{{title}}
+                                <span class="duration">{{formatDuration(.duration)}}</span>
+                            </div>
                             <div title="Double click to edit" class="artist">{{artist}}</div>
 
                             <div class="right">
