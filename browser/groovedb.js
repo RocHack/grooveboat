@@ -22,11 +22,16 @@ function exportTrack(t) {
     if (!t) return null;
     var track = {};
     for (var i in t) {
-        if (typeof t[i] != 'object') {
+        if (i != 'previewing' && typeof t[i] != 'object') {
             track[i] = t[i];
         }
     }
     return track;
+}
+
+function trackIsEqual(track1, track2) {
+    return track1 == track2 ||
+        (track1 && track2 && track1.id == track2.id);
 }
 
 // turn a file into something we can put in the db
@@ -242,9 +247,12 @@ GrooveDB.prototype.getTrackFile = ensureDb(function(track, callback) {
         return callback(null);
     }
     var files = this.db.transaction(["files"], "readonly").objectStore("files");
+    console.error("get");
     files.get(track.id).onsuccess = function(e) {
         callback(dataURItoBlob(e.target.result));
     };
 });
 
 module.exports = GrooveDB;
+GrooveDB.exportTrack = exportTrack;
+GrooveDB.trackIsEqual = trackIsEqual;

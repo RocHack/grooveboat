@@ -1,5 +1,6 @@
 var Ractive = require('ractive/build/ractive.runtime');
 var PrivateChat = Ractive.extend(require('./privatechat'));
+var trackIsEqual = require('../groovedb').trackIsEqual;
 
 function pick(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -9,11 +10,6 @@ function subtract(arr1, arr2) {
     return !arr1 ? [] : !arr2 ? arr1 : arr1.filter(function(item) {
         return arr2.indexOf(item) == -1;
     });
-}
-
-function trackIsEqual(track1, track2) {
-    return track1 == track2 ||
-        (track1 && track2 && track1.id == track2.id);
 }
 
 var noDjMessages = [

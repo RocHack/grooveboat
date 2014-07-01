@@ -1,4 +1,5 @@
 var AudioContext = window.AudioContext || window.webkitAudioContext;
+var trackIsEqual = require('./groovedb').trackIsEqual;
 
 function once(element, eventName, handler, context, bubble) {
     element.addEventListener(eventName, function listener(e) {
@@ -9,6 +10,7 @@ function once(element, eventName, handler, context, bubble) {
 
 function Player() {
     this.audio = new Audio();
+    this.audio.onended = Player_onEndPlaying.bind(this);
     this.audioContext = new AudioContext();
     this.gainNode = this.audioContext.createGain();
 }
@@ -93,16 +95,21 @@ function Player_stop() {
     }
 }
 
-Player.prototype.playTrack = function(track, startTime) {
+Player.prototype.playTrack = function(track, startTime, onEnded) {
     if (this.previewingTrack) {
         // stop currently previewing track
         Player_stopPreviewing.call(this);
     }
-    if (track != this.playingTrack) {
+    if (trackIsEqual(track, this.playingTrack)) {
+        // already playing this track
+        return;
+    } else {
         // stop previously playing track
         Player_stop.call(this);
     }
     this.playingTrack = track;
+    this._onPlayingTrackEnded = onEnded;
+    this._trackPlayStart = Date.now()/1000 - startTime;
     Player_play.call(this, startTime);
 };
 
@@ -117,7 +124,7 @@ Player.prototype.previewTrack = function(track, cb) {
     if (!track) {
         if (this.playingTrack) {
             // allow previously playing track to continue
-            Player_play.call(this, 0);
+            Player_play.call(this, this.getPlayStartTime());
         }
         return;
     }
@@ -139,6 +146,10 @@ Player.prototype.previewTrack = function(track, cb) {
     this._endPreviewCb = cb;
 };
 
+Player.prototype.getPlayStartTime = function() {
+    return Date.now()/1000 - this._trackPlayStart;
+};
+
 function Player_stopPreviewing() {
     if (this._endPreviewTimer) {
         clearTimeout(this._endPreviewTimer);
@@ -155,7 +166,14 @@ function Player_stopPreviewing() {
 function Player_onEndPreview() {
     Player_stopPreviewing.call(this);
     if (this.playingTrack) {
-        Player_play.call(this, 0);
+        Player_play.call(this, this.getPlayStartTime());
+    }
+}
+
+function Player_onEndPlaying() {
+    if (this._onPlayingTrackEnded) {
+        this._onPlayingTrackEnded.call(this);
+        this._onPlayingTrackEnded = null;
     }
 }
 

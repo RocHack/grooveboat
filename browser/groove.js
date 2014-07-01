@@ -297,6 +297,7 @@ Groove.prototype.leaveRoom = function() {
             this.activeDJ.dj = false;
             this.cleanupDJing();
         }
+        this.player.playTrack(null);
     }
     this._setActiveTrack(null, null);
     this.emit('activeTrack');
@@ -578,7 +579,8 @@ Groove.prototype._playMyTrack = function() {
     }
 
     if (track.audioUrl) {
-        this.player.playTrack(track);
+        var onended = Groove_onPlaybackEnded.bind(this);
+        this.player.playTrack(track, 0, onended);
         //this.emit('activeTrack');
         return;
     }

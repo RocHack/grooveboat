@@ -40,6 +40,7 @@ module.exports = function sortable(listEl, keypath, index) {
 
     // find the element ancestor corresponding to an item in our list
     function findEl(child) {
+        if (child == listEl) return;
         for (var el = child;
             el && el.parentNode != listEl;
             el = el.parentNode) {
