@@ -17,23 +17,23 @@
     "rtcpeerconnection": "clehner/rtcpeerconnection",
     "websocket": "1.0.x",
     "node-uuid": "1.4.x",
-    "ractive": "^0.4.0",
-    "html-linkify": "^1.1.0"
+    "ractive": "^0.6.1",
+    "html-linkify": "^1.2.0"
   },
   "devDependencies": {
-    "browserify": "^4.1.6",
-    "watchify": "^0.10.2",
-    "partialify": "^3.1.1",
-    "ractivate": "^0.1.0",
+    "browserify": "^8.1.1",
+    "watchify": "^2.2.1",
+    "partialify": "^3.1.3",
+    "ractivate": "^0.2.0",
     "catw": "^0.2.0",
-    "uglify-js": "^2.4.13",
-    "less": "^1.5.1",
-    "clean-css": "^2.1.8",
-    "napa": "^0.4.1",
-    "nodemon": "^1.1.1",
-    "mocha": "^1.20.0",
-    "should": "^4.0.0",
-    "sinon": "^1.10.1"
+    "uglify-js": "^2.4.16",
+    "less": "^2.2.0",
+    "clean-css": "^3.0.4",
+    "napa": "^1.2.0",
+    "nodemon": "^1.2.1",
+    "mocha": "^2.1.0",
+    "should": "^4.6.0",
+    "sinon": "^1.12.2"
   },
   "napa": {
     "emoji-images": "nmbook/emoji-images.js"
