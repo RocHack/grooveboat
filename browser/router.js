@@ -35,6 +35,7 @@ function Route(route, controller, router) {
 }
 
 Route.prototype.handle = function(path) {
+	// augment options from path with options from router initializer
 	var matches = this.regexp.exec(path);
 	if (!matches) return;
 	var options = Object.create(this.router.routeOptions);
@@ -45,33 +46,42 @@ Route.prototype.handle = function(path) {
 };
 
 module.exports = {
-	template: [],
+	template: {v: 1, t: []}, // placeholder
 
-	init: function(options) {
-		this.observe(this.observers);
+	onconstruct: function(options) {
+		// bind event handlers
+		this.updatePath = this.updatePath.bind(this);
+		this.onClick = this.onClick.bind(this);
+		window.addEventListener('popstate', this.updatePath, false);
+		window.addEventListener('click', this.onClick, false);
 
+		// handle options
 		this.root = options.root ? normalizeUrl(options.root) : '/';
 		this.routeOptions = options.options || {};
 		this.routeOptions._router = this;
-		this.routes = {};
+		this._routes = {};
 		if (options.routes) for (var route in options.routes) {
 			this.route(route, options.routes[route]);
 		}
+	},
 
-		var updatePath = this.updatePath.bind(this);
-		var onClick = this.onClick.bind(this);
-		window.addEventListener('popstate', updatePath, false);
-		window.addEventListener('click', onClick, false);
+	onrender: function() {
+		this.observer = this.observe(this.observers);
+	},
 
-		this.on('teardown', function() {
-			window.removeEventListener('popstate', updatePath, false);
-			window.removeEventListener('click', onClick, false);
-		});
+	onunrender: function() {
+		this.observer.cancel();
+	},
+
+	onteardown: function() {
+		window.removeEventListener('popstate', this.updatePath, false);
+		window.removeEventListener('click', this.onClick, false);
 	},
 
 	observers: {
 		page: function(newPage, oldPage) {
 			if (oldPage) oldPage.teardown();
+			if (newPage) newPage.render(this.el);
 		},
 		relativePath: function(path) {
 			var page;
@@ -126,15 +136,16 @@ module.exports = {
 
 	// execute a route for a given path
 	handle: function (path) {
-		for (var key in this.routes) {
-			var page = this.routes[key].handle(path, this);
+		for (var key in this._routes) {
+			var route = this._routes[key];
+			var page = route.handle(path, this);
 			if (page) return page;
 		}
 	},
 
 	// register a route
 	route: function(route, callback) {
-		this.routes[route] = new Route(route, callback, this);
+		this._routes[route] = new Route(route, callback, this);
 	},
 
 	// handle current route

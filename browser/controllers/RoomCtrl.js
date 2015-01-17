@@ -1,4 +1,4 @@
-var Ractive = require('ractive/build/ractive.runtime');
+var Ractive = require('ractive/ractive.runtime');
 var PrivateChat = Ractive.extend(require('./privatechat'));
 
 function pick(arr) {
@@ -70,7 +70,7 @@ module.exports = Ractive.extend({
     /*
      * Listeners on the UI
      */
-    init: function(options) {
+    onconstruct: function(options) {
         var self = this;
         this.groove = options.groove;
         this.router = options._router;
@@ -78,16 +78,6 @@ module.exports = Ractive.extend({
         this.room = options.room;
         this.storage = options.storage;
         this.groove.joinRoom(this.room);
-
-        this.set({
-            djs: [],
-            files: [],
-            users: [this.groove.me],
-            me: this.groove.me,
-            chat_messages: [],
-            currentTab: this.storage.get('user:tab') || 'music',
-            tracks: this.groove.playlists[this.groove.activePlaylist].slice(),
-        });
 
         this.privateChats = {};
 
@@ -102,17 +92,6 @@ module.exports = Ractive.extend({
         this.watchUser(this.groove.me);
 
         this.on(this.eventHandlers);
-        this.observe(this.observers);
-
-        this.appObservers = this.app.observe({
-            // proxy some keypaths
-            muted: this.set.bind(this, 'muted')
-        });
-
-        // periodically pick a random no-DJ message
-        this.pickNoDjMessage();
-        this.pickInterval =
-            setInterval(this.pickNoDjMessage.bind(this), 30 * 1000);
 
         /*
         * Listeners from the buoy server
@@ -123,13 +102,48 @@ module.exports = Ractive.extend({
         }
     },
 
+    onrender: function() {
+        this.observer = this.observe(this.observers);
+        this.appObserver = this.app.observe({
+            // proxy some keypaths
+            muted: this.set.bind(this, 'muted')
+        });
+
+        this.set({
+            djs: [],
+            files: [],
+            users: [this.groove.me],
+            me: this.groove.me,
+            chat_messages: [],
+            currentTab: this.storage.get('user:tab') || 'music',
+            tracks: this.groove.playlists[this.groove.activePlaylist].slice(),
+        });
+
+        // periodically pick a random no-DJ message
+        this.pickNoDjMessage();
+        this.pickInterval =
+            setInterval(this.pickNoDjMessage.bind(this), 30 * 1000);
+    },
+
+    onunrender: function() {
+        this.observer.cancel();
+        this.appObserver.cancel();
+        clearTimeout(this.pickInterval);
+    },
+
+    onteardown: function() {
+        this.groove.leaveRoom();
+        this.groove.releaseGroup(this);
+    },
+
     observers: {
         currentTab: function(tab) {
             this.storage.set("user:tab", tab);
         },
 
         files: function() {
-            this.groove.addFilesToQueue(this.data.files);
+            var files = this.data.files;
+            if (files) this.groove.addFilesToQueue(files);
         },
 
         muted: function(muted) {
@@ -138,7 +152,7 @@ module.exports = Ractive.extend({
 
         tracks: function() {
             var tracks = this.get('tracks');
-            if (tracks._dragging) {
+            if (tracks && tracks._dragging) {
                 tracks._dragging = false;
                 this.groove.setPlaylist(this.groove.activePlaylist, tracks);
             }
@@ -146,13 +160,6 @@ module.exports = Ractive.extend({
     },
 
     eventHandlers: {
-        teardown: function() {
-            this.groove.leaveRoom();
-            this.appObservers.cancel();
-            clearTimeout(this.pickInterval);
-            this.groove.releaseGroup(this);
-        },
-
         switchTab: function(e, tab) {
             if (tab == 'chat' && this.data.newMessages) {
                 this.set('newMessages', false);

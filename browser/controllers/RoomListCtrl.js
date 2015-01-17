@@ -1,7 +1,7 @@
 /*
 * Room selection
 */
-var Ractive = require('ractive/build/ractive.runtime');
+var Ractive = require('ractive/ractive.runtime');
 module.exports = Ractive.extend({
     template: require("../templates/room_list.html"),
 
@@ -13,24 +13,26 @@ module.exports = Ractive.extend({
         rooms: []
     },
 
-    init: function(options) {
+    onconstruct: function(options) {
         this.groove = options.groove;
         this.router = options._router;
 
         this.on(this.eventHandlers);
         this.updateRooms = this.update.bind(this, 'rooms');
         this.groove.on('roomsChanged', this.updateRooms);
+    },
 
+    onrender: function() {
         this.set('username', this.groove.me.name);
         this.set('rooms', this.groove.rooms);
     },
 
-    eventHandlers: {
-        teardown: function() {
-            this.groove.me.setName(this.data.username);
-            this.groove.off('roomsChanged', this.updateRooms);
-        },
+    onteardown: function() {
+        this.groove.me.setName(this.data.username);
+        this.groove.off('roomsChanged', this.updateRooms);
+    },
 
+    eventHandlers: {
         joinRoom: function() {
             var room;
             if (this.data.room_selected == 'new') {

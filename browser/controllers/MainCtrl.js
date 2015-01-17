@@ -1,4 +1,4 @@
-var Ractive = require("ractive/build/ractive.runtime");
+var Ractive = require("ractive/ractive.runtime");
 
 module.exports = Ractive.extend({
     template: require("../templates/main.html"),
@@ -18,24 +18,40 @@ module.exports = Ractive.extend({
         }
     },
 
-    init: function(options) {
+    onconstruct: function(options) {
         this.groove = options.groove;
         this.router = options.router;
         this.storage = options.storage;
 
+        this.on(this.eventHandlers);
+
+        this.groove.buoy.on('disconnected', this,
+            this.setOverlay.bind(this, 'disconnected'));
+        this.groove.buoy.on('reconnected', this,
+            this.clearOverlay.bind(this, 'disconnected'));
+        this.groove.db.on('blocked', this,
+            this.setOverlay.bind(this, 'blocked'));
+        this.groove.db.on('open', this,
+            this.clearOverlay.bind(this, 'blocked'));
+    },
+
+    onrender: function() {
         this.set({
             persistPlaylists: !!this.storage.get("user:persist"),
             tempGravatarEmail: this.groove.me.gravatar,
             tempUsername: this.groove.me.name
         });
 
-        this.on(this.eventHandlers);
-        this.observe(this.observers);
+        this.observer = this.observe(this.observers);
+    },
 
-        this.groove.buoy.on('disconnected', this, this.setOverlay.bind(this, 'disconnected'));
-        this.groove.buoy.on('reconnected', this, this.clearOverlay.bind(this, 'disconnected'));
-        this.groove.db.on('blocked', this, this.setOverlay.bind(this, 'blocked'));
-        this.groove.db.on('open', this, this.clearOverlay.bind(this, 'blocked'));
+    onunrender: function() {
+        this.observer.cancel();
+    },
+
+    onteardown: function() {
+        this.groove.buoy.releaseGroup(this);
+        this.groove.db.releaseGroup(this);
     },
 
     observers: {
@@ -46,11 +62,6 @@ module.exports = Ractive.extend({
     },
 
     eventHandlers: {
-        teardown: function() {
-            this.groove.buoy.releaseGroup(this);
-            this.groove.db.releaseGroup(this);
-        },
-
         setOverlay: function(e, overlay) {
             this.setOverlay(overlay);
         },

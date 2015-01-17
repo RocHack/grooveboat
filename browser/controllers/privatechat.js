@@ -39,7 +39,7 @@ module.exports = {
         return bound;
     },
 
-    init: function(options) {
+    onconstruct: function(options) {
         this.peer = options.peer;
         this.me = options.me;
 
@@ -59,6 +59,10 @@ module.exports = {
         this.focus();
     },
 
+    onteardown: function() {
+        this.peer.releaseGroup(this);
+    },
+
     observers: {
         collapsed: function() {
             this.set('newMessages', false);
@@ -66,10 +70,6 @@ module.exports = {
     },
 
     eventHandlers: {
-        teardown: function() {
-            this.peer.releaseGroup(this);
-        },
-
         toggleCollapse: function(e) {
             e.original.preventDefault();
             this.toggle('collapsed');
