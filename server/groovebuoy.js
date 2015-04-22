@@ -11,9 +11,10 @@ WebsocketConnection.prototype.sendJSON = function(send) {
 }
 
 var http_server = http.createServer(staticServer);
+var port = process.env.PORT || 8844;
 
-http_server.listen(8844, function() {
-    console.log("Server active on port 8844");
+http_server.listen(port, function() {
+    console.log("Server active on port", port);
 });
 
 var ws_server = new WebsocketServer({
