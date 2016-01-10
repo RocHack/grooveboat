@@ -55,6 +55,9 @@ module.exports = {
 		window.addEventListener('popstate', this.updatePath, false);
 		window.addEventListener('click', this.onClick, false);
 
+		// create element for the pages to render into
+		this.innerEl = document.createElement("div");
+
 		// handle options
 		this.root = options.root ? normalizeUrl(options.root) : '/';
 		this.routeOptions = options.options || {};
@@ -67,6 +70,7 @@ module.exports = {
 
 	onrender: function() {
 		this.observer = this.observe(this.observers);
+		this.el.appendChild(this.innerEl);
 	},
 
 	onunrender: function() {
@@ -81,7 +85,7 @@ module.exports = {
 	observers: {
 		page: function(newPage, oldPage) {
 			if (oldPage) oldPage.teardown();
-			if (newPage) newPage.render(this.el);
+			if (newPage) newPage.render(this.innerEl);
 		},
 		relativePath: function(path) {
 			var page;
