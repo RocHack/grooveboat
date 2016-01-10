@@ -433,6 +433,7 @@ module.exports = Ractive.extend({
                 peer: user,
                 me: this.groove.me
             });
+            pc.focus();
             var onTeardown = pc.on('teardown', function() {
                 delete this.privateChats[user.id];
                 onTeardown.cancel();

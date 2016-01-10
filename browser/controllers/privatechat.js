@@ -22,7 +22,9 @@ module.exports = {
 
     data: function () {
         return {
+            peer: this.peer,
             collapsed: false,
+            messages: [],
             messageToHTML: messageToHTML
         };
     },
@@ -45,31 +47,32 @@ module.exports = {
         this.peer = options.peer;
         this.me = options.me;
 
-        this.set({
-            peer: this.peer,
-            messages: [],
-            messageToHTML: messageToHTML
-        });
-
         this.on(this.eventHandlers);
-        this.observe(this.observers);
         this.peerEventHandlers = this.bind(this.peerEventHandlers);
         for (var name in this.peerEventHandlers) {
             this.peer.on(name, this, this.peerEventHandlers[name]);
         }
-
-        this.focus();
     },
 
     onteardown: function() {
         this.peer.releaseGroup(this);
     },
 
+    onrender: function () {
+        this.observer = this.observe(this.observers);
+    },
+
+    onunrender: function() {
+        this.observer.cancel();
+    },
+
     observers: {
-        collapsed: function() {
-            this.set('newMessages', false);
+        collapsed: function(collapsed) {
+            if (!collapsed)
+                this.set('newMessages', false);
         }
     },
+
 
     eventHandlers: {
         toggleCollapse: function(e) {
@@ -118,6 +121,8 @@ module.exports = {
             text: text
         });
         this.last = from;
+        if (this.get('collapsed'))
+            this.set('newMessages', true);
     },
 
     send: function(text) {
