@@ -3,12 +3,14 @@ var Ractive = require("ractive/ractive.runtime");
 module.exports = Ractive.extend({
     template: require("../templates/main.html"),
 
-    data: {
-        currentOverlay: false,
-        persistPlaylists: false,
-        tempGravatarEmail: null,
-        tempUsername: null,
-        muted: false
+    data: function () {
+        return {
+            currentOverlay: false,
+            persistPlaylists: false,
+            tempGravatarEmail: null,
+            tempUsername: null,
+            muted: false
+        };
     },
 
     computed: {

@@ -30,15 +30,18 @@ var noDjMessages = [
 module.exports = Ractive.extend({
     template: require("../templates/room.html"),
 
-    data: {
-        djs: [],
-        currentTab: null,
-        currentTrack: null,
-        activeDJ: null,
-        votes: {yes: 0, no: 0},
-        newMessages: false,
+    data: function () {
+        return {
+            users: [],
+            djs: [],
+            currentTab: null,
+            currentTrack: null,
+            activeDJ: null,
+            votes: {yes: 0, no: 0},
+            newMessages: false,
 
-        messageToHTML: PrivateChat.prototype.messageToHTML
+            messageToHTML: PrivateChat.prototype.messageToHTML
+        };
     },
 
     computed: {
@@ -142,7 +145,7 @@ module.exports = Ractive.extend({
         },
 
         files: function() {
-            var files = this.data.files;
+            var files = this.get('files');
             if (files) this.groove.addFilesToQueue(files);
         },
 
@@ -161,7 +164,7 @@ module.exports = Ractive.extend({
 
     eventHandlers: {
         switchTab: function(e, tab) {
-            if (tab == 'chat' && this.data.newMessages) {
+            if (tab == 'chat' && this.get('newMessages')) {
                 this.set('newMessages', false);
             }
             this.set('currentTab', tab);
@@ -189,7 +192,7 @@ module.exports = Ractive.extend({
             var me = this.groove.me;
 
             if (text && text.trim()) {
-                this.data.chat_messages.push({
+                this.get('chat_messages').push({
                     from: me,
                     text: text,
                     isContinuation: last && last == me
@@ -263,7 +266,7 @@ module.exports = Ractive.extend({
 
         previewTrack: function(e) {
             var i = e.index.i;
-            var track = this.data.tracks[i];
+            var track = this.get('tracks.' + i);
             if (!track) return;
             var keypath = 'tracks.' + i + '.previewing';
             var previewing = this.get(keypath);
@@ -313,7 +316,7 @@ module.exports = Ractive.extend({
 
     grooveEventHandlers: {
         chat: function(message) {
-            if (this.data.currentTab != 'chat') {
+            if (this.get('currentTab') != 'chat') {
                 this.set('newMessages', true);
             }
 
@@ -324,20 +327,20 @@ module.exports = Ractive.extend({
             var last = this.groove.lastChatAuthor;
             message.isContinuation = (last && last == message.from);
             this.groove.lastChatAuthor = message.from;
-            this.data.chat_messages.push(message);
+            this.get('chat_messages').push(message);
             this.pruneChat();
         },
 
         peerConnected: function(user) {
-            this.data.users.push(user);
+            this.get('users').push(user);
             this.watchUser(user);
             this.updateVotes();
         },
 
         peerDisconnected: function(user) {
-            var i = this.data.users.indexOf(user);
+            var i = this.get('users').indexOf(user);
             if (i == -1) return;
-            this.data.users.splice(i, 1);
+            this.get('users').splice(i, 1);
             delete this.privateChats[user.id];
             // groove might not yet realize the user has disconnected, so reset
             // their vote here for recalculation purposes
@@ -407,7 +410,7 @@ module.exports = Ractive.extend({
     },
 
     pruneChat: function() {
-        var msgs = this.data.chat_messages;
+        var msgs = this.get('chat_messages');
         if (msgs.length > 76) {
             msgs.splice(0, msgs.length - 75);
         }

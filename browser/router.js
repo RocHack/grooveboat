@@ -46,7 +46,7 @@ Route.prototype.handle = function(path) {
 };
 
 module.exports = {
-	template: {v: 1, t: []}, // placeholder
+	template: {v: 3, t: []}, // placeholder
 
 	onconstruct: function(options) {
 		// bind event handlers

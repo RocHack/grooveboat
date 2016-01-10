@@ -5,12 +5,14 @@ var Ractive = require('ractive/ractive.runtime');
 module.exports = Ractive.extend({
     template: require("../templates/room_list.html"),
 
-    data: {
-        room_selected: -1,
-        new_room_name: '',
-        creating_room: false,
-        username: 'Guest',
-        rooms: []
+    data: function () {
+        return {
+            room_selected: -1,
+            new_room_name: '',
+            creating_room: false,
+            username: 'Guest',
+            rooms: []
+        };
     },
 
     onconstruct: function(options) {
@@ -28,17 +30,18 @@ module.exports = Ractive.extend({
     },
 
     onteardown: function() {
-        this.groove.me.setName(this.data.username);
+        this.groove.me.setName(this.get('username'));
         this.groove.off('roomsChanged', this.updateRooms);
     },
 
     eventHandlers: {
         joinRoom: function() {
             var room;
-            if (this.data.room_selected == 'new') {
-                room = this.data.new_room_name;
+            var roomSel = this.get('room_selected');
+            if (roomSel == 'new') {
+                room = this.get('new_room_name');
             } else {
-                room = this.data.rooms[this.data.room_selected];
+                room = this.get('rooms')[roomSel];
             }
             var roomId = room.replace(/\s/g, "-");
             this.router.navigate("/room/" + roomId);

@@ -20,9 +20,11 @@ module.exports = {
         autoscroll: require('../autoscroll')
     },
 
-    data: {
-        collapsed: false,
-        messageToHTML: messageToHTML
+    data: function () {
+        return {
+            collapsed: false,
+            messageToHTML: messageToHTML
+        };
     },
 
     computed: {
