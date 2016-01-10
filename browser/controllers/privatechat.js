@@ -48,14 +48,16 @@ module.exports = {
         this.me = options.me;
 
         this.on(this.eventHandlers);
+        this.channelEventHandlers = this.bind(this.channelEventHandlers);
         this.peerEventHandlers = this.bind(this.peerEventHandlers);
-        for (var name in this.peerEventHandlers) {
+        for (var name in this.peerEventHandlers)
             this.peer.on(name, this, this.peerEventHandlers[name]);
-        }
     },
 
     onteardown: function() {
         this.peer.releaseGroup(this);
+        this.channel.close();
+        this.set('channel', null);
     },
 
     onrender: function () {
@@ -67,12 +69,23 @@ module.exports = {
     },
 
     observers: {
+        channel: function(chan, prevChan) {
+            this.channel = chan;
+            this.set('status', chan && chan.readyState == 'open'
+                ? 'connected'
+                : 'disconnected');
+            for (var name in this.channelEventHandlers) {
+                var fn = this.channelEventHandlers[name];
+                if (chan) chan.addEventListener(name, fn, false);
+                if (prevChan) prevChan.removeEventListener(name, fn, false);
+            }
+        },
+
         collapsed: function(collapsed) {
             if (!collapsed)
                 this.set('newMessages', false);
         }
     },
-
 
     eventHandlers: {
         toggleCollapse: function(e) {
@@ -87,11 +100,13 @@ module.exports = {
 
         newMessage: function(e) {
             e.original.preventDefault();
-            var text = this.get('message_text');
-            if (text && text.trim()) {
-                this.send(text);
-            }
-            this.set('message_text', '');
+            this.send(this.get('message_text'), function(err) {
+                if (err) {
+                    this.addMessage('unable to send message', null, 'status');
+                } else {
+                    this.set('message_text', '');
+                }
+            });
         },
 
         newMessageFocus: function() {
@@ -100,6 +115,26 @@ module.exports = {
 
         newMessageBlur: function() {
             this.set('newMessageFocused', false);
+        }
+    },
+
+    channelEventHandlers: {
+        message: function(e) {
+            this.addMessage(e.data, this.peer);
+            this.set('newMessages', true);
+        },
+
+        open: function() {
+            this.set('status', 'connected');
+        },
+
+        close: function() {
+            this.set('status', 'disconnected');
+        },
+
+        error: function(e) {
+            console.error(e);
+            this.addMessage(e.toString(), null, 'error');
         }
     },
 
@@ -125,10 +160,32 @@ module.exports = {
             this.set('newMessages', true);
     },
 
-    send: function(text) {
+    send: function(text, cb, immediate) {
         if (!text) return;
-        this.peer.sendChat(text);
+        try {
+            this.channel.send(text);
+        } catch(e) {
+            if (immediate) {
+                return cb.call(this, e);
+            }
+            // remote closed connection
+            this.set('status', 'disconnected');
+            // try to reconnect
+            this.peer.startChat();
+            // resend message
+            var onStatus = this.observe('status', function(status) {
+                if (status == 'connected') {
+                    this.send(text, cb, true);
+                    onStatus.cancel();
+                } else if (status == 'disconnected') {
+                    cb.call(this, e);
+                    onStatus.cancel();
+                }
+            });
+            return;
+        }
         this.addMessage(text, this.me);
+        cb.call(this);
     },
 
     focus: function () {

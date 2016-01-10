@@ -88,8 +88,8 @@ module.exports = Ractive.extend({
         this.updateUsers = function() {
             self.update('users');
         };
-        this.gotChat = function(message) {
-            self.gotUserChatMessage(this, message);
+        this.gotChatChannel = function(channel) {
+            self.gotUserChatChannel(this, channel);
         };
 
         this.watchUser(this.groove.me);
@@ -179,7 +179,7 @@ module.exports = Ractive.extend({
                 if (chat) {
                     chat.focus();
                 } else {
-                    this.getUserChat(user);
+                    user.startChat();
                 }
             }
         },
@@ -406,7 +406,7 @@ module.exports = Ractive.extend({
         user.on('name', this.updateUsers);
         user.on('vote', this.updateUsers);
         user.on('gravatar', this.updateUsers);
-        user.on('chat', this.gotChat);
+        user.on('chatChannel', this.gotChatChannel);
     },
 
     pruneChat: function() {
@@ -424,7 +424,7 @@ module.exports = Ractive.extend({
         a.play();
     },
 
-    getUserChat: function(user) {
+    gotUserChatChannel: function(user, chan) {
         var pc = this.privateChats[user.id];
         if (!pc) {
             pc = this.privateChats[user.id] = new PrivateChat({
@@ -439,11 +439,7 @@ module.exports = Ractive.extend({
                 onTeardown.cancel();
             }.bind(this));
         }
-        return pc;
-    },
-
-    gotUserChatMessage: function(user, message) {
-        this.getUserChat(user).addMessage(message, user);
+        pc.set('channel', chan);
     },
 
     previewTrack: function(track, onDone) {
