@@ -119,12 +119,6 @@ module.exports = Ractive.extend({
     },
 
     onrender: function() {
-        this.observer = this.observe(this.observers);
-        this.appObserver = this.app.observe({
-            // proxy some keypaths
-            muted: this.set.bind(this, 'muted')
-        });
-
         this.set({
             djs: [],
             files: [],
@@ -133,6 +127,12 @@ module.exports = Ractive.extend({
             chat_messages: [],
             currentTab: this.storage.get('user:tab') || 'music',
             tracks: this.groove.playlists[this.groove.activePlaylist].slice(),
+        });
+
+        this.observer = this.observe(this.observers);
+        this.appObserver = this.app.observe({
+            // proxy some keypaths
+            muted: this.set.bind(this, 'muted')
         });
 
         // periodically pick a random no-DJ message
