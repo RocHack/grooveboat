@@ -2,6 +2,25 @@
 <div class="screen" on-click="clearOverlay">&nbsp;</div>
 
 <div class="prompt overlay">
+
+	{{# currentOverlay == 'about'}}
+	<div class="about">
+		<div class="title">
+			<img src="/static/img/grooveboat-logo.png" alt="Grooveboat logo"><br>
+			<h2 class="gb-title">Grooveboat</h2>
+			<p class="subtitle">P2P shared music listening</p>
+		</div>
+		<p>Copyright (c) 2013-2016 Charles Lehner, Steve Gattuso, and contributors</p>
+		<p>Grooveboat is free software, released under the<br>
+		<a href="//www.gnu.org/licenses/agpl-3.0.html" target="_blank">GNU Affero General Public License</a>.</p>
+		<p>Get the <a href="//github.com/RocHack/grooveboat" target="_blank">Source</a><br>
+		Chat with us in <a href="//kiwiirc.com/client/irc.freenode.net/?nick=groovebuddy|?##rochack" target="_blank">IRC</a><br>
+		Report issues on <a href="//github.com/RocHack/grooveboat/issues" target="_blank">GitHub</p>
+
+		<button class="action" on-click="clearOverlay">interesting</button>
+	</div>
+	{{/ about}}
+
 	{{# currentOverlay == 'settings'}}
 	<form class="settings" on-submit="saveSettings">
 		<h1>Settings</h1>
@@ -43,7 +62,10 @@
 {{/ currentOverlay}}
 
 <div class="container top">
-	<a href="/" class="title">grooveboat</a>
+	<a href="/" class="gb-title">grooveboat</a>
+	<a class="right-btn" on-click="setOverlay:about">
+		<i class="icon-about"></i>
+	</a>
 	<a class="right-btn settings" on-click="setOverlay:settings">
 		<i class="icon-gear"></i>
 	</a>

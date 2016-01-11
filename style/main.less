@@ -136,18 +136,20 @@ a {
     }
 }
 
+.gb-title {
+        font-family: 'Amatic SC', cursive;
+        font-size: 24px;
+        display: inline-block;
+        text-decoration: none;
+        padding: 5px 20px 5px 20px;
+}
+
 .top {
     background: @dark;
     color: @white;
 
-    .title {
-        font-family: 'Amatic SC', cursive;
-        font-size: 24px;
-        display: inline-block;
+    .gb-title {
         color: @white;
-        text-decoration: none;
-        padding: 5px 20px 5px 20px;
-        cursor: pointer;
     }
 
     .right-btn {
@@ -950,6 +952,24 @@ a {
         :hover {
             color: @red;
         }
+    }
+}
+
+/*
+ * About
+ */
+
+.about {
+    .title {
+        text-align: center;
+    }
+    .gb-title {
+        font-size: 2em;
+        text-align: center;
+        margin: 0;
+    }
+    .subtitle {
+        margin: 0;
     }
 }
 
