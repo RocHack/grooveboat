@@ -14,7 +14,7 @@
     "md5-jkmyers": "^0.0.1",
     "audio-metadata": "^0.3.0",
     "wildemitter": "^1.0.1",
-    "rtcpeerconnection": "clehner/rtcpeerconnection",
+    "rtcpeerconnection": "git://github.com/clehner/rtcpeerconnection#678dea22e264d5856e4336cda5c76cdd5d227753",
     "websocket": "1.0.x",
     "node-uuid": "1.4.x",
     "ractive": "^0.7.3",
