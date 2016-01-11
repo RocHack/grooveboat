@@ -1,4 +1,5 @@
 var Ractive = require('ractive/ractive.runtime');
+Ractive.DEBUG = /unminified/.test(function(){/*unminified*/});
 var Router = Ractive.extend(require('./router'));
 
 var MainCtrl = require('./controllers/MainCtrl');
