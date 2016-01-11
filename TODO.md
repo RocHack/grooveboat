@@ -18,7 +18,6 @@
 - Add more remote track sources
 
 ## Packaging
-- Self-host fonts
 - Self-host identicons
 - Use libravatar instead of gravatar
 
