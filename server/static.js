@@ -40,6 +40,6 @@ module.exports = function(request, response) {
         serveFile(uri, response);
     } else {
         // Serve site on non-existent pages, so the client can handle routing.
-        serveFile("index.html", response);
+        serveFile("static/index.html", response);
     }
 };
