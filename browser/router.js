@@ -56,7 +56,8 @@ module.exports = {
 		window.addEventListener('click', this.onClick, false);
 
 		// create element for the pages to render into
-		this.innerEl = document.createElement("div");
+		this.innerEl = document.createElement('div');
+		this.innerEl.style.height = '100%';
 
 		// handle options
 		this.root = options.root ? normalizeUrl(options.root) : '/';
