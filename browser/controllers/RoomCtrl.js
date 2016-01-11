@@ -21,6 +21,9 @@ var noDjMessages = [
     "We'll just be waiting...",
     "*zzz*",
     "*jeopardy thinking music*",
+    "Get 'er done!",
+    "I like music",
+    "*whistles*",
 ];
 
 module.exports = Ractive.extend({
