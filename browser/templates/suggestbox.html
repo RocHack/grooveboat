@@ -1,0 +1,16 @@
+<div class="suggest-box" style="position: fixed; left: {{left+'px'}}; bottom: {{bottom+'px'}}">
+	<ul>
+		{{#options}}
+		<li class="{{@index == selection ? 'selected' : ''}}"
+			on-mousedown="optionMouseDown"
+			on-mouseup="optionMouseUp">
+			{{#image}}
+				<img src="{{image}}" alt="{{title}}">
+			{{else}}
+				<strong>{{title}}</strong>
+			{{/image}}
+			{{#subtitle}}<small>{{subtitle}}</small>{{/subtitle}}
+		</li>
+		{{/options}}
+	</ul>
+</div>

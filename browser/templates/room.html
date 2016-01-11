@@ -29,8 +29,8 @@
                 </div>
                 {{/chat_messages}}
             </div>
-            <textarea class="new-message" 
-                on-enter="newMessage"
+            <textarea id="messageTextarea" class="new-message"
+                decorator="suggestbox:enter"
                 on-focus="newMessageFocus"
                 on-blur="newMessageBlur"
                 placeholder="{{msgPlaceholder}}"

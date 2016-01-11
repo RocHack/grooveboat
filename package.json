@@ -17,7 +17,8 @@
     "rtcpeerconnection": "git://github.com/clehner/rtcpeerconnection#678dea22e264d5856e4336cda5c76cdd5d227753",
     "node-uuid": "1.4.x",
     "ractive": "^0.7.3",
-    "html-linkify": "^1.2.0"
+    "html-linkify": "^1.2.0",
+    "textarea-caret-position": "^0.1.1"
   },
   "devDependencies": {
     "browserify": "^13.0.0",

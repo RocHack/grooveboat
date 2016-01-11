@@ -1,6 +1,7 @@
 var Ractive = require('ractive/ractive.runtime');
 var PrivateChat = Ractive.extend(require('./privatechat'));
 var trackIsEqual = require('../groovedb').trackIsEqual;
+var emoji = require('emoji-images');
 
 function pick(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -142,6 +143,10 @@ module.exports = Ractive.extend({
         this.pickNoDjMessage();
         this.pickInterval =
             setInterval(this.pickNoDjMessage.bind(this), 30 * 1000);
+
+        // bind to custom event emitted by SuggestBox
+        this.nodes.messageTextarea.addEventListener("enter",
+            this.sendMessage.bind(this), false);
     },
 
     onunrender: function() {
@@ -198,27 +203,6 @@ module.exports = Ractive.extend({
                     user.startChat();
                 }
             }
-        },
-
-        newMessage: function(e) {
-            e.original.preventDefault();
-
-            var text = this.get('message_text');
-            var last = this.groove.lastChatAuthor;
-            var me = this.groove.me;
-
-            if (text && text.trim()) {
-                this.get('chat_messages').push({
-                    from: me,
-                    text: text,
-                    isContinuation: last && last == me
-                });
-                this.groove.lastChatAuthor = me;
-                this.groove.sendChat(text);
-            }
-
-            this.pruneChat();
-            this.set('message_text', '');
         },
 
         becomeDJ: function() {
@@ -345,7 +329,23 @@ module.exports = Ractive.extend({
 
     decorators: {
         sortable: require('../sortable'),
-        autoscroll: require('../autoscroll')
+        autoscroll: require('../autoscroll'),
+        suggestbox: require('../suggest-box')({
+            ':': emoji.list.map(function (emoji) {
+                emoji = emoji.replace(/:/g, '');
+                return {
+                    image: '/static/img/emoji/' + emoji + '.png',
+                    title: emoji,
+                    subtitle: emoji,
+                    value: emoji + ':'
+                }
+            }),
+            '@': [
+                {title: 'Bob', subtitle: 'Bob Jones', value: 'bob'},
+                {title: 'Bin', subtitle: 'Bin Lom', value: 'bin'},
+                {title: 'Aly', subtitle: 'Aly Lynn', value: 'aly'},
+            ]
+        }),
     },
 
     grooveEventHandlers: {
@@ -425,6 +425,26 @@ module.exports = Ractive.extend({
         emptyPlaylist: function() {
             alert('Add some music to your playlist first.');
         }
+    },
+
+    sendMessage: function(e) {
+        this.updateModel();
+        var text = this.get('message_text');
+        this.set('message_text', '');
+        var last = this.groove.lastChatAuthor;
+        var me = this.groove.me;
+
+        if (text && text.trim()) {
+            this.get('chat_messages').push({
+                from: me,
+                text: text,
+                isContinuation: last && last == me
+            });
+            this.groove.lastChatAuthor = me;
+            this.groove.sendChat(text);
+        }
+
+        this.pruneChat();
     },
 
     pickNoDjMessage: function() {
