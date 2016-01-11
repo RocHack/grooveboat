@@ -727,7 +727,7 @@ function statIsSrc(stat) {
 // analyze bitrate from peer connection stats
 function Groove_gotStats(err, stats) {
     if (err) throw err;
-    var stat = stats.filter(statIsSrc)[0];
+    var stat = stats && stats.filter && stats.filter(statIsSrc)[0];
     if (!stat) return;
 
     var bytesNow = stat.bytesReceived;
