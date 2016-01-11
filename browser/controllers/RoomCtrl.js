@@ -1,4 +1,4 @@
-var Ractive = require('ractive/build/ractive.runtime');
+var Ractive = require('ractive/ractive.runtime');
 var PrivateChat = Ractive.extend(require('./privatechat'));
 var trackIsEqual = require('../groovedb').trackIsEqual;
 
@@ -26,27 +26,31 @@ var noDjMessages = [
 module.exports = Ractive.extend({
     template: require("../templates/room.html"),
 
-    data: {
-        djs: [],
-        currentTab: null,
-        currentTrack: null,
-        activeDJ: null,
-        votes: {yes: 0, no: 0},
-        newMessages: false,
-        searchResults: [],
+    data: function () {
+        return {
+            users: [],
+            djs: [],
+            currentTab: null,
+            currentTrack: null,
+            activeDJ: null,
+            votes: {yes: 0, no: 0},
+            newMessages: false,
+            searchResults: [],
 
-        messageToHTML: PrivateChat.prototype.messageToHTML,
-        hasTrack: function(track) {
-            return this.groove.hasTrack(track, this.groove.activePlaylist);
-        },
+            messageToHTML: PrivateChat.prototype.messageToHTML,
 
-        formatDuration: function(ms) {
-            if (!ms) return '';
-            var sec = Math.round(ms/1000);
-            var min = Math.floor(sec / 60);
-            sec %= 60;
-            return min + ':' + ('0' + sec).substr(-2);
-        }
+            hasTrack: function(track) {
+                return this.groove.hasTrack(track, this.groove.activePlaylist);
+            },
+
+            formatDuration: function(ms) {
+                if (!ms) return '';
+                var sec = Math.round(ms/1000);
+                var min = Math.floor(sec / 60);
+                sec %= 60;
+                return min + ':' + ('0' + sec).substr(-2);
+            }
+        };
     },
 
     computed: {
@@ -78,7 +82,7 @@ module.exports = Ractive.extend({
     /*
      * Listeners on the UI
      */
-    init: function(options) {
+    onconstruct: function(options) {
         var self = this;
         this.groove = options.groove;
         this.router = options._router;
@@ -86,6 +90,36 @@ module.exports = Ractive.extend({
         this.room = options.room;
         this.storage = options.storage;
         this.groove.joinRoom(this.room);
+
+        this.privateChats = {};
+
+        // bind some handlers
+        this.updateUsers = function() {
+            self.update('users');
+        };
+        this.gotChatChannel = function(channel) {
+            self.gotUserChatChannel(this, channel);
+        };
+
+        this.watchUser(this.groove.me);
+
+        this.on(this.eventHandlers);
+
+        /*
+        * Listeners from the buoy server
+        */
+        for (var event in this.grooveEventHandlers) {
+            var handler = this.grooveEventHandlers[event].bind(this);
+            this.groove.on(event, this, handler);
+        }
+    },
+
+    onrender: function() {
+        this.observer = this.observe(this.observers);
+        this.appObserver = this.app.observe({
+            // proxy some keypaths
+            muted: this.set.bind(this, 'muted')
+        });
 
         this.set({
             djs: [],
@@ -97,38 +131,21 @@ module.exports = Ractive.extend({
             tracks: this.groove.playlists[this.groove.activePlaylist].slice(),
         });
 
-        this.privateChats = {};
-
-        // bind some handlers
-        this.updateUsers = function() {
-            self.update('users');
-        };
-        this.gotChat = function(message) {
-            self.gotUserChatMessage(this, message);
-        };
-
-        this.watchUser(this.groove.me);
-
-        this.on(this.eventHandlers);
-        this.observe(this.observers);
-
-        this.appObservers = this.app.observe({
-            // proxy some keypaths
-            muted: this.set.bind(this, 'muted')
-        });
-
         // periodically pick a random no-DJ message
         this.pickNoDjMessage();
         this.pickInterval =
             setInterval(this.pickNoDjMessage.bind(this), 30 * 1000);
+    },
 
-        /*
-        * Listeners from the buoy server
-        */
-        for (var event in this.grooveEventHandlers) {
-            var handler = this.grooveEventHandlers[event].bind(this);
-            this.groove.on(event, this, handler);
-        }
+    onunrender: function() {
+        this.observer.cancel();
+        this.appObserver.cancel();
+        clearTimeout(this.pickInterval);
+    },
+
+    onteardown: function() {
+        this.groove.leaveRoom();
+        this.groove.releaseGroup(this);
     },
 
     observers: {
@@ -137,7 +154,8 @@ module.exports = Ractive.extend({
         },
 
         files: function() {
-            this.groove.addFilesToQueue(this.data.files);
+            var files = this.get('files');
+            if (files) this.groove.addFilesToQueue(files);
         },
 
         muted: function(muted) {
@@ -146,7 +164,7 @@ module.exports = Ractive.extend({
 
         tracks: function() {
             var tracks = this.get('tracks');
-            if (tracks._dragging) {
+            if (tracks && tracks._dragging) {
                 tracks._dragging = false;
                 this.groove.setPlaylist(this.groove.activePlaylist, tracks);
             }
@@ -154,15 +172,8 @@ module.exports = Ractive.extend({
     },
 
     eventHandlers: {
-        teardown: function() {
-            this.groove.leaveRoom();
-            this.appObservers.cancel();
-            clearTimeout(this.pickInterval);
-            this.groove.releaseGroup(this);
-        },
-
         switchTab: function(e, tab) {
-            if (tab == 'chat' && this.data.newMessages) {
+            if (tab == 'chat' && this.get('newMessages')) {
                 this.set('newMessages', false);
             }
             this.set('currentTab', tab);
@@ -177,7 +188,7 @@ module.exports = Ractive.extend({
                 if (chat) {
                     chat.focus();
                 } else {
-                    this.getUserChat(user);
+                    user.startChat();
                 }
             }
         },
@@ -190,7 +201,7 @@ module.exports = Ractive.extend({
             var me = this.groove.me;
 
             if (text && text.trim()) {
-                this.data.chat_messages.push({
+                this.get('chat_messages').push({
                     from: me,
                     text: text,
                     isContinuation: last && last == me
@@ -332,7 +343,7 @@ module.exports = Ractive.extend({
 
     grooveEventHandlers: {
         chat: function(message) {
-            if (this.data.currentTab != 'chat') {
+            if (this.get('currentTab') != 'chat') {
                 this.set('newMessages', true);
             }
 
@@ -343,20 +354,20 @@ module.exports = Ractive.extend({
             var last = this.groove.lastChatAuthor;
             message.isContinuation = (last && last == message.from);
             this.groove.lastChatAuthor = message.from;
-            this.data.chat_messages.push(message);
+            this.get('chat_messages').push(message);
             this.pruneChat();
         },
 
         peerConnected: function(user) {
-            this.data.users.push(user);
+            this.get('users').push(user);
             this.watchUser(user);
             this.updateVotes();
         },
 
         peerDisconnected: function(user) {
-            var i = this.data.users.indexOf(user);
+            var i = this.get('users').indexOf(user);
             if (i == -1) return;
-            this.data.users.splice(i, 1);
+            this.get('users').splice(i, 1);
             delete this.privateChats[user.id];
             // groove might not yet realize the user has disconnected, so reset
             // their vote here for recalculation purposes
@@ -422,11 +433,11 @@ module.exports = Ractive.extend({
         user.on('name', this.updateUsers);
         user.on('vote', this.updateUsers);
         user.on('gravatar', this.updateUsers);
-        user.on('chat', this.gotChat);
+        user.on('chatChannel', this.gotChatChannel);
     },
 
     pruneChat: function() {
-        var msgs = this.data.chat_messages;
+        var msgs = this.get('chat_messages');
         if (msgs.length > 76) {
             msgs.splice(0, msgs.length - 75);
         }
@@ -440,7 +451,7 @@ module.exports = Ractive.extend({
         a.play();
     },
 
-    getUserChat: function(user) {
+    gotUserChatChannel: function(user, chan) {
         var pc = this.privateChats[user.id];
         if (!pc) {
             pc = this.privateChats[user.id] = new PrivateChat({
@@ -449,16 +460,13 @@ module.exports = Ractive.extend({
                 peer: user,
                 me: this.groove.me
             });
+            pc.focus();
             var onTeardown = pc.on('teardown', function() {
                 delete this.privateChats[user.id];
                 onTeardown.cancel();
             }.bind(this));
         }
-        return pc;
-    },
-
-    gotUserChatMessage: function(user, message) {
-        this.getUserChat(user).addMessage(message, user);
+        pc.set('channel', chan);
     },
 
     previewTrack: function(track, onDone) {

@@ -1,4 +1,4 @@
-var Ractive = require('ractive/build/ractive.runtime');
+var Ractive = require('ractive/ractive.runtime');
 var Router = Ractive.extend(require('./router'));
 
 var MainCtrl = require('./controllers/MainCtrl');
@@ -24,7 +24,8 @@ var Groove = require('./groove');
 var groove = new Groove();
 window.groove = groove;
 
-groove.connectToBuoy("ws://" + location.hostname + ":8844/buoy");
+var proto = location.protocol == "https:" ? "wss" : "ws";
+groove.connectToBuoy(proto + "://" + location.host + "/buoy");
 
 var name = storage.get("user:name");
 var gravatar = storage.get("user:gravatar");
@@ -44,15 +45,10 @@ var main = new MainCtrl({
     storage: storage
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    main.insert(document.body);
-}, false);
-
 // Set up routing
 
-new Router({
+var router = new Router({
     options: {
-        el: main.nodes.content,
         app: main,
         groove: groove,
         storage: storage
@@ -61,4 +57,10 @@ new Router({
         '/': RoomListCtrl,
         '/room/:room': RoomCtrl
     }
-}).go();
+});
+router.go();
+
+document.addEventListener('DOMContentLoaded', function() {
+    main.render(document.body);
+    router.render(main.nodes.content);
+}, false);

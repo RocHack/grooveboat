@@ -75,6 +75,10 @@ User.prototype.updateIconURL = function() {
         "?s=80&d=monsterid";
 };
 
+User.prototype.send = function(msg) {
+    this.groove.webrtc.send(msg, this.id);
+};
+
 // send data via server
 User.prototype.send = function (data) {
     this.groove.buoy.send('sendTo', {
@@ -97,9 +101,6 @@ User.prototype.handleMessage = function (data) {
         case 'ice':
             if (!data.candidate) return console.error('Missing candidate');
             this.handleIce(data.candidate);
-            break;
-        case 'chat':
-            this.emit('chat', data.msg);
     }
 };
 
@@ -113,6 +114,7 @@ User.prototype.preparePeerConnection = function() {
     this.pc.on('addStream', User_onAddStream.bind(this));
     this.pc.on('removeStream', User_onRemoveStream.bind(this));
     this.pc.on('negotiationNeeded', User_onNegotiationNeeded.bind(this));
+    this.pc.on('addChannel', User_onAddChannel.bind(this));
 };
 
 User.prototype.offerConnection = function() {
@@ -193,6 +195,17 @@ User.prototype.addStream = function(stream) {
     this.pc.addStream(stream);
 };
 
+// add a stream to the peer connection
+User.prototype.createDataChannel = function(name) {
+    if (!this.pc) this.preparePeerConnection();
+    return this.pc.createDataChannel(name, {});
+};
+
+User.prototype.startChat = function() {
+    this.chatChannel = this.createDataChannel('private_chat');
+    this.emit('chatChannel', this.chatChannel);
+};
+
 // got a remote audio stream over peer connection
 function User_onAddStream(e) {
     if (this != this.groove.activeDJ) {
@@ -203,6 +216,21 @@ function User_onAddStream(e) {
 }
 
 
+
+// got a data channel over peer connection
+function User_onAddChannel(channel) {
+    if (channel.label == 'private_chat') {
+        this.chatChannel = channel;
+
+        // defer the event until receiving first message
+        var self = this;
+        channel.addEventListener("message", function onMessage(e) {
+            channel.removeEventListener("message", onMessage, false);
+            self.emit('chatChannel', channel);
+            setTimeout(channel.dispatchEvent.bind(channel, e), 10);
+        }, false);
+    }
+}
 
 // remove a stream from the peer connection
 User.prototype.removeStream = function(stream) {
@@ -238,14 +266,6 @@ User.prototype.closePeerConnection = function() {
     if (this.pc) {
         this.pc.close();
     }
-};
-
-// send the user a chat message
-User.prototype.sendChat = function(message) {
-    this.send({
-        type: 'chat',
-        msg: message
-    });
 };
 
 // set default icon URL
