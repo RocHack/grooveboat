@@ -3,13 +3,11 @@ var md5 = require('md5-jkmyers');
 var PeerConnection = require('rtcpeerconnection');
 
 // PeerConnection config and constraints
-var isChrome = 'WebKitPoint' in global;
 var peerConnectionConfig = {
     iceServers: [{
-        "url": isChrome ?
-            "stun:stun.l.google.com:19302" : "stun:124.124.124.2"
+        urls: "stun:stun.services.mozilla.com"
     }, {
-        url: "turn:turn.celehner.com",
+        urls: "turn:grooveboat.com",
         username: "grooveboat",
         credential: "nautical"
     }]
