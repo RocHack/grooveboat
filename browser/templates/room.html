@@ -45,7 +45,8 @@
             </form>
 
             <div class="track-search">
-                <input type="search" value="{{searchTerm}}" placeholder="Search tracks" on-search="trackSearch" on-input="trackSearchType">
+                <input type="search" value="{{searchTerm}}" placeholder="search SoundCloud tracks" on-search="trackSearch" on-input="trackSearchType">
+                <a href="https://soundcloud.com/" target="_blank"><img alt="SoundCloud" src="/static/img/soundcloud-small.png"></a>
             </div>
 
             {{#searching}}
