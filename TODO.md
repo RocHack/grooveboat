@@ -11,6 +11,8 @@
 - Add suggest menu for emoji/mentions: Use https://github.com/pfraze/suggest-box
 - Add intro/help UI things
 - Add option to disable CPU-intensive spinning disc animation
+- Add desktop notifications for chat and tracks
+- Clarify playlist persistence, i.e. warn user if their playlist is going away
 
 ## Features
 - Add "Live" mode: DJ streams their mic instead of an audio file
