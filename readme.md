@@ -1,6 +1,6 @@
 ![Grooveboat](http://i.imgur.com/3xnsCqi.png)
 
-A WebRTC powered peer-to-peer implementation of the late [Turntable.fm](http://turntable.fm). Coming soon to a browser near you.
+A WebRTC powered peer-to-peer implementation of the late [Turntable.fm](http://turntable.fm). Available now in a browser near you.
 
 Written by [Charles Lehner](https://celehner.com/) and [Steve Gattuso](http://stevegattuso.me) with some artistic help from [Krisi Hinova](http://krisi.stevegattuso.me/).
 
