@@ -20,7 +20,7 @@ npm run watch
 
 ## License
 
-Copyright (C) 2013-2014 Charles Lehner, Steve Gattuso, and contributors.
+Copyright (C) 2013-2016 Charles Lehner, Steve Gattuso, and contributors.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
