@@ -58,10 +58,7 @@
                         <div class="add-icon" title="Add track to your playlist" on-click="addTrack"></div>
                         {{/ hasTrack}}
                         <div class="preview {{.previewing ? 'previewing' : ''}}" title="Preview track" on-click="previewTrack"></div>
-                        <div class="track">{{title}}
-                            <span class="duration">{{formatDuration(.duration)}}</span>
-                        </div>
-                        <div class="artist">{{artist}}</div>
+                        {{>track}}
                     </li>
                     {{/searchResults}}
                 </ul>
@@ -78,12 +75,7 @@
                 {{#isActiveDJ}}
                 {{#currentTrack}}
                 <ul class="songs">
-                    <li class="active">
-                        <div class="track">{{title}}
-                            <span class="duration">{{formatDuration(.duration)}}</span>
-                        </div>
-                        <div class="artist">{{artist}}</div>
-                    </li>
+                    <li class="active">{{>track}}</li>
                 </ul>
                 {{/currentTrack}}
                 {{/isActiveDJ}}
@@ -95,15 +87,14 @@
                         <div class="preview {{.previewing ? 'previewing' : ''}}" title="Preview track" on-click="previewTrack"></div>
 
                         {{^editing}}
-                            <div title="Double click to edit" class="track">{{title}}
-                                <span class="duration">{{formatDuration(.duration)}}</span>
-                            </div>
-                            <div title="Double click to edit" class="artist">{{artist}}</div>
+                        <div title="Double click to edit">
+                            {{>track}}
 
                             <div class="right">
                                 <div title="Delete track" on-click="deleteTrack">&times;</div>
                                 <div title="Move to top" on-click="bumpTrack"><i class="icon-up-arrow"></i></div>
                             </div>
+                        </div>
                         {{/editing}}
 
                         {{#editing}}

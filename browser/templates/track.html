@@ -1,0 +1,18 @@
+<div class="track">
+	{{#url}}
+		<a href="{{url}}" target="_blank">{{title}}</a>
+	{{/url}}
+	{{^url}}
+		{{title}}
+	{{/url}}
+	<span class="duration">{{formatDuration(.duration)}}</span>
+</div>
+<div class="artist">
+	{{#artistUrl}}
+		<a href="{{artistUrl}}" target="_blank">{{artist}}</a>
+	{{/artistUrl}}
+	{{^artistUrl}}
+		{{artist}}
+	{{/artistUrl}}
+</div>
+

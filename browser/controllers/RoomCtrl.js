@@ -25,6 +25,7 @@ var noDjMessages = [
 
 module.exports = Ractive.extend({
     template: require("../templates/room.html"),
+    partials: {track: require("../templates/track.html")},
 
     data: function () {
         return {
