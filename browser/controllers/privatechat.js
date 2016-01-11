@@ -121,7 +121,6 @@ module.exports = {
     channelEventHandlers: {
         message: function(e) {
             this.addMessage(e.data, this.peer);
-            this.set('newMessages', true);
         },
 
         open: function() {
