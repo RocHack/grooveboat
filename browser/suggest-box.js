@@ -134,6 +134,7 @@ module.exports = Ractive.extend({
                     return opt
                 }
             }).filter(Boolean).sort(compare).slice(0, 20)
+            this.filtered.isAny = isany;
             next()
         } else if ('function' === typeof choices) {
             var r = this.request = (this.request || 0) + 1
@@ -213,15 +214,33 @@ module.exports = Ractive.extend({
         var v = this.input.value;
         var start = this.input.selectionStart;
         var end = start;
-        for (start; start >= 0; start--) {
-            if (v.charAt(start) in this.choices)
+        var isany = this.filtered.isAny;
+        var choiceV = choice.value.toLowerCase();
+        for (start; start > 0; start--) {
+            var c = v.charAt(start);
+            if (c in this.choices)
                 break;
+
+            if (isany && start != end) {
+                // correctly recreate end of phrase
+                var suffix = v.slice(start, end).toLowerCase();
+                var i = choiceV.indexOf(suffix);
+                if (i == -1) {
+                    start++;
+                    break;
+                } else if (i == 0) {
+                    break;
+                } else if (i == choiceV.length - suffix.length) {
+                    start -= choiceV.length - 1;
+                    break;
+                }
+            }
         }
         for (end; end < v.length; end++) {
             if (wordBoundary.test(v.charAt(end)))
                 break;
         }
-        this.input.value = v.slice(0, start + 1) + choice.value + v.slice(end)
+        this.input.value = v.slice(0, start + (isany?0:1)) + choice.value + v.slice(end)
         this.input.selectionStart = this.input.selectionEnd = start + choice.value.length + 1
         this.deactivate();
     }
