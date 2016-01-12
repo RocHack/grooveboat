@@ -1,16 +1,6 @@
 var emoji = require('emoji-images');
-var linkify = require('html-linkify');
-
-function messageToHTML(text) {
-    // sanitize html
-    text = linkify(text);
-    // render emoji
-    text = emoji(text, '/static/img/emoji');
-    // highlight mentions
-    var myName = this.groove.me.name;
-    return text.replace(myName,
-        '<span class="mention">' + myName + '</span>');
-}
+var SuggestBox = require('../suggest-box');
+var emojiUtils = require('../emojiutils');
 
 module.exports = {
     template: require('../templates/private_chat.html'),
@@ -25,7 +15,7 @@ module.exports = {
             peer: this.peer,
             collapsed: false,
             messages: [],
-            messageToHTML: messageToHTML
+            messageToHTML: emojiUtils.messageToHTML.bind(this)
         };
     },
 
@@ -63,10 +53,22 @@ module.exports = {
 
     onrender: function () {
         this.observer = this.observe(this.observers);
+        this.nodes.newMessage.addEventListener('enter',
+            this.sendMessage.bind(this), false);
+
+        this.suggestbox = new SuggestBox({
+            input: this.nodes.newMessage,
+            el: document.createElement('div'),
+            submitEvent: 'enter',
+            choices: {
+                ':': emojiUtils.getSuggests
+            }
+        });
     },
 
     onunrender: function() {
         this.observer.cancel();
+        this.suggestbox.teardown();
     },
 
     observers: {
@@ -97,17 +99,6 @@ module.exports = {
         closeChat: function(e) {
             e.original.preventDefault();
             this.teardown();
-        },
-
-        newMessage: function(e) {
-            e.original.preventDefault();
-            this.send(this.get('message_text'), function(err) {
-                if (err) {
-                    this.addMessage('unable to send message', null, 'status');
-                } else {
-                    this.set('message_text', '');
-                }
-            });
         },
 
         newMessageFocus: function() {
@@ -166,6 +157,17 @@ module.exports = {
             this.set('newMessages', true);
     },
 
+    sendMessage: function(e) {
+        this.updateModel();
+        this.send(this.get('message_text'), function(err) {
+            if (err) {
+                this.addMessage('unable to send message', null, 'status');
+            } else {
+                this.set('message_text', '');
+            }
+        });
+    },
+
     send: function(text, cb, immediate) {
         if (!text) return;
         try {
@@ -197,7 +199,5 @@ module.exports = {
     focus: function () {
         this.nodes.newMessage.focus();
         this.set('collapsed', false);
-    },
-
-    messageToHTML: messageToHTML
+    }
 };

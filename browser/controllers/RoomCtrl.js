@@ -2,7 +2,7 @@ var Ractive = require('ractive/ractive.runtime');
 var PrivateChat = Ractive.extend(require('./privatechat'));
 var SuggestBox = require('../suggest-box');
 var trackIsEqual = require('../groovedb').trackIsEqual;
-var emoji = require('emoji-images');
+var emojiUtils = require('../emojiutils');
 
 function pick(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -12,20 +12,6 @@ function subtract(arr1, arr2) {
     return !arr1 ? [] : !arr2 ? arr1 : arr1.filter(function(item) {
         return arr2.indexOf(item) == -1;
     });
-}
-
-function getEmojiSuggests() {
-    return getEmojiSuggests.list || (getEmojiSuggests.list =
-        emoji.list.map(function (emoji) {
-            emoji = emoji.replace(/:/g, '');
-            return {
-                image: '/static/img/emoji/' + emoji + '.png',
-                title: emoji,
-                subtitle: emoji,
-                value: emoji + ':'
-            }
-        })
-    );
 }
 
 var noDjMessages = [
@@ -60,7 +46,7 @@ module.exports = Ractive.extend({
             newMessages: false,
             searchResults: [],
 
-            messageToHTML: PrivateChat.prototype.messageToHTML,
+            messageToHTML: emojiUtils.messageToHTML.bind(this.groove),
 
             hasTrack: function(track) {
                 return this.groove.hasTrack(track, this.groove.activePlaylist);
@@ -171,7 +157,7 @@ module.exports = Ractive.extend({
             el: document.createElement('div'),
             submitEvent: 'enter',
             choices: {
-                ':': getEmojiSuggests,
+                ':': emojiUtils.getSuggests,
                 any: this.getUserSuggests.bind(this)
             }
         });

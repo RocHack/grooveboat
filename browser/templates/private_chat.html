@@ -22,13 +22,12 @@
                     {{name}}
                 </div>
                 {{/from}}
-                <div class="text">{{text}}</div>
+                <div class="text">{{{messageToHTML(text)}}}</div>
             </div>
             {{/messages}}
         </div>
         <textarea class="new-message" 
             id="newMessage"
-            on-enter="newMessage"
             on-focus="newMessageFocus"
             on-blur="newMessageBlur"
             placeholder="{{msgPlaceholder}}"
