@@ -60,6 +60,10 @@ module.exports = Ractive.extend({
         persistPlaylists: function(persist) {
             this.storage.set('user:persist', persist || '');
             this.groove.setPersist(persist);
+        },
+
+        muted: function(muted) {
+            this.groove.player.setMuted(muted);
         }
     },
 
@@ -99,6 +103,18 @@ module.exports = Ractive.extend({
         togglePersistTracks: function() {
             this.toggle('persistPlaylists');
         }
+    },
+
+    soundEffects: {
+        ping: new Audio("/static/ping.wav")
+    },
+
+    playSoundEffect: function(sound) {
+        if (this.get('muted')) return;
+        var a = this.soundEffects[sound];
+        a.pause();
+        a.currentTime = 0;
+        a.play();
     },
 
     setOverlay: function(overlay) {

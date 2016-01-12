@@ -109,10 +109,6 @@ module.exports = Ractive.extend({
         }
     },
 
-    soundEffects: {
-        ping: new Audio("/static/ping.wav")
-    },
-
     /*
      * Listeners on the UI
      */
@@ -160,10 +156,6 @@ module.exports = Ractive.extend({
         });
 
         this.observer = this.observe(this.observers);
-        this.appObserver = this.app.observe({
-            // proxy some keypaths
-            muted: this.set.bind(this, 'muted')
-        });
 
         // periodically pick a random no-DJ message
         this.pickNoDjMessage();
@@ -187,7 +179,6 @@ module.exports = Ractive.extend({
 
     onunrender: function() {
         this.observer.cancel();
-        this.appObserver.cancel();
         this.suggestbox.teardown();
         clearTimeout(this.pickInterval);
     },
@@ -205,10 +196,6 @@ module.exports = Ractive.extend({
         files: function() {
             var files = this.get('files');
             if (files) this.groove.addFilesToQueue(files);
-        },
-
-        muted: function(muted) {
-            this.groove.player.setMuted(muted);
         },
 
         tracks: function() {
@@ -376,7 +363,7 @@ module.exports = Ractive.extend({
             }
 
             if (message.text.indexOf(this.groove.me.name) != -1) {
-                this.playSoundEffect('ping');
+                this.app.playSoundEffect('ping');
             }
 
             var last = this.groove.lastChatAuthor;
@@ -493,14 +480,6 @@ module.exports = Ractive.extend({
         if (msgs.length > 76) {
             msgs.splice(0, msgs.length - 75);
         }
-    },
-
-    playSoundEffect: function(sound) {
-        if (this.get('muted')) return;
-        var a = this.soundEffects[sound];
-        a.pause();
-        a.currentTime = 0;
-        a.play();
     },
 
     gotUserChatChannel: function(user, chan) {
