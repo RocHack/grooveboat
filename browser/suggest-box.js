@@ -66,13 +66,20 @@ module.exports = Ractive.extend({
         }
     },
 
+    selectFromEvent: function(e) {
+        this.set("selection", e.keypath.match(/[0-9]*$/)[0]);
+    },
+
     eventHandlers: {
         optionMouseDown: function(e) {
-            this.set("selection", e.keypath.match(/[0-9]*$/)[0]);
+            this.selectFromEvent(e);
             this.addChoice();
             setTimeout(function () {
                 this.input.focus();
             }.bind(this), 50);
+        },
+        optionMouseMove: function(e) {
+            this.selectFromEvent(e);
         },
     },
 
@@ -167,31 +174,28 @@ module.exports = Ractive.extend({
     onkeydown: function (e) {
         if (this.active) {
             var sel = this.get("selection")
+            var len = this.get("options.length")
 
             if (e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 13 || e.keyCode == 9|| e.keyCode == 27)
                 e.preventDefault()
 
             // up
-            if (e.keyCode == 38 && sel > 0) {
-                this.set("selection", sel - 1);
-            }
+            if (e.keyCode == 38)
+                this.set("selection", (sel - 1 + len) % len);
 
             // down
-            if (e.keyCode == 40 && sel < (this.filtered.length - 1)) {
-                this.set("selection", sel + 1);
-            }
+            else if (e.keyCode == 40)
+                this.set("selection", (sel + 1) % len);
 
             // escape
-            if (e.keyCode == 27) {
+            else if (e.keyCode == 27)
                 this.deactivate()
-            }
 
             // enter or tab
-            if (e.keyCode == 13 || e.keyCode == 9) {
+            else if (e.keyCode == 13 || e.keyCode == 9)
                 this.addChoice();
-            }
         } else if (e.keyCode == 13) {
-            // enter
+            // mock the enter event because otherwise ractive takes it
             e.preventDefault();
             this.input.dispatchEvent(new CustomEvent(this.submitEvent));
         }

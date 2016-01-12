@@ -3,7 +3,7 @@
 		{{#options}}
 		<li class="{{@index == selection ? 'selected' : ''}}"
 			on-mousedown="optionMouseDown"
-			on-mouseup="optionMouseUp">
+			on-mousemove="optionMouseMove">
 			{{#image}}
 				<img src="{{image}}" alt="{{title}}">
 			{{else}}
