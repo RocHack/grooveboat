@@ -364,6 +364,11 @@ module.exports = Ractive.extend({
 
             if (message.text.indexOf(this.groove.me.name) != -1) {
                 this.app.playSoundEffect('ping');
+                this.app.backgroundNotify({
+                    title: message.from.name + ' in ' + this.room,
+                    icon: message.from.iconURL,
+                    body: message.text
+                });
             }
 
             var last = this.groove.lastChatAuthor;
@@ -486,6 +491,7 @@ module.exports = Ractive.extend({
         var pc = this.privateChats[user.id];
         if (!pc) {
             pc = this.privateChats[user.id] = new PrivateChat({
+                app: this.app,
                 el: this.nodes.private_chats,
                 append: true,
                 peer: user,

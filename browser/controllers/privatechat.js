@@ -46,6 +46,7 @@ module.exports = {
     onconstruct: function(options) {
         this.peer = options.peer;
         this.me = options.me;
+        this.app = options.app;
 
         this.on(this.eventHandlers);
         this.channelEventHandlers = this.bind(this.channelEventHandlers);
@@ -120,6 +121,12 @@ module.exports = {
 
     channelEventHandlers: {
         message: function(e) {
+            this.app.playSoundEffect('ping');
+            this.app.backgroundNotify({
+                title: this.peer.name,
+                icon: this.peer.iconURL,
+                body: e.data
+            });
             this.addMessage(e.data, this.peer);
         },
 

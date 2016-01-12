@@ -35,6 +35,11 @@ module.exports = Ractive.extend({
             this.setOverlay.bind(this, 'blocked'));
         this.groove.db.on('open', this,
             this.clearOverlay.bind(this, 'blocked'));
+
+        this.onWindowFocus = this.set.bind(this, {windowFocused: true}),
+        this.onWindowBlur = this.set.bind(this, {windowFocused: false}),
+        window.addEventListener("focus", this.onWindowFocus, false);
+        window.addEventListener("blur", this.onWindowBlur, false);
     },
 
     onrender: function() {
@@ -54,6 +59,8 @@ module.exports = Ractive.extend({
     onteardown: function() {
         this.groove.buoy.releaseGroup(this);
         this.groove.db.releaseGroup(this);
+        window.removeEventListener("focus", this.onWindowFocus, false);
+        window.removeEventListener("blur", this.onWindowBlur, false);
     },
 
     observers: {
@@ -115,6 +122,22 @@ module.exports = Ractive.extend({
         a.pause();
         a.currentTime = 0;
         a.play();
+    },
+
+    backgroundNotify: function notify(title, opts, cb) {
+        if (!this.get('windowFocused'))
+            this.notify(title, opts, cb);
+    },
+
+    notify: function notify(opts, cb) {
+        if (!cb) cb = Function.prototype;
+        if (Notification.permission == 'granted') {
+            cb(new Notification(opts.title, opts));
+        } else if (Notification.permission == 'denied') {
+            cb(null);
+        } else {
+            Notification.requestPermission(notify.bind(this, opts, cb));
+        }
     },
 
     setOverlay: function(overlay) {
