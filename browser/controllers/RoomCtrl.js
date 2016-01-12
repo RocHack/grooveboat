@@ -1,5 +1,6 @@
 var Ractive = require('ractive/ractive.runtime');
 var PrivateChat = Ractive.extend(require('./privatechat'));
+var SuggestBox = require('../suggest-box');
 var trackIsEqual = require('../groovedb').trackIsEqual;
 var emoji = require('emoji-images');
 
@@ -11,6 +12,20 @@ function subtract(arr1, arr2) {
     return !arr1 ? [] : !arr2 ? arr1 : arr1.filter(function(item) {
         return arr2.indexOf(item) == -1;
     });
+}
+
+function getEmojiSuggests() {
+    return getEmojiSuggests.list || (getEmojiSuggests.list =
+        emoji.list.map(function (emoji) {
+            emoji = emoji.replace(/:/g, '');
+            return {
+                image: '/static/img/emoji/' + emoji + '.png',
+                title: emoji,
+                subtitle: emoji,
+                value: emoji + ':'
+            }
+        })
+    );
 }
 
 var noDjMessages = [
@@ -80,6 +95,17 @@ module.exports = Ractive.extend({
 
         msgPlaceholder: function() {
             return this.get('newMessageFocused') ? '' : 'send a message';
+        },
+
+        userSuggestsList: function() {
+            return this.get('users').map(function (user) {
+                return {
+                    title: '@' + user.name,
+                    subtitle: user.name,
+                    value: user.name,
+                    image: user.iconURL
+                };
+            });
         }
     },
 
@@ -147,11 +173,22 @@ module.exports = Ractive.extend({
         // bind to custom event emitted by SuggestBox
         this.nodes.messageTextarea.addEventListener("enter",
             this.sendMessage.bind(this), false);
+
+        this.suggestbox = new SuggestBox({
+            input: this.nodes.messageTextarea,
+            el: document.createElement('div'),
+            submitEvent: 'enter',
+            choices: {
+                ':': getEmojiSuggests,
+                any: this.getUserSuggests.bind(this)
+            }
+        });
     },
 
     onunrender: function() {
         this.observer.cancel();
         this.appObserver.cancel();
+        this.suggestbox.teardown();
         clearTimeout(this.pickInterval);
     },
 
@@ -329,23 +366,7 @@ module.exports = Ractive.extend({
 
     decorators: {
         sortable: require('../sortable'),
-        autoscroll: require('../autoscroll'),
-        suggestbox: require('../suggest-box')({
-            ':': emoji.list.map(function (emoji) {
-                emoji = emoji.replace(/:/g, '');
-                return {
-                    image: '/static/img/emoji/' + emoji + '.png',
-                    title: emoji,
-                    subtitle: emoji,
-                    value: emoji + ':'
-                }
-            }),
-            '@': [
-                {title: 'Bob', subtitle: 'Bob Jones', value: 'bob'},
-                {title: 'Bin', subtitle: 'Bin Lom', value: 'bin'},
-                {title: 'Aly', subtitle: 'Aly Lynn', value: 'aly'},
-            ]
-        }),
+        autoscroll: require('../autoscroll')
     },
 
     grooveEventHandlers: {
@@ -445,6 +466,10 @@ module.exports = Ractive.extend({
         }
 
         this.pruneChat();
+    },
+
+    getUserSuggests: function() {
+        return this.get('userSuggestsList');
     },
 
     pickNoDjMessage: function() {

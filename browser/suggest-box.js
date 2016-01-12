@@ -1,3 +1,7 @@
+// Suggest Box
+// Allows a textarea to have suggest menu popups
+// based on [suggest-box](https://github.com/pfraze/suggest-box) by Paul Frazee (MIT Licensed)
+
 var Ractive = require("ractive/ractive.runtime");
 var TextareaCaretPosition = require("textarea-caret-position")
 
@@ -11,7 +15,7 @@ function compareval(a, b) {
     return a === b ? 0 : a < b ? -1 : 1
 }
 
-var SuggestBox = Ractive.extend({
+module.exports = Ractive.extend({
     template: require("./templates/suggestbox.html"),
 
     data: function () {
@@ -108,6 +112,10 @@ var SuggestBox = Ractive.extend({
 
         //request data for this query.
 
+        if ('function' === typeof choices) {
+            // synchronous is easier. can memoize
+            choices = choices();
+        }
         if (Array.isArray(choices)) {
             var wordRe = new RegExp(word.replace(/\W/g, ''), 'i')
             this.filtered = choices.map(function (opt, i) {
@@ -213,27 +221,4 @@ var SuggestBox = Ractive.extend({
         this.input.selectionStart = this.input.selectionEnd = start + choice.value.length + 1
         this.deactivate();
     }
-
 });
-
-// Suggest Box decorator
-// Allows a textarea to have suggest menu popups
-// based on [suggest-box](https://github.com/pfraze/suggest-box) by Paul Frazee (MIT Licensed)
-module.exports = function (choices) {
-    return function (el, submitEvent) {
-        var box = new SuggestBox({
-            input: el,
-            // el: document.createDocumentFragment(),
-            el: document.createElement("div"),
-            choices: choices,
-            submitEvent: submitEvent
-        });
-
-        return {
-            teardown: function () {
-                box.teardown();
-            }
-        };
-    };
-};
-

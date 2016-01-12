@@ -8,7 +8,6 @@
 ## Improvements
 - Add notice about WebRTC/IndexedDB-capable browser required
 - Make things work minimally if the browser doesn't support WebRTC/IndexedDB
-- Add suggest menu for emoji/mentions: Use https://github.com/pfraze/suggest-box
 - Add intro/help UI things
 - Add option to disable CPU-intensive spinning disc animation
 - Add desktop notifications for chat and tracks
