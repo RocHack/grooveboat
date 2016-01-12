@@ -10,8 +10,9 @@
 - Make things work minimally if the browser doesn't support WebRTC/IndexedDB
 - Add intro/help UI things
 - Add option to disable CPU-intensive spinning disc animation
-- Add desktop notifications for chat and tracks
 - Clarify playlist persistence, i.e. warn user if their playlist is going away
+- Extract album artwork from MP3s
+- Allow using custom artwork from file
 
 ## Features
 - Add "Live" mode: DJ streams their mic instead of an audio file

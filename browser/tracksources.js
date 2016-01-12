@@ -36,7 +36,8 @@ SoundCloud.search = function(query, cb) {
                 audioUrl: track.stream_url + '?client_id=' +
                     soundCloudClientId,
                 duration: track.duration,
-                url: track.permalink_url
+                url: track.permalink_url,
+                iconURL: track.artwork_url
             };
         }));
     };

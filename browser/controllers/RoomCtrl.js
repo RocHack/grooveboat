@@ -190,7 +190,23 @@ module.exports = Ractive.extend({
                 tracks._dragging = false;
                 this.groove.setPlaylist(this.groove.activePlaylist, tracks);
             }
-        }
+        },
+
+        currentTrack: function (track) {
+            if (this.currentTrackNotification) {
+                this.currentTrackNotification.close();
+                delete this.currentTrackNotification;
+            }
+            if (track) {
+                this.app.backgroundNotify({
+                    title: track.title,
+                    icon: track.iconURL,
+                    body: track.artist
+                }, function (notification) {
+                    this.currentTrackNotification = notification;
+                }.bind(this));
+            }
+        },
     },
 
     eventHandlers: {
