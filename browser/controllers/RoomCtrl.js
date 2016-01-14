@@ -500,9 +500,8 @@ module.exports = Ractive.extend({
                 me: this.groove.me
             });
             pc.focus();
-            var onTeardown = pc.on('teardown', function() {
+            pc.once('teardown', function() {
                 delete this.privateChats[user.id];
-                onTeardown.cancel();
             }.bind(this));
         }
         pc.set('channel', chan);
