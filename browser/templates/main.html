@@ -58,6 +58,22 @@
 		<p>Looks like we've lost track of the buoy. Attempting to reconnect...</p>
 	</div>
 	{{/ disconnected}}
+
+	{{# currentOverlay == 'missing-features'}}
+	<div>
+		<h1>Missing browser features</h1>
+		<p>Your browser doesn't support some of the technologies that
+		Grooveboat uses. Streaming audio and chat might not work here.</p>
+
+		<p>Try <a href="https://www.chromium.org/Home">Chromium</a> or
+		<a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>
+		for an improved experience.</p>
+
+		<button class="action"
+			on-click="clearMissingFeaturesOverlay">ok</button>
+	</div>
+	{{/ missing-features}}
+
 </div>
 {{/ currentOverlay}}
 

@@ -50,6 +50,12 @@ module.exports = Ractive.extend({
         });
 
         this.observer = this.observe(this.observers);
+
+        if ((!window.RTCPeerConnection
+          || !window.AudioContext
+          || !window.indexedDB) &&
+          !this.storage.get('user:seenMissingFeaturesOverlay'))
+            this.setOverlay('missing-features');
     },
 
     onunrender: function() {
@@ -81,6 +87,11 @@ module.exports = Ractive.extend({
 
         clearOverlay: function() {
             this.clearOverlay();
+        },
+
+        clearMissingFeaturesOverlay: function() {
+            this.clearOverlay();
+            this.storage.set('user:seenMissingFeaturesOverlay', true);
         },
 
         saveSettings: function(e) {
