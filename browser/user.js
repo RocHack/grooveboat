@@ -247,7 +247,11 @@ User.prototype.removeStream = function(stream) {
     }
     // our PeerConnection doesn't expose the underlying removeStream method
     if (this.pc.pc) {
-        this.pc.pc.removeStream(stream);
+        try {
+            this.pc.pc.removeStream(stream);
+        } catch(e) {
+            console.error(e);
+        }
     }
 };
 
