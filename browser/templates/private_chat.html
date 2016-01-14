@@ -9,7 +9,7 @@
     </div>
     <div class="chat-contents">
         <div class="messages" decorator="autoscroll:messages">
-            {{^messages}}
+            {{#!messages && status == 'connected'}}
             <div class="no_messages">
                 Say something about stuff
             </div>

@@ -6,7 +6,9 @@ module.exports = function sortable(el, keypath) {
     }
 
     var observer = this.observe(keypath + '.length', function() {
-        var lastElHeight = el.lastElementChild.offsetHeight;
+        var lastEl = el.lastElementChild;
+        if (!lastEl) return;
+        var lastElHeight = lastEl.offsetHeight
         var isScrolledToBottom = (el.scrollHeight - el.scrollTop -
             el.clientHeight - lastElHeight) < lastElHeight;
         if (isScrolledToBottom) {
