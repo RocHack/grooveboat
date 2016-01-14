@@ -10,27 +10,25 @@ module.exports = Ractive.extend({
             room_selected: -1,
             new_room_name: '',
             creating_room: false,
-            username: 'Guest',
-            rooms: []
+            username: this.groove.me.name,
+            rooms: this.groove.rooms
         };
     },
 
     onconstruct: function(options) {
         this.groove = options.groove;
         this.router = options._router;
+        this.storage = options.storage;
 
         this.on(this.eventHandlers);
         this.updateRooms = this.update.bind(this, 'rooms');
         this.groove.on('roomsChanged', this.updateRooms);
     },
 
-    onrender: function() {
-        this.set('username', this.groove.me.name);
-        this.set('rooms', this.groove.rooms);
-    },
-
     onteardown: function() {
-        this.groove.me.setName(this.get('username'));
+        var username = this.get('username');
+        this.groove.me.setName(username);
+        this.storage.set('user:name', username);
         this.groove.off('roomsChanged', this.updateRooms);
     },
 
