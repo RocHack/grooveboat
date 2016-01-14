@@ -4,6 +4,7 @@
 - Fix track list: make it drag/sortable again
 - Fix glitches with changing songs
 - Fix layout glitches
+- Fix local track previewing in Firefox
 
 ## Improvements
 - Add notice about WebRTC/IndexedDB-capable browser required

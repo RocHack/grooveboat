@@ -131,10 +131,11 @@ module.exports = Ractive.extend({
 
     notify: function notify(opts, cb) {
         if (!cb) cb = Function.prototype;
-        if (Notification.permission == 'granted') {
-            cb(new Notification(opts.title, opts));
-        } else if (Notification.permission == 'denied') {
+        if (typeof Notification != 'function' ||
+                Notification.permission == 'denied') {
             cb(null);
+        } else if (Notification.permission == 'granted') {
+            cb(new Notification(opts.title, opts));
         } else {
             Notification.requestPermission(notify.bind(this, opts, cb));
         }

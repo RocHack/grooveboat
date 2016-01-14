@@ -104,6 +104,10 @@ User.prototype.handleMessage = function (data) {
 
 // create peerconnection and send offer
 User.prototype.preparePeerConnection = function() {
+    if (!window.RTCPeerConnection) {
+        console.error("RTCPeerConnection not supported");
+        return;
+    }
     if (this.pc) {
         console.log('Already have peer connection to ' + this.id);
     }
@@ -122,8 +126,8 @@ User.prototype.offerConnection = function() {
 // handle an offer from a prospective peer
 User.prototype.handleOffer = function(offer) {
     if (!this.pc) this.preparePeerConnection();
-    // answer offer unconditionally
-    this.pc.handleOffer(offer, User_offerHandled.bind(this));
+    if (this.pc)
+        this.pc.handleOffer(offer, User_offerHandled.bind(this));
 };
 
 function User_offered(err, offer) {
@@ -196,12 +200,13 @@ User.prototype.addStream = function(stream) {
 // add a stream to the peer connection
 User.prototype.createDataChannel = function(name) {
     if (!this.pc) this.preparePeerConnection();
-    return this.pc.createDataChannel(name, {});
+    if (this.pc) return this.pc.createDataChannel(name, {});
 };
 
 User.prototype.startChat = function() {
     this.chatChannel = this.createDataChannel('private_chat');
-    this.emit('chatChannel', this.chatChannel);
+    if (this.chatChannel)
+        this.emit('chatChannel', this.chatChannel);
 };
 
 // got a remote audio stream over peer connection

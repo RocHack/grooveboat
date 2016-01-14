@@ -47,7 +47,8 @@ module.exports = {
 
     onteardown: function() {
         this.peer.releaseGroup(this);
-        this.channel.close();
+        if (this.channel)
+            this.channel.close();
         this.set('channel', null);
     },
 

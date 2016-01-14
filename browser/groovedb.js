@@ -8,7 +8,8 @@ function ensureDb(origFn) {
         if (this.db) {
             origFn.apply(this, fn.arguments);
         } else {
-            this._queue.push([origFn, fn.arguments]);
+            if (this._queue)
+                this._queue.push([origFn, fn.arguments]);
         }
     };
 }
@@ -57,10 +58,15 @@ function dataURItoBlob(dataURI) {
 
 function GrooveDB() {
     Emitter.call(this);
+    this.db = null;
+
+    if (!window.indexedDB) {
+        console.error("IndexedDB not supported");
+        return;
+    }
 
     this._queue = [];
     this.dbReq = window.indexedDB.open("grooveboat", DB_VERSION);
-    this.db = null;
 
     this.dbReq.onerror = this._onRequestError.bind(this);
     this.dbReq.onsuccess = this._onRequestSuccess.bind(this);

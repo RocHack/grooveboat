@@ -11,6 +11,11 @@ function once(element, eventName, handler, context, bubble) {
 function Player() {
     this.audio = new Audio();
     this.audio.onended = Player_onEndPlaying.bind(this);
+    if (!AudioContext) {
+        console.error('AudioContext not supported');
+        return;
+    }
+
     this.audioContext = new AudioContext();
     this.gainNode = this.audioContext.createGain();
 }
@@ -22,13 +27,15 @@ Player.prototype.previewDuration = 20;
 Player.prototype.setMuted = function(muted) {
     this.muted = muted;
     this.audio.muted = muted;
-    this.gainNode.gain.value = muted ? 0 : this.volume;
+    if (this.gainNode)
+        this.gainNode.gain.value = muted ? 0 : this.volume;
 };
 
 Player.prototype.setVolume = function(volume) {
     this.volume = volume;
-    this.gainNode.gain.value = this.muted ? 0 : volume;
     this.audio.volume = volume;
+    if (this.gainNode)
+        this.gainNode.gain.value = this.muted ? 0 : volume;
 };
 
 function Player_playURL(url, startTime) {
